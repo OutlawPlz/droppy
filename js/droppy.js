@@ -4,9 +4,20 @@
 
   var console = window.console;
 
+
   // Constructor
   // ---------------------------------------------------------------------------
 
+  /**
+   * Instantiate a new Droppy object.
+   *
+   * @param  {Node} element
+   *         The element on which Droppy will act.
+   * @param  {Object} options
+   *         An object containig Droppy options.
+   * @return {Object}
+   *         A new Droppy object.
+   */
   window.Droppy = function( element, options )  {
 
     if ( element.nodeType != Node.ELEMENT_NODE ) {
@@ -46,6 +57,10 @@
   // Public methods
   // ---------------------------------------------------------------------------
 
+  /**
+   * Initialize a Droppy object. This function is called when a new Droppy
+   * object is created.
+   */
   Droppy.prototype.init = function() {
     // Add Droppy class.
     this.element.classList.add( 'droppy' );
@@ -60,6 +75,12 @@
     }
   };
 
+  /**
+   * Open the given dropdown.
+   *
+   * @param  {Node} dropdown
+   *         The dropdown element to open.
+   */
   Droppy.prototype.open = function( dropdown ) {
     if ( this.options.close_others ) {
       var items_close = getItemsToClose( dropdown, this.element ),
@@ -73,6 +94,12 @@
     dropdown.classList.add( 'droppy__drop--active' );
   };
 
+  /**
+   * Close the given dropdown.
+   *
+   * @param  {Node} dropdown
+   *         The dropdown element to close.
+   */
   Droppy.prototype.close = function( dropdown ) {
     var children = dropdown.querySelectorAll( '.droppy__drop--active' ),
         chl_index = children.length;
@@ -84,6 +111,12 @@
     dropdown.classList.remove( 'droppy__drop--active' );
   };
 
+  /**
+   * Open or close the given dropdown.
+   *
+   * @param  {Node} dropdown
+   *         The dropdown element to open or close.
+   */
   Droppy.prototype.toggle = function( dropdown ) {
     if ( dropdown.classList.contains( 'droppy__drop--active' ) ) {
       this.close( dropdown );
@@ -93,6 +126,9 @@
     }
   };
 
+  /**
+   * Close all dropdown in a Droppy menu.
+   */
   Droppy.prototype.closeAll = function() {
     var items_close = this.element.querySelectorAll( '.droppy__drop--active' ),
         itm_index = items_close.length;
@@ -129,6 +165,17 @@
     return source;
   }
 
+  /**
+   * Loop over the start element parents looking for active elements, until
+   * reach the end element.
+   *
+   * @param  {Node} start
+   *         The starting element.
+   * @param  {Node} end
+   *         The ending element.
+   * @return {Array}
+   *         An array containing active elements, paretns of the start element.
+   */
   function getActiveParents( start, end ) {
     var active_items = [];
 
@@ -145,6 +192,18 @@
     return active_items;
   }
 
+  /**
+   * In the given range of elements, looks for active elements that aren't
+   * parents of the starting element.
+   *
+   * @param  {Node} start
+   *         The starting node.
+   * @param  {Node} end
+   *         The eding node.
+   * @return {Array}
+   *         An array of active elements that aren't parents of the starting
+   *         element.
+   */
   function getItemsToClose( start, end ) {
     var parents_active = getActiveParents( start, end ),
         items_active = [].slice.call( end.querySelectorAll( '.droppy__drop--active' ) );
@@ -164,6 +223,13 @@
   // Events
   // ---------------------------------------------------------------------------
 
+  /**
+   * Attach an event listener to the Droppy object. When user click on a trigegr
+   * element, the relative dropdown will open or close.
+   *
+   * @param  {Object} droppy
+   *         The Droppy object on which attach the event listener.
+   */
   function handleClick( droppy ) {
     droppy.element.addEventListener( 'click', function( event ) {
       if ( event.target.classList.contains( 'droppy__trigger' ) ) {
