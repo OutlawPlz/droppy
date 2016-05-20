@@ -32,6 +32,7 @@
     // Default options
     var defaults = {
       dropdown_selector: 'li > ul',
+      trigger_selector: 'a',
       close_others: true
     };
 
@@ -60,17 +61,25 @@
   /**
    * Initialize a Droppy object. This function is called when a new Droppy
    * object is created.
+   *
+   * Adds classes 'droppy__parent', 'droppy__trigger' and 'droppy__drop'. The
+   * 'droppy__parent' element must be the direct parent of
+   * options.dropdown_selector. Then inside the parent it gets the first child
+   * options.trigger_selector and adds 'droppy__trigger' class to it. Finally
+   * adds 'droppy_drop' class to options.dropdown_selector.
    */
   Droppy.prototype.init = function() {
     // Add Droppy class.
     this.element.classList.add( 'droppy' );
 
     var dropdowns = this.element.querySelectorAll( this.options.dropdown_selector ),
-        drp_index = dropdowns.length;
+        drp_index = dropdowns.length,
+        parent;
 
     while ( drp_index-- ) {
-      dropdowns[ drp_index ].parentElement.classList.add( 'droppy__parent' );
-      dropdowns[ drp_index ].previousElementSibling.classList.add( 'droppy__trigger' );
+      parent = dropdowns[ drp_index ].parentElement;
+      parent.classList.add( 'droppy__parent' );
+      parent.querySelector( this.options.trigger_selector ).classList.add( 'droppy__trigger' );
       dropdowns[ drp_index ].classList.add( 'droppy__drop' );
     }
   };
@@ -215,6 +224,30 @@
     return items_close;
   }
 
+  /**
+   * Loop over start element's parents looking for the droppy__parent class,
+   * then return the drop element.
+   *
+   * @param  {Node} start
+   *         The starting node.
+   * @param  {Node} end
+   *         The ending node.
+   * @return {Node|Boolean}
+   *         The element to drop or false.
+   */
+  function getItemToOpen( start, end ) {
+
+    while ( start != end ) {
+      if ( start.classList.contains( 'droppy__trigger' ) ) {
+        return start.parentElement.querySelector( '.droppy__drop' );
+      }
+
+      start = start.parentElement;
+    }
+
+    return false;
+  }
+
 
   // Events
   // ---------------------------------------------------------------------------
@@ -228,14 +261,12 @@
    */
   function handleClick( droppy ) {
     droppy.element.addEventListener( 'click', function( event ) {
-      event.preventDefault();
-      var current = event.target;
+      var drop = getItemToOpen( event.target, droppy.element );
 
-      while ( !current.classList.contains( 'droppy__trigger' ) ) {
-        current = current.parentElement;
+      if ( drop ) {
+        event.preventDefault();
+        droppy.toggle( drop );
       }
-
-      droppy.toggle( current.nextElementSibling );
     }, true );
   }
 

@@ -10,6 +10,7 @@
 
   var droppy = new Droppy( element, {
     dropdown_selector: 'li > ul.menu',
+    trigger_selector: 'a',
     close_others: true
   } );
 
