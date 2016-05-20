@@ -187,8 +187,6 @@
       start = start.parentElement;
     }
 
-    console.log( active_items );
-
     return active_items;
   }
 
@@ -207,8 +205,6 @@
   function getItemsToClose( start, end ) {
     var parents_active = getActiveParents( start, end ),
         items_active = [].slice.call( end.querySelectorAll( '.droppy__drop--active' ) );
-
-    console.log( parents_active, items_active );
 
     var items_close = items_active.filter( function( item ) {
       return this.every( function( parent ) {
@@ -232,11 +228,15 @@
    */
   function handleClick( droppy ) {
     droppy.element.addEventListener( 'click', function( event ) {
-      if ( event.target.classList.contains( 'droppy__trigger' ) ) {
-        event.preventDefault();
-        droppy.toggle( event.target.nextElementSibling );
+      event.preventDefault();
+      var current = event.target;
+
+      while ( !current.classList.contains( 'droppy__trigger' ) ) {
+        current = current.parentElement;
       }
-    } );
+
+      droppy.toggle( current.nextElementSibling );
+    }, true );
   }
 
 } () );

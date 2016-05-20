@@ -81,6 +81,7 @@ gulp.task( 'styles', function() {
 // Minify CSS.
 gulp.task( 'minify-css', function() {
   return gulp.src( path.styles.css )
+    .pipe( gulp.dest( path.dist ) )
     .pipe( cssnano() )
     .pipe( rename( options.rename.css ) )
     .pipe( gulp.dest( path.dist ) );

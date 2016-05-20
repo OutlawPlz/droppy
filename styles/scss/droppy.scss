@@ -1,0 +1,11 @@
+
+.droppy {
+
+  &__drop {
+    display: none;
+
+    &--active {
+      display: block;
+    }
+  }
+}
