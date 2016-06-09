@@ -1,3 +1,8 @@
+/*!
+ * Droppy - v1.0.1
+ * Pure JavaScript multi-level dropdown menu.
+ */
+
 ( function() {
 
   'use strict';

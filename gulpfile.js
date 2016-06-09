@@ -3,6 +3,7 @@ var gulp = require( 'gulp' ),
     sass = require( 'gulp-sass' ),
     autoprefixer = require( 'gulp-autoprefixer' ),
     cssnano = require( 'gulp-cssnano' ),
+    concat = require( 'gulp-concat' ),
     rename = require( 'gulp-rename' );
 
 
@@ -15,18 +16,22 @@ var path = {
   dist: './dist',
 
   // JavaScript path.
-  js: './js/**/*.js',
+  js: [
+    './js/*.js',
+    // Shims
+    './js/shims/classList.js/classList.js'
+  ],
 
   // Styles path.
   styles: {
-    sass: './styles/scss/**/*.scss',
-    css: './styles/css/**/*.css',
+    sass: [ './styles/scss/**/*.scss' ],
+    css: [ './styles/css/**/*.css' ],
     output: './styles/css'
   },
 
   // Test path.
   test: {
-    sass: './test/style.scss',
+    sass: [ './test/style.scss' ],
     output: './test'
   }
 };
@@ -45,13 +50,17 @@ var options = {
   },
 
   // Autoprefixer options.
-  autoprefixer: {},
+  autoprefixer: {
+    browsers: [ 'ie >= 9' ]
+  },
 
   // UglifyJS2 options.
   uglifyjs2: {
     ext: {
       min: '.min.js'
-    }
+    },
+
+    preserveComments: 'some'
   },
 
   // Rename options.
@@ -63,6 +72,12 @@ var options = {
     js: {
       extname: '.min.js'
     }
+  },
+
+  // Concat options.
+  concat: {
+    css: 'droppy.css',
+    js: 'droppy.js'
   }
 };
 
@@ -81,6 +96,7 @@ gulp.task( 'styles', function() {
 // Minify CSS.
 gulp.task( 'minify-css', function() {
   return gulp.src( path.styles.css )
+    .pipe( concat( options.concat.css ) )
     .pipe( gulp.dest( path.dist ) )
     .pipe( cssnano() )
     .pipe( rename( options.rename.css ) )
@@ -90,19 +106,19 @@ gulp.task( 'minify-css', function() {
 // Minify JS.
 gulp.task( 'minify-js', function() {
   return gulp.src( path.js )
+    .pipe( concat( options.concat.js ) )
     .pipe( uglifyjs2( options.uglifyjs2 ) )
-    // .pipe( rename( options.rename.js ) )
     .pipe( gulp.dest( path.dist ) );
 } );
 
-// Compile test SCSS.
-gulp.task( 'test-styles', function() {
+// Test files operations.
+gulp.task( 'test', function() {
   return gulp.src( path.test.sass )
     .pipe( sass( options.sass ) ).on( 'error', sass.logError )
     .pipe( autoprefixer() )
     .pipe( gulp.dest( path.test.output ) );
 } );
 
-gulp.task( 'dist', [ 'styles', 'minify-css', 'minify-js' ] );
+gulp.task( 'dist', [ 'test', 'styles', 'minify-css', 'minify-js' ] );
 
 gulp.task( 'default', [ 'styles' ] );

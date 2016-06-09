@@ -1,0 +1,3 @@
+[submodule "js/shims/classList.js"]
+	path = js/shims/classList.js
+	url = https://github.com/eligrey/classList.js.git
