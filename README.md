@@ -7,25 +7,29 @@ Pure JavaScript multi-level dropdown menu.
 Start using Droppy in three steps.
 
 1. Download latest Droppy package from [Github][836c3e46].
+
 2. Add `dist/droppy.min.css` and `dist/droppy.min.js` to your web page.
-```html
-<link href="/path/to/droppy.min.css" rel="stylesheet" media="screen">
-```
-```html
-<script src="/path/to/droppy.min.js"></script>
-```
+  ```html
+  <link href="/path/to/droppy.min.css" rel="stylesheet" media="screen">
+  ```
+  ```html
+  <script src="/path/to/droppy.min.js"></script>
+  ```
+
 3. Initialize Droppy in a custom script.
-```js
-var element = document.querySelector( '.dropdown-menu' )
-// Initialize Droppy.
-var droppy = new Droppy( element, {
-  dropdownSelector: 'li > ul.menu',
-  triggerSelector: 'a',
-  closeOthers: true
-} )
-```
+  ```js
+  var element = document.querySelector( '.dropdown-menu' )
+  // Initialize Droppy.
+  var droppy = new Droppy( element, {
+    dropdownSelector: 'li > ul.menu',
+    triggerSelector: 'a',
+    closeOthers: true
+  } )
+  ```
 
 That's it. You're all set to start using Droppy.
+
+  [836c3e46]: https://github.com/OutlawPlz "Download"
 
 ## Options
 
@@ -60,10 +64,12 @@ var droppy = new Droppy( element, {
 ### dropdownSelector
 
 Droppy will mark all elements found inside the Droppy's element as dropdown
-menu. 
+menu.
 
 ### triggerSelector
 
+...
+
 ### closeOthers
 
-[836c3e46]: https://github.com/OutlawPlz "Download"
+...
