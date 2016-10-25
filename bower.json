@@ -1,0 +1,17 @@
+{
+  "name": "droppy",
+  "description": "Pure JavaScript multi-level dropdown menu.",
+  "main": "gulpfile.js",
+  "authors": [
+    "OutlawPlz"
+  ],
+  "license": "GPL-3.0",
+  "homepage": "https://github.com/OutlawPlz/droppy",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
+}
