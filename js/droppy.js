@@ -1,5 +1,5 @@
 /*!
- * Droppy - v1.0.1
+ * Droppy - v1.0.2
  * Pure JavaScript multi-level dropdown menu.
  */
 
@@ -7,7 +7,8 @@
 
   'use strict';
 
-  var console = window.console;
+  var console = window.console,
+      droppyStore = [];
 
 
   // Constructor
@@ -16,16 +17,17 @@
   /**
    * Instantiate a new Droppy object.
    *
-   * @param  {Node} element
+   * @param  {Element} element
    *         The element on which Droppy will act.
    * @param  {Object} options
-   *         An object containig Droppy options.
-   * @return {Object}
+   *         An object containing Droppy options.
+   *
+   * @return {Object|undefined}
    *         A new Droppy object.
    */
-  window.Droppy = function( element, options )  {
+  function Droppy( element, options )  {
 
-    if ( element.nodeType != Node.ELEMENT_NODE ) {
+    if ( element.nodeType !== Node.ELEMENT_NODE ) {
       if ( console ) {
         console.error( 'Droppy: the given element is not valid.', element );
       }
@@ -36,28 +38,36 @@
 
     // Default options
     var defaults = {
-      dropdown_selector: 'li > ul',
-      trigger_selector: 'a',
-      close_others: true
+      dropdownSelector: 'li > ul',
+      triggerSelector: 'a',
+      closeOthers: true
     };
 
     if ( arguments[ 1 ] && typeof arguments[ 1 ] === 'object' ) {
       this.options = extendDefaults( defaults, arguments[ 1 ] );
     }
+    else {
+      this.options = defaults;
+    }
 
-    var dropdowns = this.element.querySelectorAll( this.options.dropdown_selector ).length;
+    var dropdowns = this.element.querySelectorAll( this.options.dropdownSelector ).length;
 
     if ( !dropdowns ) {
       if ( console ) {
-        console.error( 'Droppy: the given dropdown_selector returns no value.', this.options.dropdown_selector );
+        console.error( 'Droppy: the given dropdownSelector returns no value.', this.options.dropdownSelector );
       }
       return;
     }
 
+    // Init Droppy.
     this.init();
 
+    // Add events.
     handleClick( this );
-  };
+
+    // Add the current object to the store.
+    droppyStore.push( this );
+  }
 
 
   // Public methods
@@ -69,22 +79,22 @@
    *
    * Adds classes 'droppy__parent', 'droppy__trigger' and 'droppy__drop'. The
    * 'droppy__parent' element must be the direct parent of
-   * options.dropdown_selector. Then inside the parent it gets the first child
-   * options.trigger_selector and adds 'droppy__trigger' class to it. Finally
-   * adds 'droppy_drop' class to options.dropdown_selector.
+   * options.dropdownSelector. Then inside the parent it gets the first child
+   * options.triggerSelector and adds 'droppy__trigger' class to it. Finally
+   * adds 'droppy_drop' class to options.dropdownSelector.
    */
   Droppy.prototype.init = function() {
     // Add Droppy class.
     this.element.classList.add( 'droppy' );
 
-    var dropdowns = this.element.querySelectorAll( this.options.dropdown_selector ),
+    var dropdowns = this.element.querySelectorAll( this.options.dropdownSelector ),
         drp_index = dropdowns.length,
         parent;
 
     while ( drp_index-- ) {
-      parent = dropdowns[ drp_index ].parentElement;
+      parent = dropdowns[ drp_index ].parentNode;
       parent.classList.add( 'droppy__parent' );
-      parent.querySelector( this.options.trigger_selector ).classList.add( 'droppy__trigger' );
+      parent.querySelector( this.options.triggerSelector ).classList.add( 'droppy__trigger' );
       dropdowns[ drp_index ].classList.add( 'droppy__drop' );
     }
   };
@@ -92,11 +102,11 @@
   /**
    * Open the given dropdown.
    *
-   * @param  {Node} dropdown
+   * @param  {Element} dropdown
    *         The dropdown element to open.
    */
   Droppy.prototype.open = function( dropdown ) {
-    if ( this.options.close_others ) {
+    if ( this.options.closeOthers ) {
       var items_close = getItemsToClose( dropdown, this.element ),
           itm_index = items_close.length;
 
@@ -111,7 +121,7 @@
   /**
    * Close the given dropdown.
    *
-   * @param  {Node} dropdown
+   * @param  {Element} dropdown
    *         The dropdown element to close.
    */
   Droppy.prototype.close = function( dropdown ) {
@@ -128,7 +138,7 @@
   /**
    * Open or close the given dropdown.
    *
-   * @param  {Node} dropdown
+   * @param  {Element} dropdown
    *         The dropdown element to open or close.
    */
   Droppy.prototype.toggle = function( dropdown ) {
@@ -153,6 +163,20 @@
   };
 
 
+  // Static methods
+  // ---------------------------------------------------------------------------
+
+  /**
+   * Return an array containing all Droppy's instances.
+   *
+   * @returns {Array}
+   *          An array containing all Droppy's instances.
+   */
+  Droppy.prototype.getStore = function() {
+    return droppyStore;
+  };
+
+
   // Private methods
   // ---------------------------------------------------------------------------
 
@@ -162,9 +186,10 @@
    *
    * @param  {Object} source
    *         An object representing the default options.
-   * @param  {object} properties
+   * @param  {Object} properties
    *         An object representing the user options.
-   * @return {object}
+   *
+   * @return {Object}
    *         An updated object with merged options.
    */
   function extendDefaults( source, properties ) {
@@ -185,20 +210,21 @@
    *
    * @param  {Node} start
    *         The starting element.
-   * @param  {Node} end
+   * @param  {Element} end
    *         The ending element.
+   *
    * @return {Array}
-   *         An array containing active elements, paretns of the start element.
+   *         An array containing active elements, parents of the start element.
    */
   function getActiveParents( start, end ) {
     var active_items = [];
 
-    while ( start != end ) {
+    while ( start !== end ) {
       if ( start.classList.contains( 'droppy__drop--active' ) ) {
         active_items.push( start );
       }
 
-      start = start.parentElement;
+      start = start.parentNode;
     }
 
     return active_items;
@@ -208,10 +234,11 @@
    * In the given range of elements, looks for active elements that aren't
    * parents of the starting element.
    *
-   * @param  {Node} start
+   * @param  {Element} start
    *         The starting node.
-   * @param  {Node} end
-   *         The eding node.
+   * @param  {Element} end
+   *         The ending node.
+   *
    * @return {Array}
    *         An array of active elements that aren't parents of the starting
    *         element.
@@ -220,13 +247,11 @@
     var parents_active = getActiveParents( start, end ),
         items_active = [].slice.call( end.querySelectorAll( '.droppy__drop--active' ) );
 
-    var items_close = items_active.filter( function( item ) {
+    return items_active.filter( function( item ) {
       return this.every( function( parent ) {
-        return item != parent;
+        return item !== parent;
       } );
     }, parents_active );
-
-    return items_close;
   }
 
   /**
@@ -235,19 +260,20 @@
    *
    * @param  {Node} start
    *         The starting node.
-   * @param  {Node} end
+   * @param  {Element} end
    *         The ending node.
-   * @return {Node|Boolean}
+   *
+   * @return {Element|Boolean}
    *         The element to drop or false.
    */
   function getItemToOpen( start, end ) {
 
-    while ( start != end ) {
+    while ( start !== end ) {
       if ( start.classList.contains( 'droppy__trigger' ) ) {
-        return start.parentElement.querySelector( '.droppy__drop' );
+        return start.parentNode.querySelector( '.droppy__drop' );
       }
 
-      start = start.parentElement;
+      start = start.parentNode;
     }
 
     return false;
@@ -258,7 +284,7 @@
   // ---------------------------------------------------------------------------
 
   /**
-   * Attach an event listener to the Droppy object. When user click on a trigegr
+   * Attach an event listener to the Droppy object. When user click on a trigger
    * element, the relative dropdown will open or close.
    *
    * @param  {Object} droppy
@@ -273,6 +299,16 @@
         droppy.toggle( drop );
       }
     }, true );
+  }
+
+  // Expose Droppy to the global object.
+  window.Droppy = Droppy;
+
+  // Init via HTML
+  var elements = document.querySelectorAll( '[data-droppy]' );
+
+  for ( var e = 0; e < elements.length; ++e ) {
+    new Droppy( elements[ e ], JSON.parse( elements[ e ].getAttribute( 'data-droppy' ) ) );
   }
 
 } () );

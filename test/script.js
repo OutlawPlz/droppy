@@ -14,4 +14,6 @@
     close_others: true
   } );
 
+  console.log( Droppy.prototype.getStore() )
+
 } () );

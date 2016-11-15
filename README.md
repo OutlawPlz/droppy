@@ -61,15 +61,9 @@ var droppy = new Droppy( element, {
 </nav>
 ```
 
-### dropdownSelector
+- ***dropdownSelector*** - Droppy will mark all elements found inside the 
+Droppy's element as dropdown menu.
 
-Droppy will mark all elements found inside the Droppy's element as dropdown
-menu.
+- ***triggerSelector*** - ...
 
-### triggerSelector
-
-...
-
-### closeOthers
-
-...
+- ***closeOthers*** - ...
