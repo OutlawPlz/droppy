@@ -1,5 +1,5 @@
 {
-  "name": "droppy",
+  "name": "droppy-menu",
   "version": "1.0.2",
   "description": "Pure JavaScript multi-level dropdown menu.",
   "keywords": [
@@ -7,8 +7,8 @@
     "dropdown",
     "multi-level"
   ],
-  "main": "js/droppy.js",
-  "stles": "styles/css/droppy.css",
+  "main": "dist/droppy.js",
+  "style": "dist/droppy.css",
   "author": "OutlawPlz",
   "license": "GPL-3.0",
   "repository": {

@@ -1,5 +1,5 @@
 /*!
- * Droppy - v1.0.2
+ * Droppy - v1.0.3
  * Pure JavaScript multi-level dropdown menu.
  */
 
@@ -169,7 +169,7 @@
   /**
    * Return an array containing all Droppy's instances.
    *
-   * @returns {Array}
+   * @return {Array}
    *          An array containing all Droppy's instances.
    */
   Droppy.prototype.getStore = function() {
@@ -304,7 +304,7 @@
   // Expose Droppy to the global object.
   window.Droppy = Droppy;
 
-  // Init via HTML
+  // Init via HTML.
   var elements = document.querySelectorAll( '[data-droppy]' );
 
   for ( var e = 0; e < elements.length; ++e ) {
