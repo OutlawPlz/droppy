@@ -1,8 +1,10 @@
-var gulp = require( 'gulp' ),
-    uglifyjs2 = require( 'gulp-minify' ),
+'use strict';
+
+var gulp = require('gulp'),
+    uglifyjs2 = require( 'gulp-uglify' ),
     sass = require( 'gulp-sass' ),
     autoprefixer = require( 'gulp-autoprefixer' ),
-    cssnano = require( 'gulp-cssnano' ),
+    cleancss = require( 'gulp-clean-css' ),
     concat = require( 'gulp-concat' ),
     rename = require( 'gulp-rename' );
 
@@ -10,43 +12,48 @@ var gulp = require( 'gulp' ),
 // Path
 // -----------------------------------------------------------------------------
 
-var path = {
-
-  // Distribution path.
-  dist: './dist',
+// Source path.
+var src = {
 
   // JavaScript path.
-  js: [
-    './js/*.js',
-    // Shims
-    './js/shims/classList.js/classList.js'
-  ],
+  js: {
+    glob: './js/**/*.js'
+  },
 
-  // Styles path.
-  styles: {
-    sass: [ './styles/scss/**/*.scss' ],
-    css: [ './styles/css/**/*.css' ],
-    output: './styles/css'
+  // Scss path.
+  scss: {
+    glob: './styles/scss/**/*.scss'
+  },
+
+  // Css path.
+  css: {
+    glob: './styles/css/**/*.css'
   },
 
   // Test path.
   test: {
-    sass: [ './test/style.scss' ],
-    output: './test'
+    glob: './test/styles/scss/**/*.scss'
   }
+};
+
+// Destination path.
+var dest = {
+
+  dist: './dist',
+  css: './styles/css',
+  test: './test/styles/css'
 };
 
 
 // Options
 // -----------------------------------------------------------------------------
 
-var options = {
+var opts = {
 
-  // SASS options.
+  // Sass options.
   sass: {
     errLogToConsole: true,
-    outputStyle: 'expanded',
-    includePaths: []
+    outputStyle: 'expanded'
   },
 
   // Autoprefixer options.
@@ -56,28 +63,7 @@ var options = {
 
   // UglifyJS2 options.
   uglifyjs2: {
-    ext: {
-      min: '.min.js'
-    },
-
-    preserveComments: 'some'
-  },
-
-  // Rename options.
-  rename: {
-    css: {
-      extname: '.min.css'
-    },
-
-    js: {
-      extname: '.min.js'
-    }
-  },
-
-  // Concat options.
-  concat: {
-    css: 'droppy.css',
-    js: 'droppy.js'
+    preserveComments: 'license'
   }
 };
 
@@ -85,40 +71,47 @@ var options = {
 // Tasks
 // -----------------------------------------------------------------------------
 
-// Compile SCSS.
-gulp.task( 'styles', function() {
-  return gulp.src( path.styles.sass )
-    .pipe( sass( options.sass ) ).on( 'error', sass.logError )
-    .pipe( autoprefixer() )
-    .pipe( gulp.dest( path.styles.output ) );
+// Compile scss.
+gulp.task( 'sass', function() {
+  return gulp.src( src.scss.glob )
+    .pipe( sass( opts.sass ) ).on( 'error', sass.logError )
+    .pipe( autoprefixer( opts.autoprefixer ) )
+    .pipe( gulp.dest( dest.css ) )
 } );
 
-// Minify CSS.
-gulp.task( 'minify-css', function() {
-  return gulp.src( path.styles.css )
-    .pipe( concat( options.concat.css ) )
-    .pipe( gulp.dest( path.dist ) )
-    .pipe( cssnano() )
-    .pipe( rename( options.rename.css ) )
-    .pipe( gulp.dest( path.dist ) );
+// Minify css.
+gulp.task( 'css', [ 'sass' ], function() {
+  return gulp.src( src.css.glob )
+    .pipe( concat( 'droppy.css' ) )
+    .pipe( gulp.dest( dest.dist ) )
+    .pipe( cleancss() )
+    .pipe( rename( { extname: '.min.css' } ) )
+    .pipe( gulp.dest( dest.dist ) )
 } );
 
-// Minify JS.
-gulp.task( 'minify-js', function() {
-  return gulp.src( path.js )
-    .pipe( concat( options.concat.js ) )
-    .pipe( uglifyjs2( options.uglifyjs2 ) )
-    .pipe( gulp.dest( path.dist ) );
-} );
+// Call to scss and css.
+gulp.task( 'style', [ 'css' ] );
 
-// Test files operations.
+// Compile test scss.
 gulp.task( 'test', function() {
-  return gulp.src( path.test.sass )
-    .pipe( sass( options.sass ) ).on( 'error', sass.logError )
-    .pipe( autoprefixer() )
-    .pipe( gulp.dest( path.test.output ) );
+  return gulp.src( src.test.glob )
+    .pipe( sass( opts.sass ) ).on( 'error', sass.logError )
+    .pipe( autoprefixer( opts.autoprefixer ) )
+    .pipe( gulp.dest( dest.test ) )
 } );
 
-gulp.task( 'dist', [ 'test', 'styles', 'minify-css', 'minify-js' ] );
+// Minify js.
+gulp.task( 'js', function() {
+  return gulp.src( src.js.glob )
+    .pipe( concat( 'droppy.js' ) )
+    .pipe( gulp.dest( dest.dist ) )
+    .pipe( uglifyjs2( opts.uglifyjs2 ) )
+    .pipe( rename( { extname: '.min.js' } ) )
+    .pipe( gulp.dest( dest.dist ) )
+} );
 
-gulp.task( 'default', [ 'styles' ] );
+// Prepare for distribution.
+gulp.task( 'dist', [ 'style', 'js', 'test' ] );
+
+// Default task.
+gulp.task( 'default', [ 'dist' ] );

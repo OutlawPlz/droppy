@@ -3,6 +3,15 @@
  * Pure JavaScript multi-level dropdown menu.
  */
 
+/*
+TODO - Improve default visualization.
+TODO - Implements animations.
+TODO - Implements UMD.
+TODO - Improve docs.
+TODO - Init via jQuery.
+TODO - Init open or close.
+ */
+
 ( function() {
 
   'use strict';
@@ -189,7 +198,7 @@
    * @param  {Object} properties
    *         An object representing the user options.
    *
-   * @return {Object}
+   * @return {Object} source
    *         An updated object with merged options.
    */
   function extendDefaults( source, properties ) {

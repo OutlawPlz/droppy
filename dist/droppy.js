@@ -3,6 +3,15 @@
  * Pure JavaScript multi-level dropdown menu.
  */
 
+/*
+TODO - Improve default visualization.
+TODO - Implements animations.
+TODO - Implements UMD.
+TODO - Improve docs.
+TODO - Init via jQuery.
+TODO - Init open or close.
+ */
+
 ( function() {
 
   'use strict';
@@ -189,7 +198,7 @@
    * @param  {Object} properties
    *         An object representing the user options.
    *
-   * @return {Object}
+   * @return {Object} source
    *         An updated object with merged options.
    */
   function extendDefaults( source, properties ) {
@@ -553,3 +562,99 @@ if (objCtr.defineProperty) {
 
 }
 
+
+if("document"in self){if(!("classList"in document.createElement("_"))||document.createElementNS&&!("classList"in document.createElementNS("http://www.w3.org/2000/svg","g"))){(function(t){"use strict";if(!("Element"in t))return;var e="classList",i="prototype",n=t.Element[i],s=Object,r=String[i].trim||function(){return this.replace(/^\s+|\s+$/g,"")},a=Array[i].indexOf||function(t){var e=0,i=this.length;for(;e<i;e++){if(e in this&&this[e]===t){return e}}return-1},o=function(t,e){this.name=t;this.code=DOMException[t];this.message=e},l=function(t,e){if(e===""){throw new o("SYNTAX_ERR","An invalid or illegal string was specified")}if(/\s/.test(e)){throw new o("INVALID_CHARACTER_ERR","String contains an invalid character")}return a.call(t,e)},c=function(t){var e=r.call(t.getAttribute("class")||""),i=e?e.split(/\s+/):[],n=0,s=i.length;for(;n<s;n++){this.push(i[n])}this._updateClassName=function(){t.setAttribute("class",this.toString())}},u=c[i]=[],f=function(){return new c(this)};o[i]=Error[i];u.item=function(t){return this[t]||null};u.contains=function(t){t+="";return l(this,t)!==-1};u.add=function(){var t=arguments,e=0,i=t.length,n,s=false;do{n=t[e]+"";if(l(this,n)===-1){this.push(n);s=true}}while(++e<i);if(s){this._updateClassName()}};u.remove=function(){var t=arguments,e=0,i=t.length,n,s=false,r;do{n=t[e]+"";r=l(this,n);while(r!==-1){this.splice(r,1);s=true;r=l(this,n)}}while(++e<i);if(s){this._updateClassName()}};u.toggle=function(t,e){t+="";var i=this.contains(t),n=i?e!==true&&"remove":e!==false&&"add";if(n){this[n](t)}if(e===true||e===false){return e}else{return!i}};u.toString=function(){return this.join(" ")};if(s.defineProperty){var h={get:f,enumerable:true,configurable:true};try{s.defineProperty(n,e,h)}catch(d){if(d.number===-2146823252){h.enumerable=false;s.defineProperty(n,e,h)}}}else if(s[i].__defineGetter__){n.__defineGetter__(e,f)}})(self)}else{(function(){"use strict";var t=document.createElement("_");t.classList.add("c1","c2");if(!t.classList.contains("c2")){var e=function(t){var e=DOMTokenList.prototype[t];DOMTokenList.prototype[t]=function(t){var i,n=arguments.length;for(i=0;i<n;i++){t=arguments[i];e.call(this,t)}}};e("add");e("remove")}t.classList.toggle("c3",false);if(t.classList.contains("c3")){var i=DOMTokenList.prototype.toggle;DOMTokenList.prototype.toggle=function(t,e){if(1 in arguments&&!this.contains(t)===!e){return e}else{return i.call(this,t)}}}t=null})()}}
+
+QUnit.module("classList.remove");
+
+QUnit.test("Removes duplicated instances of class", function(assert) {
+	var el = document.createElement("p"), cList = el.classList;
+	el.className = "ho ho ho"
+
+	cList.remove("ho");
+	assert.ok(!cList.contains("ho"), "Should remove all instances of 'ho'");
+	assert.strictEqual(el.className, "")
+});
+
+QUnit.module("classList.toggle");
+
+QUnit.test("Adds a class", function(assert) {
+	var cList = document.createElement("p").classList;
+
+	cList.toggle("c1");
+	assert.ok(cList.contains("c1"), "Adds a class that is not present");
+
+	assert.strictEqual(
+		cList.toggle("c2"),
+		true,
+		"Returns true when class is added"
+	);
+});
+
+QUnit.test("Removes a class", function(assert) {
+	var cList = document.createElement("p").classList;
+
+	cList.add("c1");
+	cList.toggle("c1");
+	assert.ok(!cList.contains("c1"), "Removes a class that is present");
+
+	cList.add("c2");
+	assert.strictEqual(
+		cList.toggle("c2"),
+		false,
+		"Return false when class is removed"
+	);
+});
+
+QUnit.test("Adds class with second argument", function(assert) {
+	var cList = document.createElement("p").classList;
+
+	cList.toggle("c1", true);
+	assert.ok(cList.contains("c1"), "Adds a class");
+
+	assert.strictEqual(
+		cList.toggle("c2", true),
+		true,
+		"Returns true when class is added"
+	);
+
+	cList.add("c3");
+	cList.toggle("c3", true);
+	assert.ok(
+		cList.contains("c3"),
+		"Does not remove a class that is already present"
+	);
+
+	cList.add("c4");
+	assert.strictEqual(
+		cList.toggle("c4", true),
+		true,
+		"Returns true when class is already present"
+	);
+});
+
+QUnit.test("Removes class with second argument", function(assert) {
+	var cList = document.createElement("p").classList;
+
+	cList.add("c1");
+	cList.toggle("c1", false);
+	assert.ok(!cList.contains("c1"), "Removes a class");
+
+	assert.strictEqual(
+		cList.toggle("c2", false),
+		false,
+		"Returns false when class is removed"
+	);
+
+	cList.toggle("c3", false);
+	assert.ok(
+		!cList.contains("c3"),
+		"Does not add a class that is not present"
+	);
+
+	assert.strictEqual(
+		cList.toggle("c4", false),
+		false,
+		"Returns false when class was not present"
+	);
+});
