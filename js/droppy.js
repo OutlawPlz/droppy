@@ -4,15 +4,19 @@
  */
 
 /*
-TODO - [x] Improve default visualization.
+TODO - [x] Screen reader.
 TODO - [ ] Implements animations.
 TODO - [ ] Implements UMD.
-TODO - [ ] Improve docs.
+TODO - [x] Improve docs.
 TODO - [ ] Init via jQuery.
 TODO - [ ] ? Init open or close.
 TODO - [x] Click-out to close.
+TODO - [ ] Click-out to close as option.
+TODO - [ ] Add one click-out event for all Droppy instances.
 TODO - [ ] ? Grow direction.
 TODO - [x] Implements openAll().
+TODO - [ ] Change options.
+TODO - [ ] Implements destroy().
  */
 
 ( function() {
