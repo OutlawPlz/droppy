@@ -4,12 +4,15 @@
  */
 
 /*
-TODO - Improve default visualization.
-TODO - Implements animations.
-TODO - Implements UMD.
-TODO - Improve docs.
-TODO - Init via jQuery.
-TODO - Init open or close.
+TODO - [x] Improve default visualization.
+TODO - [ ] Implements animations.
+TODO - [ ] Implements UMD.
+TODO - [ ] Improve docs.
+TODO - [ ] Init via jQuery.
+TODO - [ ] ? Init open or close.
+TODO - [x] Click-out to close.
+TODO - [ ] ? Grow direction.
+TODO - [x] Implements openAll().
  */
 
 ( function() {
@@ -73,6 +76,7 @@ TODO - Init open or close.
 
     // Add events.
     handleClick( this );
+    handleClickOut( this );
 
     // Add the current object to the store.
     droppyStore.push( this );
@@ -168,6 +172,19 @@ TODO - Init open or close.
 
     while ( itm_index-- ) {
       items_close[ itm_index ].classList.remove( 'droppy__drop--active' );
+    }
+  };
+
+
+  /**
+   * Open all dropdown in a Droppy menu.
+   */
+  Droppy.prototype.openAll = function() {
+    var items_open = this.element.querySelectorAll( '.droppy__drop' ),
+        itm_index = items_open.length;
+
+    while ( itm_index-- ) {
+      items_open[ itm_index ].classList.add( 'droppy__drop--active' );
     }
   };
 
@@ -308,6 +325,30 @@ TODO - Init open or close.
         droppy.toggle( drop );
       }
     }, true );
+  }
+
+  /**
+   * Attach an event listener to the body. When user click outside the menu, all
+   * dropdown will close.
+   *
+   * @param {Droppy} droppy
+   *        The Droppy object that will close dropdowns.
+   */
+  function handleClickOut( droppy ) {
+    document.body.addEventListener( 'click', function ( event ) {
+      var element = event.target,
+          currentTarget = event.currentTarget;
+
+      while ( !( element === currentTarget ) ) {
+        if ( element === droppy.element ) {
+          return false;
+        }
+
+        element = element.parentNode;
+      }
+
+      droppy.closeAll();
+    } )
   }
 
   // Expose Droppy to the global object.

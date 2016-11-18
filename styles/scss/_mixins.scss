@@ -1,5 +1,7 @@
+@import "animations";
 
-// Custom mixins
+
+// Mixins
 // -----------------------------------------------------------------------------
 
 @mixin visually-hidden {
@@ -9,4 +11,12 @@
   height: 1px;
   width: 1px;
   word-wrap: normal;
+}
+
+@mixin visually-hidden-off {
+  position: static !important;
+  clip: auto;
+  height: auto;
+  width: auto;
+  overflow: auto;
 }

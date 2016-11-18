@@ -4,13 +4,12 @@
 // Droppy
 // -----------------------------------------------------------------------------
 
-.droppy {
+.droppy {}
 
-  &__drop {
-    display: none;
+.droppy__drop {
+  @include visually-hidden();
 
-    &--active {
-      display: block;
-    }
+  &--active {
+    @include visually-hidden-off();
   }
 }
