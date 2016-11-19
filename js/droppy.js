@@ -11,8 +11,8 @@ TODO - [x] Improve docs.
 TODO - [ ] Init via jQuery.
 TODO - [ ] ? Init open or close.
 TODO - [x] Click-out to close.
-TODO - [ ] Click-out to close as option.
-TODO - [ ] Add one click-out event for all Droppy instances.
+TODO - [x] Click-out to close as option.
+TODO - [x] Add one click-out event for all Droppy instances.
 TODO - [ ] ? Grow direction.
 TODO - [x] Implements openAll().
 TODO - [ ] Change options.
@@ -24,7 +24,8 @@ TODO - [ ] Implements destroy().
   'use strict';
 
   var console = window.console,
-      droppyStore = [];
+      droppyStore = [],
+      setClickOut = true;
 
 
   // Constructor
@@ -56,7 +57,8 @@ TODO - [ ] Implements destroy().
     var defaults = {
       dropdownSelector: 'li > ul',
       triggerSelector: 'a',
-      closeOthers: true
+      closeOthers: true,
+      clickOutToClose: true
     };
 
     if ( arguments[ 1 ] && typeof arguments[ 1 ] === 'object' ) {
@@ -80,7 +82,7 @@ TODO - [ ] Implements destroy().
 
     // Add events.
     handleClick( this );
-    handleClickOut( this );
+    handleClickOut();
 
     // Add the current object to the store.
     droppyStore.push( this );
@@ -334,25 +336,49 @@ TODO - [ ] Implements destroy().
   /**
    * Attach an event listener to the body. When user click outside the menu, all
    * dropdown will close.
-   *
-   * @param {Droppy} droppy
-   *        The Droppy object that will close dropdowns.
    */
-  function handleClickOut( droppy ) {
-    document.body.addEventListener( 'click', function ( event ) {
-      var element = event.target,
-          currentTarget = event.currentTarget;
+  function handleClickOut() {
 
-      while ( !( element === currentTarget ) ) {
-        if ( element === droppy.element ) {
+    if ( !setClickOut ) {
+      return;
+    }
+
+    document.body.addEventListener( 'click', function ( event ) {
+
+      /*
+       For each Droppy instance in droppyStore it loops over the parents, to see
+       if the click event was generated in the current menu. If true, then the
+       current menu should not be closed; otherwise close it.
+       */
+      var toClose = droppyStore.map( function ( droppy ) {
+
+        // If clickOutToClose is false, then the menu should not be closed.
+        if ( !droppy.options.clickOutToClose ) {
           return false;
         }
 
-        element = element.parentNode;
-      }
+        var element = event.target,
+            currentTarget = event.currentTarget;
 
-      droppy.closeAll();
-    } )
+        while ( element !== currentTarget ) {
+          if ( element === droppy.element ) {
+            return false;
+          }
+
+          element = element.parentNode;
+        }
+
+        return droppy;
+      } );
+
+      toClose.forEach( function ( droppy ) {
+        if ( droppy ) {
+          droppy.closeAll();
+        }
+      } );
+    } );
+
+    setClickOut = false;
   }
 
   // Expose Droppy to the global object.

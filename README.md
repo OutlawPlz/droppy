@@ -22,13 +22,14 @@ Start using Droppy in three steps.
 
 3. Initialize Droppy in a custom script.
   ```js
-  var element = document.querySelector( '.dropdown-menu' )
+  var element = document.querySelector( '.dropdown-menu' );
   // Initialize Droppy.
   var droppy = new Droppy( element, {
     dropdownSelector: 'li > ul.menu',
     triggerSelector: 'a',
-    closeOthers: true
-  } )
+    closeOthers: true,
+    clickOutToClose: true
+  } );
   ```
 
 That's it. You're all set to start using Droppy.
@@ -42,7 +43,7 @@ menu element. Options can be set in its value using **valid JSON**.
 
 ```html
 <!-- Init with HTML -->
-<nav class="dropdown-menu" data-droppy='{ "dropdownSelector": "li > ul.menu", "triggerSelector": "a", "closeOthers": true }'>
+<nav class="dropdown-menu" data-droppy='{ "dropdownSelector": "li > ul.menu", "triggerSelector": "a", "closeOthers": true, "clickOutToClose": true }'>
 ```
 
 ## Options
@@ -55,7 +56,8 @@ menu structure you should set `dropdownSelector` and `triggerSelector`.
 var droppy = new Droppy( element, {
   dropdownSelector: 'li > ul',
   triggerSelector: 'a',
-  closeOthers: true
+  closeOthers: true,
+  clickOutToClose: true
 } );
 ```
 
@@ -86,6 +88,9 @@ That's why the `triggerSelector` is set to `a`.
 - ***closeOthers*** - A boolean value. Set to `true` if you want keep open only
 one drop-down at a time.
 
+- ***clickOutToClose*** - A boolean value. Set to `true` if you want to close
+all the drop-downs by clicking on the outside of the current menu.
+
 ## Methods
 
 Methods are actions done by Droppy instances.
@@ -95,7 +100,8 @@ Methods are actions done by Droppy instances.
 var droppy = new Droppy( element, {
   dropdownSelector: 'ul > li',
   triggerSelector: 'a',
-  closeOthers: true
+  closeOthers: true,
+  clickOutToClose: true
 } );
 ```
 

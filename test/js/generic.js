@@ -9,11 +9,12 @@
   var element = document.querySelector( 'ul.menu' );
 
   var droppy = new Droppy( element, {
-    dropdown_selector: 'li > ul.menu',
-    trigger_selector: 'a',
-    close_others: true
+    dropdownSelector: 'li > ul.menu',
+    triggerSelector: 'a',
+    closeOthers: true,
+    clickOutToClose: true
   } );
 
-  console.log( Droppy.prototype.getStore() )
+  console.log( Droppy.prototype.getStore() );
 
 } () );
