@@ -1,6 +1,5 @@
-/*!
- * Droppy - v1.0.4
- * Pure JavaScript multi-level dropdown menu.
+/**
+ * Droppy - Pure JavaScript multi-level dropdown menu.
  */
 
 /*

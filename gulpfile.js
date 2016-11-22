@@ -6,8 +6,23 @@ var gulp = require('gulp'),
     autoprefixer = require( 'gulp-autoprefixer' ),
     cleancss = require( 'gulp-clean-css' ),
     concat = require( 'gulp-concat' ),
+    header = require( 'gulp-header' ),
     rename = require( 'gulp-rename' );
 
+var pkg = require( './package.json' );
+
+
+// Header
+// -----------------------------------------------------------------------------
+
+var jsHeader = [
+  '/**',
+  ' * Droppy - v<%= pkg.version %>',
+  ' * <%= pkg.description %>',
+  ' * By <%= pkg.author %>, license <%= pkg.license %>.',
+  ' * <%= pkg.repository.url %>',
+  ' */\n'
+].join( '\n' );
 
 // Path
 // -----------------------------------------------------------------------------
@@ -17,7 +32,10 @@ var src = {
 
   // JavaScript path.
   js: {
-    glob: './js/**/*.js'
+    glob: [
+      './js/shims/**/*.js',
+      './js/droppy.js'
+    ]
   },
 
   // Scss path.
@@ -104,6 +122,7 @@ gulp.task( 'test', function() {
 gulp.task( 'js', function() {
   return gulp.src( src.js.glob )
     .pipe( concat( 'droppy.js' ) )
+    .pipe( header( jsHeader, { pkg: pkg } ) )
     .pipe( gulp.dest( dest.dist ) )
     .pipe( uglifyjs2( opts.uglifyjs2 ) )
     .pipe( rename( { extname: '.min.js' } ) )

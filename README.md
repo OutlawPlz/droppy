@@ -191,8 +191,8 @@ var droppyStore = Droppy.prototype.getStore();
 
 ## Polyfills
 
-Droppy uses a bunch of polyfills to keep compatibility with old browsers.
-Here's a list of polyfills used.
+Droppy uses a bunch of polyfills to be compatible with old browsers. Here's a
+list of polyfills used.
 
 - [Array.prototype.forEach()][9a8a4327]
 - [Array.prototype.map()][548b200b]
@@ -203,4 +203,3 @@ Here's a list of polyfills used.
   [548b200b]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/map#Polyfill "Polyfill Array.prototype.map()"
   [ad792cb7]: https://github.com/eligrey/classList.js "Polyfill Element.prototype.classList()"
   [92b6fcf0]: https://developer.mozilla.org/it/docs/Web/API/Element/matches#Polyfill "Polyfill Element.prototype.matches()"
-  
