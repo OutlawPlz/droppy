@@ -4,7 +4,7 @@
   <title>Droppy</title>
   <meta charset="utf-8">
   <!-- Attach stylesheets. -->
-  <link href="../styles/css/droppy.css" rel="stylesheet" media="all">
+  <link href="../dist/droppy.css" rel="stylesheet" media="all">
   <link href="styles/css/style.css" rel="stylesheet" media="all">
 </head>
 <body>
@@ -47,7 +47,7 @@
       <li class="menu-item"><a href="#">Contatti</a></li>
     </ul>
     <p>Init via HTML.</p>
-    <ul class="menu" data-droppy='{ "dropdownSelector": "li > ul.menu", "triggerSelector": "a", "closeOthers": false, "clickOutToClose": false }'>
+    <ul class="menu" data-droppy='{ "parentSelector": "li", "dropdownSelector": "li > ul.menu", "triggerSelector": "a", "closeOthers": false, "clickOutToClose": false }'>
       <li class="menu-item">
         <a href="#"><span>Prodotti</span></a>
         <ul class="menu">
@@ -83,7 +83,7 @@
     </ul>
   </div>
     <!-- Attach scripts. -->
-  <script src="../js/droppy.js"></script>
+  <script src="../dist/droppy.js"></script>
   <script src="js/generic.js"></script>
 </body>
 </html>

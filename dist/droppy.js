@@ -1,5 +1,5 @@
 /*!
- * Droppy - v1.0.3
+ * Droppy - v1.0.4
  * Pure JavaScript multi-level dropdown menu.
  */
 
@@ -13,10 +13,10 @@ TODO - [ ] ? Init open or close.
 TODO - [x] Click-out to close.
 TODO - [x] Click-out to close as option.
 TODO - [x] Add one click-out event for all Droppy instances.
-TODO - [ ] ? Grow direction.
 TODO - [x] Implements openAll().
 TODO - [ ] Change options.
 TODO - [ ] Implements destroy().
+TODO - [x] Remove | The parent element must be the direct parent of dropdown.
  */
 
 ( function() {
@@ -25,7 +25,7 @@ TODO - [ ] Implements destroy().
 
   var console = window.console,
       droppyStore = [],
-      setClickOut = true;
+      clickOutFlag = true;
 
 
   // Constructor
@@ -55,6 +55,7 @@ TODO - [ ] Implements destroy().
 
     // Default options
     var defaults = {
+      parentSelector: 'li',
       dropdownSelector: 'li > ul',
       triggerSelector: 'a',
       closeOthers: true,
@@ -96,25 +97,21 @@ TODO - [ ] Implements destroy().
    * Initialize a Droppy object. This function is called when a new Droppy
    * object is created.
    *
-   * Adds classes 'droppy__parent', 'droppy__trigger' and 'droppy__drop'. The
-   * 'droppy__parent' element must be the direct parent of
-   * options.dropdownSelector. Then inside the parent it gets the first child
-   * options.triggerSelector and adds 'droppy__trigger' class to it. Finally
-   * adds 'droppy_drop' class to options.dropdownSelector.
+   * Adds classes 'droppy__parent', 'droppy__trigger' and 'droppy__drop'.
    */
   Droppy.prototype.init = function() {
     // Add Droppy class.
     this.element.classList.add( 'droppy' );
 
     var dropdowns = this.element.querySelectorAll( this.options.dropdownSelector ),
-        drp_index = dropdowns.length,
+        i = dropdowns.length,
         parent;
 
-    while ( drp_index-- ) {
-      parent = dropdowns[ drp_index ].parentNode;
+    while ( i-- ) {
+      parent = getParent( dropdowns[ i ], this.element, this.options.parentSelector );
       parent.classList.add( 'droppy__parent' );
       parent.querySelector( this.options.triggerSelector ).classList.add( 'droppy__trigger' );
-      dropdowns[ drp_index ].classList.add( 'droppy__drop' );
+      dropdowns[ i ].classList.add( 'droppy__drop' );
     }
   };
 
@@ -126,11 +123,11 @@ TODO - [ ] Implements destroy().
    */
   Droppy.prototype.open = function( dropdown ) {
     if ( this.options.closeOthers ) {
-      var items_close = getItemsToClose( dropdown, this.element ),
-          itm_index = items_close.length;
+      var itemsClose = getItemsToClose( dropdown, this.element ),
+          i = itemsClose.length;
 
-      while ( itm_index-- ) {
-        items_close[ itm_index ].classList.remove( 'droppy__drop--active' );
+      while ( i-- ) {
+        itemsClose[ i ].classList.remove( 'droppy__drop--active' );
       }
     }
 
@@ -145,10 +142,10 @@ TODO - [ ] Implements destroy().
    */
   Droppy.prototype.close = function( dropdown ) {
     var children = dropdown.querySelectorAll( '.droppy__drop--active' ),
-        chl_index = children.length;
+        i = children.length;
 
-    while ( chl_index-- ) {
-      children[ chl_index ].classList.remove( 'droppy__drop--active' );
+    while ( i-- ) {
+      children[ i ].classList.remove( 'droppy__drop--active' );
     }
 
     dropdown.classList.remove( 'droppy__drop--active' );
@@ -173,11 +170,11 @@ TODO - [ ] Implements destroy().
    * Close all dropdown in a Droppy menu.
    */
   Droppy.prototype.closeAll = function() {
-    var items_close = this.element.querySelectorAll( '.droppy__drop--active' ),
-        itm_index = items_close.length;
+    var itemsClose = this.element.querySelectorAll( '.droppy__drop--active' ),
+        i = itemsClose.length;
 
-    while ( itm_index-- ) {
-      items_close[ itm_index ].classList.remove( 'droppy__drop--active' );
+    while ( i-- ) {
+      itemsClose[ i ].classList.remove( 'droppy__drop--active' );
     }
   };
 
@@ -186,11 +183,11 @@ TODO - [ ] Implements destroy().
    * Open all dropdown in a Droppy menu.
    */
   Droppy.prototype.openAll = function() {
-    var items_open = this.element.querySelectorAll( '.droppy__drop' ),
-        itm_index = items_open.length;
+    var itemsOpen = this.element.querySelectorAll( '.droppy__drop' ),
+        i = itemsOpen.length;
 
-    while ( itm_index-- ) {
-      items_open[ itm_index ].classList.add( 'droppy__drop--active' );
+    while ( i-- ) {
+      itemsOpen[ i ].classList.add( 'droppy__drop--active' );
     }
   };
 
@@ -237,6 +234,29 @@ TODO - [ ] Implements destroy().
   }
 
   /**
+   * Loop over the start element parents looking for the element that matches
+   * the given parentSelector.
+   *
+   * @param {Element} start
+   *        The starting node.
+   * @param {Node} end
+   *        The ending node.
+   * @param parentSelector
+   *        A valid CSS selector.
+   *
+   * @returns {Node|undefined}
+   */
+  function getParent( start, end, parentSelector ) {
+    while ( start !== end ) {
+      if ( start.matches( parentSelector ) ) {
+        return start;
+      }
+
+      start = start.parentNode;
+    }
+  }
+
+  /**
    * Loop over the start element parents looking for active elements, until
    * reach the end element.
    *
@@ -249,17 +269,17 @@ TODO - [ ] Implements destroy().
    *         An array containing active elements, parents of the start element.
    */
   function getActiveParents( start, end ) {
-    var active_items = [];
+    var activeItems = [];
 
     while ( start !== end ) {
       if ( start.classList.contains( 'droppy__drop--active' ) ) {
-        active_items.push( start );
+        activeItems.push( start );
       }
 
       start = start.parentNode;
     }
 
-    return active_items;
+    return activeItems;
   }
 
   /**
@@ -276,14 +296,14 @@ TODO - [ ] Implements destroy().
    *         element.
    */
   function getItemsToClose( start, end ) {
-    var parents_active = getActiveParents( start, end ),
-        items_active = [].slice.call( end.querySelectorAll( '.droppy__drop--active' ) );
+    var parentsActive = getActiveParents( start, end ),
+        itemsActive = [].slice.call( end.querySelectorAll( '.droppy__drop--active' ) );
 
-    return items_active.filter( function( item ) {
+    return itemsActive.filter( function( item ) {
       return this.every( function( parent ) {
         return item !== parent;
       } );
-    }, parents_active );
+    }, parentsActive );
   }
 
   /**
@@ -339,7 +359,7 @@ TODO - [ ] Implements destroy().
    */
   function handleClickOut() {
 
-    if ( !setClickOut ) {
+    if ( !clickOutFlag ) {
       return;
     }
 
@@ -378,7 +398,7 @@ TODO - [ ] Implements destroy().
       } );
     } );
 
-    setClickOut = false;
+    clickOutFlag = false;
   }
 
   // Expose Droppy to the global object.
@@ -387,345 +407,405 @@ TODO - [ ] Implements destroy().
   // Init via HTML.
   var elements = document.querySelectorAll( '[data-droppy]' );
 
-  for ( var e = 0; e < elements.length; ++e ) {
-    new Droppy( elements[ e ], JSON.parse( elements[ e ].getAttribute( 'data-droppy' ) ) );
+  for ( var i = 0; i < elements.length; ++i ) {
+    new Droppy( elements[ i ], JSON.parse( elements[ i ].getAttribute( 'data-droppy' ) ) );
   }
 
 } () );
 
-/*
- * classList.js: Cross-browser full element.classList implementation.
- * 1.1.20150312
- *
- * By Eli Grey, http://eligrey.com
- * License: Dedicated to the public domain.
- *   See https://github.com/eligrey/classList.js/blob/master/LICENSE.md
- */
+// Production steps of ECMA-262, Edition 5, 15.4.4.18
+// Reference: http://es5.github.io/#x15.4.4.18
+if (!Array.prototype.forEach) {
 
-/*global self, document, DOMException */
+  Array.prototype.forEach = function(callback, thisArg) {
 
-/*! @source http://purl.eligrey.com/github/classList.js/blob/master/classList.js */
+    var T, k;
 
+    if (this === null) {
+      throw new TypeError(' this is null or not defined');
+    }
+
+    // 1. Let O be the result of calling toObject() passing the
+    // |this| value as the argument.
+    var O = Object(this);
+
+    // 2. Let lenValue be the result of calling the Get() internal
+    // method of O with the argument "length".
+    // 3. Let len be toUint32(lenValue).
+    var len = O.length >>> 0;
+
+    // 4. If isCallable(callback) is false, throw a TypeError exception.
+    // See: http://es5.github.com/#x9.11
+    if (typeof callback !== "function") {
+      throw new TypeError(callback + ' is not a function');
+    }
+
+    // 5. If thisArg was supplied, let T be thisArg; else let
+    // T be undefined.
+    if (arguments.length > 1) {
+      T = thisArg;
+    }
+
+    // 6. Let k be 0
+    k = 0;
+
+    // 7. Repeat, while k < len
+    while (k < len) {
+
+      var kValue;
+
+      // a. Let Pk be ToString(k).
+      //    This is implicit for LHS operands of the in operator
+      // b. Let kPresent be the result of calling the HasProperty
+      //    internal method of O with argument Pk.
+      //    This step can be combined with c
+      // c. If kPresent is true, then
+      if (k in O) {
+
+        // i. Let kValue be the result of calling the Get internal
+        // method of O with argument Pk.
+        kValue = O[k];
+
+        // ii. Call the Call internal method of callback with T as
+        // the this value and argument list containing kValue, k, and O.
+        callback.call(T, kValue, k, O);
+      }
+      // d. Increase k by 1.
+      k++;
+    }
+    // 8. return undefined
+  };
+}
+
+// Production steps of ECMA-262, Edition 5, 15.4.4.19
+// Reference: http://es5.github.io/#x15.4.4.19
+if (!Array.prototype.map) {
+
+  Array.prototype.map = function(callback, thisArg) {
+
+    var T, A, k;
+
+    if (this == null) {
+      throw new TypeError(' this is null or not defined');
+    }
+
+    // 1. Let O be the result of calling ToObject passing the |this|
+    //    value as the argument.
+    var O = Object(this);
+
+    // 2. Let lenValue be the result of calling the Get internal
+    //    method of O with the argument "length".
+    // 3. Let len be ToUint32(lenValue).
+    var len = O.length >>> 0;
+
+    // 4. If IsCallable(callback) is false, throw a TypeError exception.
+    // See: http://es5.github.com/#x9.11
+    if (typeof callback !== 'function') {
+      throw new TypeError(callback + ' is not a function');
+    }
+
+    // 5. If thisArg was supplied, let T be thisArg; else let T be undefined.
+    if (arguments.length > 1) {
+      T = thisArg;
+    }
+
+    // 6. Let A be a new array created as if by the expression new Array(len)
+    //    where Array is the standard built-in constructor with that name and
+    //    len is the value of len.
+    A = new Array(len);
+
+    // 7. Let k be 0
+    k = 0;
+
+    // 8. Repeat, while k < len
+    while (k < len) {
+
+      var kValue, mappedValue;
+
+      // a. Let Pk be ToString(k).
+      //   This is implicit for LHS operands of the in operator
+      // b. Let kPresent be the result of calling the HasProperty internal
+      //    method of O with argument Pk.
+      //   This step can be combined with c
+      // c. If kPresent is true, then
+      if (k in O) {
+
+        // i. Let kValue be the result of calling the Get internal
+        //    method of O with argument Pk.
+        kValue = O[k];
+
+        // ii. Let mappedValue be the result of calling the Call internal
+        //     method of callback with T as the this value and argument
+        //     list containing kValue, k, and O.
+        mappedValue = callback.call(T, kValue, k, O);
+
+        // iii. Call the DefineOwnProperty internal method of A with arguments
+        // Pk, Property Descriptor
+        // { Value: mappedValue,
+        //   Writable: true,
+        //   Enumerable: true,
+        //   Configurable: true },
+        // and false.
+
+        // In browsers that support Object.defineProperty, use the following:
+        // Object.defineProperty(A, k, {
+        //   value: mappedValue,
+        //   writable: true,
+        //   enumerable: true,
+        //   configurable: true
+        // });
+
+        // For best browser support, use the following:
+        A[k] = mappedValue;
+      }
+      // d. Increase k by 1.
+      k++;
+    }
+
+    // 9. return A
+    return A;
+  };
+}
+
+
+// Implements Element.prototype.classList() - v1.1.20150312
+// By Eli Grey, http://eligrey.com
 if ("document" in self) {
 
 // Full polyfill for browsers with no classList support
 // Including IE < Edge missing SVGElement.classList
-if (!("classList" in document.createElement("_")) 
-	|| document.createElementNS && !("classList" in document.createElementNS("http://www.w3.org/2000/svg","g"))) {
+  if (!("classList" in document.createElement("_"))
+    || document.createElementNS && !("classList" in document.createElementNS("http://www.w3.org/2000/svg","g"))) {
 
-(function (view) {
+    (function (view) {
 
-"use strict";
+      "use strict";
 
-if (!('Element' in view)) return;
+      if (!('Element' in view)) return;
 
-var
-	  classListProp = "classList"
-	, protoProp = "prototype"
-	, elemCtrProto = view.Element[protoProp]
-	, objCtr = Object
-	, strTrim = String[protoProp].trim || function () {
-		return this.replace(/^\s+|\s+$/g, "");
-	}
-	, arrIndexOf = Array[protoProp].indexOf || function (item) {
-		var
-			  i = 0
-			, len = this.length
-		;
-		for (; i < len; i++) {
-			if (i in this && this[i] === item) {
-				return i;
-			}
-		}
-		return -1;
-	}
-	// Vendors: please allow content code to instantiate DOMExceptions
-	, DOMEx = function (type, message) {
-		this.name = type;
-		this.code = DOMException[type];
-		this.message = message;
-	}
-	, checkTokenAndGetIndex = function (classList, token) {
-		if (token === "") {
-			throw new DOMEx(
-				  "SYNTAX_ERR"
-				, "An invalid or illegal string was specified"
-			);
-		}
-		if (/\s/.test(token)) {
-			throw new DOMEx(
-				  "INVALID_CHARACTER_ERR"
-				, "String contains an invalid character"
-			);
-		}
-		return arrIndexOf.call(classList, token);
-	}
-	, ClassList = function (elem) {
-		var
-			  trimmedClasses = strTrim.call(elem.getAttribute("class") || "")
-			, classes = trimmedClasses ? trimmedClasses.split(/\s+/) : []
-			, i = 0
-			, len = classes.length
-		;
-		for (; i < len; i++) {
-			this.push(classes[i]);
-		}
-		this._updateClassName = function () {
-			elem.setAttribute("class", this.toString());
-		};
-	}
-	, classListProto = ClassList[protoProp] = []
-	, classListGetter = function () {
-		return new ClassList(this);
-	}
-;
+      var
+        classListProp = "classList"
+        , protoProp = "prototype"
+        , elemCtrProto = view.Element[protoProp]
+        , objCtr = Object
+        , strTrim = String[protoProp].trim || function () {
+            return this.replace(/^\s+|\s+$/g, "");
+          }
+        , arrIndexOf = Array[protoProp].indexOf || function (item) {
+            var
+              i = 0
+              , len = this.length
+              ;
+            for (; i < len; i++) {
+              if (i in this && this[i] === item) {
+                return i;
+              }
+            }
+            return -1;
+          }
+        // Vendors: please allow content code to instantiate DOMExceptions
+        , DOMEx = function (type, message) {
+          this.name = type;
+          this.code = DOMException[type];
+          this.message = message;
+        }
+        , checkTokenAndGetIndex = function (classList, token) {
+          if (token === "") {
+            throw new DOMEx(
+              "SYNTAX_ERR"
+              , "An invalid or illegal string was specified"
+            );
+          }
+          if (/\s/.test(token)) {
+            throw new DOMEx(
+              "INVALID_CHARACTER_ERR"
+              , "String contains an invalid character"
+            );
+          }
+          return arrIndexOf.call(classList, token);
+        }
+        , ClassList = function (elem) {
+          var
+            trimmedClasses = strTrim.call(elem.getAttribute("class") || "")
+            , classes = trimmedClasses ? trimmedClasses.split(/\s+/) : []
+            , i = 0
+            , len = classes.length
+            ;
+          for (; i < len; i++) {
+            this.push(classes[i]);
+          }
+          this._updateClassName = function () {
+            elem.setAttribute("class", this.toString());
+          };
+        }
+        , classListProto = ClassList[protoProp] = []
+        , classListGetter = function () {
+          return new ClassList(this);
+        }
+        ;
 // Most DOMException implementations don't allow calling DOMException's toString()
 // on non-DOMExceptions. Error's toString() is sufficient here.
-DOMEx[protoProp] = Error[protoProp];
-classListProto.item = function (i) {
-	return this[i] || null;
-};
-classListProto.contains = function (token) {
-	token += "";
-	return checkTokenAndGetIndex(this, token) !== -1;
-};
-classListProto.add = function () {
-	var
-		  tokens = arguments
-		, i = 0
-		, l = tokens.length
-		, token
-		, updated = false
-	;
-	do {
-		token = tokens[i] + "";
-		if (checkTokenAndGetIndex(this, token) === -1) {
-			this.push(token);
-			updated = true;
-		}
-	}
-	while (++i < l);
+      DOMEx[protoProp] = Error[protoProp];
+      classListProto.item = function (i) {
+        return this[i] || null;
+      };
+      classListProto.contains = function (token) {
+        token += "";
+        return checkTokenAndGetIndex(this, token) !== -1;
+      };
+      classListProto.add = function () {
+        var
+          tokens = arguments
+          , i = 0
+          , l = tokens.length
+          , token
+          , updated = false
+          ;
+        do {
+          token = tokens[i] + "";
+          if (checkTokenAndGetIndex(this, token) === -1) {
+            this.push(token);
+            updated = true;
+          }
+        }
+        while (++i < l);
 
-	if (updated) {
-		this._updateClassName();
-	}
-};
-classListProto.remove = function () {
-	var
-		  tokens = arguments
-		, i = 0
-		, l = tokens.length
-		, token
-		, updated = false
-		, index
-	;
-	do {
-		token = tokens[i] + "";
-		index = checkTokenAndGetIndex(this, token);
-		while (index !== -1) {
-			this.splice(index, 1);
-			updated = true;
-			index = checkTokenAndGetIndex(this, token);
-		}
-	}
-	while (++i < l);
+        if (updated) {
+          this._updateClassName();
+        }
+      };
+      classListProto.remove = function () {
+        var
+          tokens = arguments
+          , i = 0
+          , l = tokens.length
+          , token
+          , updated = false
+          , index
+          ;
+        do {
+          token = tokens[i] + "";
+          index = checkTokenAndGetIndex(this, token);
+          while (index !== -1) {
+            this.splice(index, 1);
+            updated = true;
+            index = checkTokenAndGetIndex(this, token);
+          }
+        }
+        while (++i < l);
 
-	if (updated) {
-		this._updateClassName();
-	}
-};
-classListProto.toggle = function (token, force) {
-	token += "";
+        if (updated) {
+          this._updateClassName();
+        }
+      };
+      classListProto.toggle = function (token, force) {
+        token += "";
 
-	var
-		  result = this.contains(token)
-		, method = result ?
-			force !== true && "remove"
-		:
-			force !== false && "add"
-	;
+        var
+          result = this.contains(token)
+          , method = result ?
+          force !== true && "remove"
+            :
+          force !== false && "add"
+          ;
 
-	if (method) {
-		this[method](token);
-	}
+        if (method) {
+          this[method](token);
+        }
 
-	if (force === true || force === false) {
-		return force;
-	} else {
-		return !result;
-	}
-};
-classListProto.toString = function () {
-	return this.join(" ");
-};
+        if (force === true || force === false) {
+          return force;
+        } else {
+          return !result;
+        }
+      };
+      classListProto.toString = function () {
+        return this.join(" ");
+      };
 
-if (objCtr.defineProperty) {
-	var classListPropDesc = {
-		  get: classListGetter
-		, enumerable: true
-		, configurable: true
-	};
-	try {
-		objCtr.defineProperty(elemCtrProto, classListProp, classListPropDesc);
-	} catch (ex) { // IE 8 doesn't support enumerable:true
-		if (ex.number === -0x7FF5EC54) {
-			classListPropDesc.enumerable = false;
-			objCtr.defineProperty(elemCtrProto, classListProp, classListPropDesc);
-		}
-	}
-} else if (objCtr[protoProp].__defineGetter__) {
-	elemCtrProto.__defineGetter__(classListProp, classListGetter);
-}
+      if (objCtr.defineProperty) {
+        var classListPropDesc = {
+          get: classListGetter
+          , enumerable: true
+          , configurable: true
+        };
+        try {
+          objCtr.defineProperty(elemCtrProto, classListProp, classListPropDesc);
+        } catch (ex) { // IE 8 doesn't support enumerable:true
+          if (ex.number === -0x7FF5EC54) {
+            classListPropDesc.enumerable = false;
+            objCtr.defineProperty(elemCtrProto, classListProp, classListPropDesc);
+          }
+        }
+      } else if (objCtr[protoProp].__defineGetter__) {
+        elemCtrProto.__defineGetter__(classListProp, classListGetter);
+      }
 
-}(self));
+    }(self));
 
-} else {
+  } else {
 // There is full or partial native classList support, so just check if we need
 // to normalize the add/remove and toggle APIs.
 
-(function () {
-	"use strict";
+    (function () {
+      "use strict";
 
-	var testElement = document.createElement("_");
+      var testElement = document.createElement("_");
 
-	testElement.classList.add("c1", "c2");
+      testElement.classList.add("c1", "c2");
 
-	// Polyfill for IE 10/11 and Firefox <26, where classList.add and
-	// classList.remove exist but support only one argument at a time.
-	if (!testElement.classList.contains("c2")) {
-		var createMethod = function(method) {
-			var original = DOMTokenList.prototype[method];
+      // Polyfill for IE 10/11 and Firefox <26, where classList.add and
+      // classList.remove exist but support only one argument at a time.
+      if (!testElement.classList.contains("c2")) {
+        var createMethod = function(method) {
+          var original = DOMTokenList.prototype[method];
 
-			DOMTokenList.prototype[method] = function(token) {
-				var i, len = arguments.length;
+          DOMTokenList.prototype[method] = function(token) {
+            var i, len = arguments.length;
 
-				for (i = 0; i < len; i++) {
-					token = arguments[i];
-					original.call(this, token);
-				}
-			};
-		};
-		createMethod('add');
-		createMethod('remove');
-	}
+            for (i = 0; i < len; i++) {
+              token = arguments[i];
+              original.call(this, token);
+            }
+          };
+        };
+        createMethod('add');
+        createMethod('remove');
+      }
 
-	testElement.classList.toggle("c3", false);
+      testElement.classList.toggle("c3", false);
 
-	// Polyfill for IE 10 and Firefox <24, where classList.toggle does not
-	// support the second argument.
-	if (testElement.classList.contains("c3")) {
-		var _toggle = DOMTokenList.prototype.toggle;
+      // Polyfill for IE 10 and Firefox <24, where classList.toggle does not
+      // support the second argument.
+      if (testElement.classList.contains("c3")) {
+        var _toggle = DOMTokenList.prototype.toggle;
 
-		DOMTokenList.prototype.toggle = function(token, force) {
-			if (1 in arguments && !this.contains(token) === !force) {
-				return force;
-			} else {
-				return _toggle.call(this, token);
-			}
-		};
+        DOMTokenList.prototype.toggle = function(token, force) {
+          if (1 in arguments && !this.contains(token) === !force) {
+            return force;
+          } else {
+            return _toggle.call(this, token);
+          }
+        };
 
-	}
+      }
 
-	testElement = null;
-}());
-
+      testElement = null;
+    }());
+  }
 }
 
+if (!Element.prototype.matches) {
+  Element.prototype.matches =
+    Element.prototype.matchesSelector ||
+    Element.prototype.mozMatchesSelector ||
+    Element.prototype.msMatchesSelector ||
+    Element.prototype.oMatchesSelector ||
+    Element.prototype.webkitMatchesSelector ||
+    function(s) {
+      var matches = (this.document || this.ownerDocument).querySelectorAll(s),
+        i = matches.length;
+      while (--i >= 0 && matches.item(i) !== this) {}
+      return i > -1;
+    };
 }
-
-
-if("document"in self){if(!("classList"in document.createElement("_"))||document.createElementNS&&!("classList"in document.createElementNS("http://www.w3.org/2000/svg","g"))){(function(t){"use strict";if(!("Element"in t))return;var e="classList",i="prototype",n=t.Element[i],s=Object,r=String[i].trim||function(){return this.replace(/^\s+|\s+$/g,"")},a=Array[i].indexOf||function(t){var e=0,i=this.length;for(;e<i;e++){if(e in this&&this[e]===t){return e}}return-1},o=function(t,e){this.name=t;this.code=DOMException[t];this.message=e},l=function(t,e){if(e===""){throw new o("SYNTAX_ERR","An invalid or illegal string was specified")}if(/\s/.test(e)){throw new o("INVALID_CHARACTER_ERR","String contains an invalid character")}return a.call(t,e)},c=function(t){var e=r.call(t.getAttribute("class")||""),i=e?e.split(/\s+/):[],n=0,s=i.length;for(;n<s;n++){this.push(i[n])}this._updateClassName=function(){t.setAttribute("class",this.toString())}},u=c[i]=[],f=function(){return new c(this)};o[i]=Error[i];u.item=function(t){return this[t]||null};u.contains=function(t){t+="";return l(this,t)!==-1};u.add=function(){var t=arguments,e=0,i=t.length,n,s=false;do{n=t[e]+"";if(l(this,n)===-1){this.push(n);s=true}}while(++e<i);if(s){this._updateClassName()}};u.remove=function(){var t=arguments,e=0,i=t.length,n,s=false,r;do{n=t[e]+"";r=l(this,n);while(r!==-1){this.splice(r,1);s=true;r=l(this,n)}}while(++e<i);if(s){this._updateClassName()}};u.toggle=function(t,e){t+="";var i=this.contains(t),n=i?e!==true&&"remove":e!==false&&"add";if(n){this[n](t)}if(e===true||e===false){return e}else{return!i}};u.toString=function(){return this.join(" ")};if(s.defineProperty){var h={get:f,enumerable:true,configurable:true};try{s.defineProperty(n,e,h)}catch(d){if(d.number===-2146823252){h.enumerable=false;s.defineProperty(n,e,h)}}}else if(s[i].__defineGetter__){n.__defineGetter__(e,f)}})(self)}else{(function(){"use strict";var t=document.createElement("_");t.classList.add("c1","c2");if(!t.classList.contains("c2")){var e=function(t){var e=DOMTokenList.prototype[t];DOMTokenList.prototype[t]=function(t){var i,n=arguments.length;for(i=0;i<n;i++){t=arguments[i];e.call(this,t)}}};e("add");e("remove")}t.classList.toggle("c3",false);if(t.classList.contains("c3")){var i=DOMTokenList.prototype.toggle;DOMTokenList.prototype.toggle=function(t,e){if(1 in arguments&&!this.contains(t)===!e){return e}else{return i.call(this,t)}}}t=null})()}}
-
-QUnit.module("classList.remove");
-
-QUnit.test("Removes duplicated instances of class", function(assert) {
-	var el = document.createElement("p"), cList = el.classList;
-	el.className = "ho ho ho"
-
-	cList.remove("ho");
-	assert.ok(!cList.contains("ho"), "Should remove all instances of 'ho'");
-	assert.strictEqual(el.className, "")
-});
-
-QUnit.module("classList.toggle");
-
-QUnit.test("Adds a class", function(assert) {
-	var cList = document.createElement("p").classList;
-
-	cList.toggle("c1");
-	assert.ok(cList.contains("c1"), "Adds a class that is not present");
-
-	assert.strictEqual(
-		cList.toggle("c2"),
-		true,
-		"Returns true when class is added"
-	);
-});
-
-QUnit.test("Removes a class", function(assert) {
-	var cList = document.createElement("p").classList;
-
-	cList.add("c1");
-	cList.toggle("c1");
-	assert.ok(!cList.contains("c1"), "Removes a class that is present");
-
-	cList.add("c2");
-	assert.strictEqual(
-		cList.toggle("c2"),
-		false,
-		"Return false when class is removed"
-	);
-});
-
-QUnit.test("Adds class with second argument", function(assert) {
-	var cList = document.createElement("p").classList;
-
-	cList.toggle("c1", true);
-	assert.ok(cList.contains("c1"), "Adds a class");
-
-	assert.strictEqual(
-		cList.toggle("c2", true),
-		true,
-		"Returns true when class is added"
-	);
-
-	cList.add("c3");
-	cList.toggle("c3", true);
-	assert.ok(
-		cList.contains("c3"),
-		"Does not remove a class that is already present"
-	);
-
-	cList.add("c4");
-	assert.strictEqual(
-		cList.toggle("c4", true),
-		true,
-		"Returns true when class is already present"
-	);
-});
-
-QUnit.test("Removes class with second argument", function(assert) {
-	var cList = document.createElement("p").classList;
-
-	cList.add("c1");
-	cList.toggle("c1", false);
-	assert.ok(!cList.contains("c1"), "Removes a class");
-
-	assert.strictEqual(
-		cList.toggle("c2", false),
-		false,
-		"Returns false when class is removed"
-	);
-
-	cList.toggle("c3", false);
-	assert.ok(
-		!cList.contains("c3"),
-		"Does not add a class that is not present"
-	);
-
-	assert.strictEqual(
-		cList.toggle("c4", false),
-		false,
-		"Returns false when class was not present"
-	);
-});

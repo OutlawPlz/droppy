@@ -10,14 +10,17 @@ control the menu appearance, just editing the `.droppy_drop` and
 
 Start using Droppy in three steps.
 
-1. Download latest Droppy package from [Github][836c3e46].
+1. Download latest Droppy package from [Github][836c3e46] or via NPM.
+  ```sh
+  npm install droppy-menu --save
+  ```
 
 2. Add `dist/droppy.min.css` and `dist/droppy.min.js` to your web page.
   ```html
-  <link href="/path/to/droppy.min.css" rel="stylesheet" media="screen">
+  <link href="/path/to/droppy/dist/droppy.min.css" rel="stylesheet" media="screen">
   ```
   ```html
-  <script src="/path/to/droppy.min.js"></script>
+  <script src="/path/to/droppy/dist/droppy.min.js"></script>
   ```
 
 3. Initialize Droppy in a custom script.
@@ -25,6 +28,7 @@ Start using Droppy in three steps.
   var element = document.querySelector( '.dropdown-menu' );
   // Initialize Droppy.
   var droppy = new Droppy( element, {
+    parentSelector: 'li',
     dropdownSelector: 'li > ul.menu',
     triggerSelector: 'a',
     closeOthers: true,
@@ -43,17 +47,19 @@ menu element. Options can be set in its value using **valid JSON**.
 
 ```html
 <!-- Init with HTML -->
-<nav class="dropdown-menu" data-droppy='{ "dropdownSelector": "li > ul.menu", "triggerSelector": "a", "closeOthers": true, "clickOutToClose": true }'>
+<nav class="dropdown-menu" data-droppy='{ "parentSelector": "li", "dropdownSelector": "li > ul.menu", "triggerSelector": "a", "closeOthers": true, "clickOutToClose": true }'>
 ```
 
 ## Options
 
 None of Droppy's options are required, but to make it work properly with your
-menu structure you should set `dropdownSelector` and `triggerSelector`.
+menu structure you should set `parentSelector`, `dropdownSelector` and
+`triggerSelector`.
 
 ```js
 // Default options.
 var droppy = new Droppy( element, {
+  parentSelector: 'li',
   dropdownSelector: 'li > ul',
   triggerSelector: 'a',
   closeOthers: true,
@@ -64,9 +70,9 @@ var droppy = new Droppy( element, {
 ```html
 <nav class="dropdown-menu"> <!-- The Droppy's element -->
   <ul class="menu">
-    <li>
-      <a href="#">Link #1</a> <!-- The trigger selector a -->
-      <ul class="menu"> <!-- The drop-down selector li > ul -->
+    <li> <!-- The parent selector "li" -->
+      <a href="#">Link #1</a> <!-- The trigger selector "a" -->
+      <ul class="menu"> <!-- The drop-down selector "li > ul" -->
         <li><a href="#">Link #1</a></li>
         <li><a href="#">Link #2</a></li>
       </ul>
@@ -76,6 +82,12 @@ var droppy = new Droppy( element, {
   </ul>
 </nav>
 ```
+
+- ***parentSelector*** - It's a valid CSS selector of your parent element. The
+parent element **have to contain** the trigger element and the dropdown element.
+It should be the closest parent. In the example above the closest parent of
+both - `dropdownSelector` and `triggerSelector` - is the `<li>` element. That's
+why the `parentSelector` is set to `li`.
 
 - ***dropdownSelector*** - It's a valid CSS selector of your drop-down. In the
 example above I have a drop-down when there is a `<ul class="menu">` son of a
@@ -98,6 +110,7 @@ Methods are actions done by Droppy instances.
 ```js
 // Instantiate
 var droppy = new Droppy( element, {
+  parentSelector: 'li',
   dropdownSelector: 'ul > li',
   triggerSelector: 'a',
   closeOthers: true,
@@ -175,3 +188,19 @@ way you can easily get an instance initialized via HTML.
 // Get the store
 var droppyStore = Droppy.prototype.getStore();
 ```
+
+## Polyfills
+
+Droppy uses a bunch of polyfills to keep compatibility with old browsers.
+Here's a list of polyfills used.
+
+- [Array.prototype.forEach()][9a8a4327]
+- [Array.prototype.map()][548b200b]
+- [Element.prototype.classList()][ad792cb7]
+- [Element.prototype.matches()][92b6fcf0]
+
+  [9a8a4327]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/forEach#Polyfill "Polyfill Array.prototype.forEach()"
+  [548b200b]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/map#Polyfill "Polyfill Array.prototype.map()"
+  [ad792cb7]: https://github.com/eligrey/classList.js "Polyfill Element.prototype.classList()"
+  [92b6fcf0]: https://developer.mozilla.org/it/docs/Web/API/Element/matches#Polyfill "Polyfill Element.prototype.matches()"
+  

@@ -1,5 +1,5 @@
 /*!
- * Droppy - v1.0.3
+ * Droppy - v1.0.4
  * Pure JavaScript multi-level dropdown menu.
  */
 
@@ -13,10 +13,10 @@ TODO - [ ] ? Init open or close.
 TODO - [x] Click-out to close.
 TODO - [x] Click-out to close as option.
 TODO - [x] Add one click-out event for all Droppy instances.
-TODO - [ ] ? Grow direction.
 TODO - [x] Implements openAll().
 TODO - [ ] Change options.
 TODO - [ ] Implements destroy().
+TODO - [x] Remove | The parent element must be the direct parent of dropdown.
  */
 
 ( function() {
@@ -25,7 +25,7 @@ TODO - [ ] Implements destroy().
 
   var console = window.console,
       droppyStore = [],
-      setClickOut = true;
+      clickOutFlag = true;
 
 
   // Constructor
@@ -55,6 +55,7 @@ TODO - [ ] Implements destroy().
 
     // Default options
     var defaults = {
+      parentSelector: 'li',
       dropdownSelector: 'li > ul',
       triggerSelector: 'a',
       closeOthers: true,
@@ -96,25 +97,21 @@ TODO - [ ] Implements destroy().
    * Initialize a Droppy object. This function is called when a new Droppy
    * object is created.
    *
-   * Adds classes 'droppy__parent', 'droppy__trigger' and 'droppy__drop'. The
-   * 'droppy__parent' element must be the direct parent of
-   * options.dropdownSelector. Then inside the parent it gets the first child
-   * options.triggerSelector and adds 'droppy__trigger' class to it. Finally
-   * adds 'droppy_drop' class to options.dropdownSelector.
+   * Adds classes 'droppy__parent', 'droppy__trigger' and 'droppy__drop'.
    */
   Droppy.prototype.init = function() {
     // Add Droppy class.
     this.element.classList.add( 'droppy' );
 
     var dropdowns = this.element.querySelectorAll( this.options.dropdownSelector ),
-        drp_index = dropdowns.length,
+        i = dropdowns.length,
         parent;
 
-    while ( drp_index-- ) {
-      parent = dropdowns[ drp_index ].parentNode;
+    while ( i-- ) {
+      parent = getParent( dropdowns[ i ], this.element, this.options.parentSelector );
       parent.classList.add( 'droppy__parent' );
       parent.querySelector( this.options.triggerSelector ).classList.add( 'droppy__trigger' );
-      dropdowns[ drp_index ].classList.add( 'droppy__drop' );
+      dropdowns[ i ].classList.add( 'droppy__drop' );
     }
   };
 
@@ -126,11 +123,11 @@ TODO - [ ] Implements destroy().
    */
   Droppy.prototype.open = function( dropdown ) {
     if ( this.options.closeOthers ) {
-      var items_close = getItemsToClose( dropdown, this.element ),
-          itm_index = items_close.length;
+      var itemsClose = getItemsToClose( dropdown, this.element ),
+          i = itemsClose.length;
 
-      while ( itm_index-- ) {
-        items_close[ itm_index ].classList.remove( 'droppy__drop--active' );
+      while ( i-- ) {
+        itemsClose[ i ].classList.remove( 'droppy__drop--active' );
       }
     }
 
@@ -145,10 +142,10 @@ TODO - [ ] Implements destroy().
    */
   Droppy.prototype.close = function( dropdown ) {
     var children = dropdown.querySelectorAll( '.droppy__drop--active' ),
-        chl_index = children.length;
+        i = children.length;
 
-    while ( chl_index-- ) {
-      children[ chl_index ].classList.remove( 'droppy__drop--active' );
+    while ( i-- ) {
+      children[ i ].classList.remove( 'droppy__drop--active' );
     }
 
     dropdown.classList.remove( 'droppy__drop--active' );
@@ -173,11 +170,11 @@ TODO - [ ] Implements destroy().
    * Close all dropdown in a Droppy menu.
    */
   Droppy.prototype.closeAll = function() {
-    var items_close = this.element.querySelectorAll( '.droppy__drop--active' ),
-        itm_index = items_close.length;
+    var itemsClose = this.element.querySelectorAll( '.droppy__drop--active' ),
+        i = itemsClose.length;
 
-    while ( itm_index-- ) {
-      items_close[ itm_index ].classList.remove( 'droppy__drop--active' );
+    while ( i-- ) {
+      itemsClose[ i ].classList.remove( 'droppy__drop--active' );
     }
   };
 
@@ -186,11 +183,11 @@ TODO - [ ] Implements destroy().
    * Open all dropdown in a Droppy menu.
    */
   Droppy.prototype.openAll = function() {
-    var items_open = this.element.querySelectorAll( '.droppy__drop' ),
-        itm_index = items_open.length;
+    var itemsOpen = this.element.querySelectorAll( '.droppy__drop' ),
+        i = itemsOpen.length;
 
-    while ( itm_index-- ) {
-      items_open[ itm_index ].classList.add( 'droppy__drop--active' );
+    while ( i-- ) {
+      itemsOpen[ i ].classList.add( 'droppy__drop--active' );
     }
   };
 
@@ -237,6 +234,29 @@ TODO - [ ] Implements destroy().
   }
 
   /**
+   * Loop over the start element parents looking for the element that matches
+   * the given parentSelector.
+   *
+   * @param {Element} start
+   *        The starting node.
+   * @param {Node} end
+   *        The ending node.
+   * @param parentSelector
+   *        A valid CSS selector.
+   *
+   * @returns {Node|undefined}
+   */
+  function getParent( start, end, parentSelector ) {
+    while ( start !== end ) {
+      if ( start.matches( parentSelector ) ) {
+        return start;
+      }
+
+      start = start.parentNode;
+    }
+  }
+
+  /**
    * Loop over the start element parents looking for active elements, until
    * reach the end element.
    *
@@ -249,17 +269,17 @@ TODO - [ ] Implements destroy().
    *         An array containing active elements, parents of the start element.
    */
   function getActiveParents( start, end ) {
-    var active_items = [];
+    var activeItems = [];
 
     while ( start !== end ) {
       if ( start.classList.contains( 'droppy__drop--active' ) ) {
-        active_items.push( start );
+        activeItems.push( start );
       }
 
       start = start.parentNode;
     }
 
-    return active_items;
+    return activeItems;
   }
 
   /**
@@ -276,14 +296,14 @@ TODO - [ ] Implements destroy().
    *         element.
    */
   function getItemsToClose( start, end ) {
-    var parents_active = getActiveParents( start, end ),
-        items_active = [].slice.call( end.querySelectorAll( '.droppy__drop--active' ) );
+    var parentsActive = getActiveParents( start, end ),
+        itemsActive = [].slice.call( end.querySelectorAll( '.droppy__drop--active' ) );
 
-    return items_active.filter( function( item ) {
+    return itemsActive.filter( function( item ) {
       return this.every( function( parent ) {
         return item !== parent;
       } );
-    }, parents_active );
+    }, parentsActive );
   }
 
   /**
@@ -339,7 +359,7 @@ TODO - [ ] Implements destroy().
    */
   function handleClickOut() {
 
-    if ( !setClickOut ) {
+    if ( !clickOutFlag ) {
       return;
     }
 
@@ -378,7 +398,7 @@ TODO - [ ] Implements destroy().
       } );
     } );
 
-    setClickOut = false;
+    clickOutFlag = false;
   }
 
   // Expose Droppy to the global object.
@@ -387,8 +407,8 @@ TODO - [ ] Implements destroy().
   // Init via HTML.
   var elements = document.querySelectorAll( '[data-droppy]' );
 
-  for ( var e = 0; e < elements.length; ++e ) {
-    new Droppy( elements[ e ], JSON.parse( elements[ e ].getAttribute( 'data-droppy' ) ) );
+  for ( var i = 0; i < elements.length; ++i ) {
+    new Droppy( elements[ i ], JSON.parse( elements[ i ].getAttribute( 'data-droppy' ) ) );
   }
 
 } () );
