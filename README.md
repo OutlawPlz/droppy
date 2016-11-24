@@ -6,6 +6,24 @@ At it's core, Droppy adds or removes CSS classes. This way you are able to
 control the menu appearance, just editing the `.droppy_drop` and
 `.droppy__drop--active` CSS classes.
 
+```html
+<!-- Classic HTML menu -->
+<nav>
+  <ul class="menu">
+    <li>
+      <a href="#">First level - Link #1</a>
+      <ul class="menu">
+        <li><a href="#">Second level - Link #1</a></li>
+        <li><a href="#">Second level - Link #2</a></li>
+      </ul>
+    </li>
+    <li><a href="#">First level - Link #2</a></li>
+    <li><a href="#">First level - Link #3</a></li>
+  </ul>
+</nav>
+
+```
+
 ## Quick Start
 
 Start using Droppy in three steps.
@@ -32,7 +50,8 @@ Start using Droppy in three steps.
     dropdownSelector: 'li > ul.menu',
     triggerSelector: 'a',
     closeOthers: true,
-    clickOutToClose: true
+    clickOutToClose: true,
+    clickEscToClose: true
   } );
   ```
 
@@ -47,14 +66,14 @@ menu element. Options can be set in its value using **valid JSON**.
 
 ```html
 <!-- Init with HTML -->
-<nav class="dropdown-menu" data-droppy='{ "parentSelector": "li", "dropdownSelector": "li > ul.menu", "triggerSelector": "a", "closeOthers": true, "clickOutToClose": true }'>
+<nav class="dropdown-menu" data-droppy='{ "parentSelector": "li", "dropdownSelector": "li > ul.menu", "triggerSelector": "a", "closeOthers": true, "clickOutToClose": true, "clickEscToClose": true }'>
 ```
 
 ## Options
 
-None of Droppy's options are required, but to make it work properly with your
-menu structure you should set `parentSelector`, `dropdownSelector` and
-`triggerSelector`.
+None of Droppy's options are required, but to make it work properly you should
+describe your menu structure by setting the options `parentSelector`,
+`dropdownSelector` and `triggerSelector`.
 
 ```js
 // Default options.
@@ -63,7 +82,8 @@ var droppy = new Droppy( element, {
   dropdownSelector: 'li > ul',
   triggerSelector: 'a',
   closeOthers: true,
-  clickOutToClose: true
+  clickOutToClose: true,
+  clickEscToClose: true
 } );
 ```
 
@@ -103,6 +123,9 @@ one drop-down at a time.
 - ***clickOutToClose*** - A boolean value. Set to `true` if you want to close
 all the drop-downs by clicking on the outside of the current menu.
 
+- ***clickEscToClose*** - A boolean value. Set to `true` if you want to close
+all the drop-downs by clicking ESC.
+
 ## Methods
 
 Methods are actions done by Droppy instances.
@@ -114,18 +137,28 @@ var droppy = new Droppy( element, {
   dropdownSelector: 'ul > li',
   triggerSelector: 'a',
   closeOthers: true,
-  clickOutToClose: true
+  clickOutToClose: true,
+  clickEscToClose: true
 } );
 ```
 
 ### init()
 
-Initialize a Droppy object. This function is called when a new Droppy object is
-instantiate.
+Initialize a Droppy object. It adds Droppy CSS classes and events.
 
 ```js
 // Init Droppy object
 droppy.init();
+```
+
+### destroy()
+
+Reset a Droppy instance to a pre-init state. It remove Droppy CSS classes and
+events.
+
+```js
+// Reset Droppy instance to a pre-init state
+droppy.destroy();
 ```
 
 ### open( dropdown )
@@ -178,11 +211,37 @@ Close all drop-downs of a menu.
 droppy.closeAll();
 ```
 
-### getStore()
+### Droppy.prototype.isInitialized( droppy )
+
+It's a **static method**. It returns true if the given Droppy instance is found
+in the store.
+
+```js
+var droppy = new Droppy( element, options );
+
+// Check if initialized
+var initialized = Droppy.prototype.isInitialized( droppy );
+```
+
+### Droppy.prototype.getInstance( element )
+
+It's a **static method**. It returns the Droppy instance used by a given
+element.
+
+```js
+var element = document.querySelector( '[data-droppy]' );
+
+// Get the instance
+var droppy = Droppy.prototype.getInstance( element );
+```
+
+### Droppy.prototype.getStore()
 
 It's a **static method**. It returns an array containing every Droppy instance.
 When you create a new Droppy object, the instance is saved in an array. This
 way you can easily get an instance initialized via HTML.
+
+**DEPRECATED** - This function will be removed in Droppy v1.0.6.
 
 ```js
 // Get the store

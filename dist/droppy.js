@@ -402,22 +402,15 @@ if (!Element.prototype.matches) {
 }
 /**
  * Droppy - Pure JavaScript multi-level dropdown menu.
- */
-
-/*
-TODO - [x] Screen reader.
-TODO - [ ] Implements animations.
-TODO - [ ] Implements UMD.
-TODO - [x] Improve docs.
-TODO - [ ] Init via jQuery.
-TODO - [ ] ? Init open or close.
-TODO - [x] Click-out to close.
-TODO - [x] Click-out to close as option.
-TODO - [x] Add one click-out event for all Droppy instances.
-TODO - [x] Implements openAll().
-TODO - [ ] Change options.
-TODO - [ ] Implements destroy().
-TODO - [x] Remove | The parent element must be the direct parent of dropdown.
+ *
+ * TODO - [ ] Implements animations.
+ * TODO - [ ] Implements UMD.
+ * TODO - [ ] Init via jQuery.
+ * TODO - [ ] ? Init open or close.
+ * TODO - [x] Change options.
+ * TODO - [x] Implements destroy().
+ * TODO - [x] Click esc to close.
+ * TODO - [x] Get instance by element.
  */
 
 ( function() {
@@ -425,8 +418,7 @@ TODO - [x] Remove | The parent element must be the direct parent of dropdown.
   'use strict';
 
   var console = window.console,
-      droppyStore = [],
-      clickOutFlag = true;
+      droppyStore = [];
 
 
   // Constructor
@@ -440,11 +432,12 @@ TODO - [x] Remove | The parent element must be the direct parent of dropdown.
    * @param  {Object} options
    *         An object containing Droppy options.
    *
-   * @return {Object|undefined}
+   * @return {Droppy|undefined}
    *         A new Droppy object.
    */
   function Droppy( element, options )  {
 
+    // Check Droppy element.
     if ( element.nodeType !== Node.ELEMENT_NODE ) {
       if ( console ) {
         console.error( 'Droppy: the given element is not valid.', element );
@@ -454,15 +447,47 @@ TODO - [x] Remove | The parent element must be the direct parent of dropdown.
 
     this.element = element;
 
+    // Check dropdown selector.
+    var dropdown = this.element.querySelector( options.dropdownSelector );
+
+    if ( !dropdown ) {
+      if ( console ) {
+        console.error( 'Droppy: the given dropdownSelector returns no value.', options.dropdownSelector );
+      }
+      return;
+    }
+
+    // Check parent selector.
+    var parent = this.element.querySelector( options.parentSelector );
+
+    if ( !parent ) {
+      if ( console ) {
+        console.err( 'Droppy: the given parentSelector returns no value.', options.parentSelector );
+      }
+      return;
+    }
+
+    // Check trigger selector.
+    var trigger = this.element.querySelector( options.triggerSelector );
+
+    if ( !trigger ) {
+      if ( console ) {
+        console.err( 'Droppy: the given triggerSelector returns no value.', options.triggerSelector );
+      }
+      return;
+    }
+
     // Default options
     var defaults = {
       parentSelector: 'li',
       dropdownSelector: 'li > ul',
       triggerSelector: 'a',
       closeOthers: true,
-      clickOutToClose: true
+      clickOutToClose: true,
+      clickEscToClose: true
     };
 
+    // Init options.
     if ( arguments[ 1 ] && typeof arguments[ 1 ] === 'object' ) {
       this.options = extendDefaults( defaults, arguments[ 1 ] );
     }
@@ -470,24 +495,15 @@ TODO - [x] Remove | The parent element must be the direct parent of dropdown.
       this.options = defaults;
     }
 
-    var dropdowns = this.element.querySelectorAll( this.options.dropdownSelector ).length;
-
-    if ( !dropdowns ) {
-      if ( console ) {
-        console.error( 'Droppy: the given dropdownSelector returns no value.', this.options.dropdownSelector );
-      }
-      return;
-    }
+    // Define handlers.
+    this.handler = {
+      clickTrigger: clickHandler.bind( this ),
+      clickOut: clickOutHandler,
+      esc: escHandler
+    };
 
     // Init Droppy.
     this.init();
-
-    // Add events.
-    handleClick( this );
-    handleClickOut();
-
-    // Add the current object to the store.
-    droppyStore.push( this );
   }
 
 
@@ -496,12 +512,16 @@ TODO - [x] Remove | The parent element must be the direct parent of dropdown.
 
   /**
    * Initialize a Droppy object. This function is called when a new Droppy
-   * object is created.
-   *
-   * Adds classes 'droppy__parent', 'droppy__trigger' and 'droppy__drop'.
+   * object is created. Adds classes 'droppy__parent', 'droppy__trigger' and
+   * 'droppy__drop'. Adds events.
    */
   Droppy.prototype.init = function() {
-    // Add Droppy class.
+
+    if ( Droppy.prototype.isInitialized( this ) ) {
+      return;
+    }
+
+    // Add Droppy CSS classes.
     this.element.classList.add( 'droppy' );
 
     var dropdowns = this.element.querySelectorAll( this.options.dropdownSelector ),
@@ -513,6 +533,60 @@ TODO - [x] Remove | The parent element must be the direct parent of dropdown.
       parent.classList.add( 'droppy__parent' );
       parent.querySelector( this.options.triggerSelector ).classList.add( 'droppy__trigger' );
       dropdowns[ i ].classList.add( 'droppy__drop' );
+    }
+
+    // Add events.
+    this.element.addEventListener( 'click', this.handler.clickTrigger );
+
+    if ( droppyStore.length === 0 ) {
+      document.body.addEventListener( 'click', this.handler.clickOut );
+      document.body.addEventListener( 'keyup', this.handler.esc );
+    }
+
+    // Add instance to the store.
+    droppyStore.push( this );
+  };
+
+  /**
+   * Reset a Droppy instance to a pre-init state. It remove Droppy CSS classes,
+   * events and the instance from the store.
+   */
+  Droppy.prototype.destroy = function() {
+
+    if ( !Droppy.prototype.isInitialized( this ) ) {
+      return;
+    }
+
+    // Remove Droppy CSS classes.
+    this.closeAll();
+    this.element.classList.remove( 'droppy' );
+
+    var dropdowns = this.element.querySelectorAll( '.droppy__drop' ),
+        parents = this.element.querySelectorAll( '.droppy__parent' ),
+        triggers = this.element.querySelectorAll( '.droppy__trigger' ),
+        i = dropdowns.length;
+
+    while ( i-- ) {
+      dropdowns[ i ].classList.remove( 'droppy__drop' );
+      parents[ i ].classList.remove( 'droppy__parent' );
+      triggers[ i ].classList.remove( 'droppy__trigger' );
+    }
+
+    // Remove events.
+    this.element.removeEventListener( 'click', this.handler.clickTrigger );
+
+    if ( droppyStore.length === 1 ) {
+      document.body.removeEventListener( 'click', this.handler.clickOut );
+      document.body.removeEventListener( 'keyup', this.handler.esc );
+    }
+
+    // Remove instance from the store.
+    i = droppyStore.length;
+
+    while ( i-- ) {
+      if ( droppyStore[ i ] === this ) {
+        droppyStore.splice( i, 1);
+      }
     }
   };
 
@@ -597,13 +671,48 @@ TODO - [x] Remove | The parent element must be the direct parent of dropdown.
   // ---------------------------------------------------------------------------
 
   /**
+   * Check if the given Droppy instance was initialized.
+   *
+   * @param {Droppy} droppy
+   *        A Droppy instance to check.
+   *
+   * @return {boolean}
+   *         True if the given Droppy instance was initialized, false otherwise.
+   */
+  Droppy.prototype.isInitialized = function( droppy ) {
+    return droppyStore.some( function( obj ) {
+      return obj === droppy;
+    } );
+  };
+
+  /**
    * Return an array containing all Droppy's instances.
    *
    * @return {Array}
-   *          An array containing all Droppy's instances.
+   *         An array containing all Droppy's instances.
    */
   Droppy.prototype.getStore = function() {
     return droppyStore;
+  };
+
+  /**
+   * Return the Droppy instance used by the given element.
+   *
+   * @param {Node} element
+   *        The element used at Droppy creation.
+   *
+   * @return {Droppy|undefined}
+   *         The Droppy instance used by the given element. If none instance is
+   *         found, return undefined.
+   */
+  Droppy.prototype.getInstance = function ( element ) {
+    var i = droppyStore.length;
+
+    while ( i-- ) {
+      if ( droppyStore[ i ].element === element ) {
+        return droppyStore[ i ];
+      }
+    }
   };
 
 
@@ -733,74 +842,86 @@ TODO - [x] Remove | The parent element must be the direct parent of dropdown.
   }
 
 
-  // Events
+  // Event handler
   // ---------------------------------------------------------------------------
 
   /**
-   * Attach an event listener to the Droppy object. When user click on a trigger
-   * element, the relative dropdown will open or close.
+   * Calls toggle when a trigger is clicked.
    *
-   * @param  {Object} droppy
-   *         The Droppy object on which attach the event listener.
+   * @param {Event} event
+   *        The event object.
    */
-  function handleClick( droppy ) {
-    droppy.element.addEventListener( 'click', function( event ) {
-      var drop = getItemToOpen( event.target, droppy.element );
+  function clickHandler( event ) {
+    var dropdown = getItemToOpen( event.target, this.element );
 
-      if ( drop ) {
+    if ( dropdown ) {
+      if ( event.cancelable ) {
         event.preventDefault();
-        droppy.toggle( drop );
       }
-    }, true );
+
+      this.toggle( dropdown );
+    }
   }
 
   /**
-   * Attach an event listener to the body. When user click outside the menu, all
-   * dropdown will close.
+   * Close dropdown when click outside.
+   *
+   * @param {Event} event
+   *        The event object.
    */
-  function handleClickOut() {
+  function clickOutHandler( event ) {
+    /*
+     For each Droppy instance in droppyStore it loops over the parents, to see
+     if the click event was generated in the current menu. If true, then the
+     current menu should not be closed, otherwise close it.
+     */
+    var toClose = droppyStore.map( function ( droppy ) {
 
-    if ( !clickOutFlag ) {
-      return;
-    }
+      // If clickOutToClose is false, then the menu should not be closed.
+      if ( !droppy.options.clickOutToClose ) {
+        return false;
+      }
 
-    document.body.addEventListener( 'click', function ( event ) {
+      var element = event.target,
+        currentTarget = event.currentTarget;
 
-      /*
-       For each Droppy instance in droppyStore it loops over the parents, to see
-       if the click event was generated in the current menu. If true, then the
-       current menu should not be closed; otherwise close it.
-       */
-      var toClose = droppyStore.map( function ( droppy ) {
-
-        // If clickOutToClose is false, then the menu should not be closed.
-        if ( !droppy.options.clickOutToClose ) {
+      while ( element !== currentTarget ) {
+        if ( element === droppy.element ) {
           return false;
         }
 
-        var element = event.target,
-            currentTarget = event.currentTarget;
+        element = element.parentNode;
+      }
 
-        while ( element !== currentTarget ) {
-          if ( element === droppy.element ) {
-            return false;
-          }
+      return droppy;
+    } );
 
-          element = element.parentNode;
-        }
+    toClose.forEach( function ( droppy ) {
+      if ( droppy ) {
+        droppy.closeAll();
+      }
+    } );
+  }
 
-        return droppy;
-      } );
-
-      toClose.forEach( function ( droppy ) {
-        if ( droppy ) {
+  /**
+   * Close dropdowns when click ESC.
+   *
+   * @param {Event} event
+   *        The event object.
+   */
+  function escHandler( event ) {
+    if ( event.which === 27 ) {
+      droppyStore.forEach( function( droppy ) {
+        if ( droppy.options.clickEscToClose ) {
           droppy.closeAll();
         }
       } );
-    } );
-
-    clickOutFlag = false;
+    }
   }
+
+
+  // Expose & Init
+  // ---------------------------------------------------------------------------
 
   // Expose Droppy to the global object.
   window.Droppy = Droppy;
