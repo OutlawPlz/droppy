@@ -403,7 +403,7 @@ if (!Element.prototype.matches) {
 /**
  * Droppy - Pure JavaScript multi-level dropdown menu.
  *
- * TODO - [ ] Implements animations.
+ * TODO - [x] Implements animations.
  * TODO - [ ] Implements UMD.
  * TODO - [ ] Init via jQuery.
  * TODO - [ ] ? Init open or close.
@@ -484,7 +484,9 @@ if (!Element.prototype.matches) {
       triggerSelector: 'a',
       closeOthers: true,
       clickOutToClose: true,
-      clickEscToClose: true
+      clickEscToClose: true,
+      animationIn: false,
+      animationOut: false
     };
 
     // Init options.
@@ -499,7 +501,8 @@ if (!Element.prototype.matches) {
     this.handler = {
       clickTrigger: clickHandler.bind( this ),
       clickOut: clickOutHandler,
-      esc: escHandler
+      esc: escHandler,
+      animationEnd: animationEndHandler.bind( this )
     };
 
     // Init Droppy.
@@ -537,6 +540,7 @@ if (!Element.prototype.matches) {
 
     // Add events.
     this.element.addEventListener( 'click', this.handler.clickTrigger );
+    this.element.addEventListener( 'animationend', this.handler.animationEnd );
 
     if ( droppyStore.length === 0 ) {
       document.body.addEventListener( 'click', this.handler.clickOut );
@@ -574,6 +578,7 @@ if (!Element.prototype.matches) {
 
     // Remove events.
     this.element.removeEventListener( 'click', this.handler.clickTrigger );
+    this.element.removeEventListener( 'animationend', this.handler.animationEnd );
 
     if ( droppyStore.length === 1 ) {
       document.body.removeEventListener( 'click', this.handler.clickOut );
@@ -597,16 +602,28 @@ if (!Element.prototype.matches) {
    *         The dropdown element to open.
    */
   Droppy.prototype.open = function( dropdown ) {
+
+    // Close others drop-downs if specified in options.
     if ( this.options.closeOthers ) {
       var itemsClose = getItemsToClose( dropdown, this.element ),
           i = itemsClose.length;
 
       while ( i-- ) {
-        itemsClose[ i ].classList.remove( 'droppy__drop--active' );
+        this.close( itemsClose[ i ] );
       }
     }
 
+    // Display the drop-down.
     dropdown.classList.add( 'droppy__drop--active' );
+
+    /*
+    If specified in the options, animate the drop-down menu. At the end of the
+    animation, call the function animationEndHandler() where the animation class
+    is removed.
+     */
+    if ( this.options.animationIn ) {
+      dropdown.classList.add( this.options.animationIn );
+    }
   };
 
   /**
@@ -616,14 +633,18 @@ if (!Element.prototype.matches) {
    *         The dropdown element to close.
    */
   Droppy.prototype.close = function( dropdown ) {
-    var children = dropdown.querySelectorAll( '.droppy__drop--active' ),
-        i = children.length;
 
-    while ( i-- ) {
-      children[ i ].classList.remove( 'droppy__drop--active' );
+    /*
+    If specified in the options, animate the drop-down menu. At the end of the
+    animation, call the function animationEndHandler() where the animation class
+    and the .droppy__drop--active are removed.
+     */
+    if ( this.options.animationOut ) {
+      dropdown.classList.add( this.options.animationOut );
     }
-
-    dropdown.classList.remove( 'droppy__drop--active' );
+    else {
+      dropdown.classList.remove( 'droppy__drop--active' );
+    }
   };
 
   /**
@@ -916,6 +937,32 @@ if (!Element.prototype.matches) {
           droppy.closeAll();
         }
       } );
+    }
+  }
+
+  /**
+   * Remove the animation CSS class. If the menu is closing, remove the
+   * .droppy__drop--active and the animation CSS class.
+   *
+   * @param {Event} event
+   *        The event object.
+   */
+  function animationEndHandler( event ) {
+
+    if ( event.target.classList.contains( this.options.animationIn ) ) {
+      event.target.classList.remove( this.options.animationIn );
+    }
+    else if ( event.target.classList.contains( this.options.animationOut ) ) {
+      event.target.classList.remove( 'droppy__drop--active' );
+      event.target.classList.remove( this.options.animationOut );
+
+      // Close all the children of the current drop-down.
+      var itemsClose = event.target.querySelectorAll( '.droppy__drop--active' ),
+          i = itemsClose.length;
+
+      while ( i-- ) {
+        itemsClose[ i ].classList.remove( 'droppy__drop--active' );
+      }
     }
   }
 

@@ -7,9 +7,21 @@
 .droppy {}
 
 .droppy__drop {
-  @include visually-hidden();
+  display: none;
 
   &--active {
-    @include visually-hidden-off();
+    display: block;
   }
+}
+
+.fadeIn {
+  animation-name: fadeIn;
+  animation-duration: .3s;
+  animation-fill-mode: both;
+}
+
+.fadeOut {
+  animation-name: fadeOut;
+  animation-duration: .3s;
+  animation-fill-mode: both;
 }

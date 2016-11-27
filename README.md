@@ -51,7 +51,9 @@ Start using Droppy in three steps.
     triggerSelector: 'a',
     closeOthers: true,
     clickOutToClose: true,
-    clickEscToClose: true
+    clickEscToClose: true,
+    animationIn: false,
+    animationOut: false
   } );
   ```
 
@@ -66,7 +68,7 @@ menu element. Options can be set in its value using **valid JSON**.
 
 ```html
 <!-- Init with HTML -->
-<nav class="dropdown-menu" data-droppy='{ "parentSelector": "li", "dropdownSelector": "li > ul.menu", "triggerSelector": "a", "closeOthers": true, "clickOutToClose": true, "clickEscToClose": true }'>
+<nav class="dropdown-menu" data-droppy='{ "parentSelector": "li", "dropdownSelector": "li > ul.menu", "triggerSelector": "a", "closeOthers": true, "clickOutToClose": true, "clickEscToClose": true, "animationIn": false, "animationOut": false }'>
 ```
 
 ## Options
@@ -83,7 +85,9 @@ var droppy = new Droppy( element, {
   triggerSelector: 'a',
   closeOthers: true,
   clickOutToClose: true,
-  clickEscToClose: true
+  clickEscToClose: true,
+  animationIn: false,
+  animationOut: false
 } );
 ```
 
@@ -125,6 +129,14 @@ all the drop-downs by clicking on the outside of the current menu.
 
 - ***clickEscToClose*** - A boolean value. Set to `true` if you want to close
 all the drop-downs by clicking ESC.
+
+- ***animationIn*** - A CSS class where is declared an animation. This class
+will be applied at the open of a drop-down and removed at the end of the
+animation.
+
+- ***animationOut*** - A CSS class where is declared an animation. This class
+will be applied at the close of a drop-down and removed at the end of the
+animation.
 
 ## Methods
 
@@ -213,12 +225,11 @@ droppy.closeAll();
 
 ### Droppy.prototype.isInitialized( droppy )
 
-It's a **static method**. It returns true if the given Droppy instance is found
-in the store.
+It's a **static method**. It returns true if the given Droppy instance is
+active, false otherwise.
 
 ```js
 var droppy = new Droppy( element, options );
-
 // Check if initialized
 var initialized = Droppy.prototype.isInitialized( droppy );
 ```
@@ -230,7 +241,6 @@ element.
 
 ```js
 var element = document.querySelector( '[data-droppy]' );
-
 // Get the instance
 var droppy = Droppy.prototype.getInstance( element );
 ```

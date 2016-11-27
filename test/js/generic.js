@@ -13,7 +13,9 @@
     dropdownSelector: 'li > ul.menu',
     triggerSelector: 'a',
     closeOthers: true,
-    clickOutToClose: true
+    clickOutToClose: true,
+    animationIn: 'fadeIn',
+    animationOut: 'fadeOut'
   } );
 
   console.log( Droppy.prototype.getStore() );
