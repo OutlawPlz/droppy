@@ -52,8 +52,8 @@ Start using Droppy in three steps.
     closeOthers: true,
     clickOutToClose: true,
     clickEscToClose: true,
-    animationIn: false,
-    animationOut: false
+    animationIn: '',
+    animationOut: ''
   } );
   ```
 
@@ -68,7 +68,7 @@ menu element. Options can be set in its value using **valid JSON**.
 
 ```html
 <!-- Init with HTML -->
-<nav class="dropdown-menu" data-droppy='{ "parentSelector": "li", "dropdownSelector": "li > ul.menu", "triggerSelector": "a", "closeOthers": true, "clickOutToClose": true, "clickEscToClose": true, "animationIn": false, "animationOut": false }'>
+<nav class="dropdown-menu" data-droppy='{ "parentSelector": "li", "dropdownSelector": "li > ul.menu", "triggerSelector": "a", "closeOthers": true, "clickOutToClose": true, "clickEscToClose": true, "animationIn": '', "animationOut": '' }'>
 ```
 
 ## Options
@@ -86,8 +86,8 @@ var droppy = new Droppy( element, {
   closeOthers: true,
   clickOutToClose: true,
   clickEscToClose: true,
-  animationIn: false,
-  animationOut: false
+  animationIn: '',
+  animationOut: ''
 } );
 ```
 
@@ -150,7 +150,9 @@ var droppy = new Droppy( element, {
   triggerSelector: 'a',
   closeOthers: true,
   clickOutToClose: true,
-  clickEscToClose: true
+  clickEscToClose: true,
+  animationIn: '',
+  animationOut: ''
 } );
 ```
 
@@ -173,10 +175,16 @@ events.
 droppy.destroy();
 ```
 
-### open( dropdown )
+### open( dropdown, withDescendants, closeOthers )
 
 Open the given drop-down. If `closeOthers` is set to `true`, the other
 drop-downs will be closed before opening the current one.
+
+- `{Element} dropdown` - The drop-down element to open.
+- `{Boolean} [withDescendants=false]` - Should open or not all the drop-downs
+in the given drop-down.
+- `{Boolean} [closeOthers=this.options.closeOthers]` - Should close others
+drop-downs on opening the current one.
 
 ```js
 var dropdown = document.querySelector( '#menu-main .droppy__drop' )
@@ -184,9 +192,13 @@ var dropdown = document.querySelector( '#menu-main .droppy__drop' )
 droppy.open( dropdown );
 ```
 
-### close( dropdown )
+### close( dropdown, withDescendants )
 
 Close the given drop-down and all its descendants.
+
+- `{Element} dropdown` - The drop-down element to close.
+- `{Boolean} [withDescendants=true]` - Should close or not all the drop-downs
+in the given drop-down.
 
 ```js
 var dropdown = document.querySelector( '#menu-main .droppy__drop' )
@@ -194,13 +206,16 @@ var dropdown = document.querySelector( '#menu-main .droppy__drop' )
 droppy.close( dropdown );
 ```
 
-### toggle( dropdown )
+### toggle( dropdown, withDescendants )
 
 Open or close the given drop-down.
 
+- `{Element} dropdown` - The drop-down element to toggle.
+- `{Boolean} [withDescendants=true]` - Should toggle or not all the drop-downs
+in the given drop-down.
+
 ```js
 var dropdown = document.querySelector( '#menu-main .droppy__drop' )
-
 // Toggle a dropdown
 droppy.toggle( dropdown );
 ```

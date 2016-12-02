@@ -1,5 +1,5 @@
 /**
- * Droppy - v1.0.4
+ * Droppy - v1.0.5
  * Pure JavaScript multi-level dropdown menu.
  * By OutlawPlz, license GPL-3.0.
  * https://github.com/OutlawPlz/droppy.git
@@ -400,7 +400,7 @@ if (!Element.prototype.matches) {
       return i > -1;
     };
 }
-/**
+/*
  * Droppy - Pure JavaScript multi-level dropdown menu.
  *
  * TODO - [x] Implements animations.
@@ -418,7 +418,8 @@ if (!Element.prototype.matches) {
   'use strict';
 
   var console = window.console,
-      droppyStore = [];
+      droppyStore = [],
+      animationSupport = detectAnimationSupport();
 
 
   // Constructor
@@ -485,8 +486,8 @@ if (!Element.prototype.matches) {
       closeOthers: true,
       clickOutToClose: true,
       clickEscToClose: true,
-      animationIn: false,
-      animationOut: false
+      animationIn: '',
+      animationOut: ''
     };
 
     // Init options.
@@ -501,8 +502,7 @@ if (!Element.prototype.matches) {
     this.handler = {
       clickTrigger: clickHandler.bind( this ),
       clickOut: clickOutHandler,
-      esc: escHandler,
-      animationEnd: animationEndHandler.bind( this )
+      esc: escHandler
     };
 
     // Init Droppy.
@@ -540,7 +540,6 @@ if (!Element.prototype.matches) {
 
     // Add events.
     this.element.addEventListener( 'click', this.handler.clickTrigger );
-    this.element.addEventListener( 'animationend', this.handler.animationEnd );
 
     if ( droppyStore.length === 0 ) {
       document.body.addEventListener( 'click', this.handler.clickOut );
@@ -578,7 +577,6 @@ if (!Element.prototype.matches) {
 
     // Remove events.
     this.element.removeEventListener( 'click', this.handler.clickTrigger );
-    this.element.removeEventListener( 'animationend', this.handler.animationEnd );
 
     if ( droppyStore.length === 1 ) {
       document.body.removeEventListener( 'click', this.handler.clickOut );
@@ -599,31 +597,49 @@ if (!Element.prototype.matches) {
    * Open the given dropdown.
    *
    * @param  {Element} dropdown
-   *         The dropdown element to open.
+   *         The drop-down element to open.
+   * @param  {Boolean} [withDescendants=false]
+   *         Should open or not all the drop-downs in the given drop-down.
+   * @param  {Boolean} [closeOthers=this.options.closeOthers]
+   *         Should close others drop-downs when open the current one.
    */
-  Droppy.prototype.open = function( dropdown ) {
+  Droppy.prototype.open = function( dropdown, withDescendants, closeOthers ) {
 
-    // Close others drop-downs if specified in options.
-    if ( this.options.closeOthers ) {
-      var itemsClose = getItemsToClose( dropdown, this.element ),
-          i = itemsClose.length;
+    if ( typeof withDescendants !== 'boolean' ) {
+      withDescendants = false;
+    }
+
+    if ( typeof closeOthers !== 'boolean') {
+      closeOthers = this.options.closeOthers;
+    }
+
+    if ( closeOthers ) {
+      var closing = getOthersToClose( dropdown, this.element ),
+          i = closing.length;
 
       while ( i-- ) {
-        this.close( itemsClose[ i ] );
+        this.close( closing[ i ] );
       }
     }
 
-    // Display the drop-down.
-    dropdown.classList.add( 'droppy__drop--active' );
+    var animationIn = this.options.animationIn;
 
-    /*
-    If specified in the options, animate the drop-down menu. At the end of the
-    animation, call the function animationEndHandler() where the animation class
-    is removed.
-     */
-    if ( this.options.animationIn ) {
-      dropdown.classList.add( this.options.animationIn );
+    if ( animationSupport && animationIn ) {
+      // During animation, abort open().
+      if ( dropdown.classList.contains( animationIn ) ) {
+        return;
+      }
+
+      // At animation end, remove animation CSS class.
+      dropdown.addEventListener( 'animationend', function() {
+        dropdown.classList.remove( animationIn )
+      }, { once: true } );
+
+      dropdown.classList.add( animationIn );
     }
+
+    // Open the drop-down.
+    open( dropdown, withDescendants );
   };
 
   /**
@@ -631,19 +647,33 @@ if (!Element.prototype.matches) {
    *
    * @param  {Element} dropdown
    *         The dropdown element to close.
+   * @param  {Boolean} [withDescendants=true]
+   *         Should close or not all the drop-downs in the given drop-down.
    */
-  Droppy.prototype.close = function( dropdown ) {
+  Droppy.prototype.close = function( dropdown, withDescendants ) {
 
-    /*
-    If specified in the options, animate the drop-down menu. At the end of the
-    animation, call the function animationEndHandler() where the animation class
-    and the .droppy__drop--active are removed.
-     */
-    if ( this.options.animationOut ) {
-      dropdown.classList.add( this.options.animationOut );
+    if ( typeof withDescendants !== 'boolean' ) {
+      withDescendants = true;
+    }
+
+    var animationOut = this.options.animationOut;
+
+    if ( animationSupport && animationOut ) {
+      // Durign animation, abort close().
+      if ( dropdown.classList.contains( this.options.animationIn ) ) {
+        return;
+      }
+
+      // At animation end, remove animation CSS class and close the drop.down.
+      dropdown.addEventListener( 'animationend', function() {
+        close( dropdown, withDescendants );
+        dropdown.classList.remove( animationOut );
+      }, { once: true } );
+
+      dropdown.classList.add( animationOut );
     }
     else {
-      dropdown.classList.remove( 'droppy__drop--active' );
+      close( dropdown, withDescendants );
     }
   };
 
@@ -652,13 +682,21 @@ if (!Element.prototype.matches) {
    *
    * @param  {Element} dropdown
    *         The dropdown element to open or close.
+   * @param  {Boolean|undefined} withDescendants
+   *         Should open/close or not all the drop-downs in the given drop-down.
    */
-  Droppy.prototype.toggle = function( dropdown ) {
+  Droppy.prototype.toggle = function( dropdown, withDescendants ) {
     if ( dropdown.classList.contains( 'droppy__drop--active' ) ) {
-      this.close( dropdown );
+      if ( typeof withDescendants !== 'boolean' ) {
+        this.close( dropdown );
+      }
+      this.close( dropdown, withDescendants );
     }
-    else {
-      this.open( dropdown );
+    else if ( dropdown.classList.contains( 'droppy__drop' ) ) {
+      if ( typeof  withDescendants !== 'boolean' ) {
+        this.open( dropdown );
+      }
+      this.open( dropdown, withDescendants );
     }
   };
 
@@ -666,11 +704,12 @@ if (!Element.prototype.matches) {
    * Close all dropdown in a Droppy menu.
    */
   Droppy.prototype.closeAll = function() {
-    var itemsClose = this.element.querySelectorAll( '.droppy__drop--active' ),
-        i = itemsClose.length;
+
+    var dropdowns = getFirstLevelDropdown( this.element, '.droppy__drop--active' ),
+        i = dropdowns.length;
 
     while ( i-- ) {
-      itemsClose[ i ].classList.remove( 'droppy__drop--active' );
+      this.close( dropdowns[ i ], true );
     }
   };
 
@@ -679,11 +718,12 @@ if (!Element.prototype.matches) {
    * Open all dropdown in a Droppy menu.
    */
   Droppy.prototype.openAll = function() {
-    var itemsOpen = this.element.querySelectorAll( '.droppy__drop' ),
-        i = itemsOpen.length;
+
+    var dropdowns = getFirstLevelDropdown( this.element, '.droppy__drop' ),
+        i = dropdowns.length;
 
     while ( i-- ) {
-      itemsOpen[ i ].classList.add( 'droppy__drop--active' );
+      this.open( dropdowns[ i ], true, false );
     }
   };
 
@@ -766,16 +806,17 @@ if (!Element.prototype.matches) {
 
   /**
    * Loop over the start element parents looking for the element that matches
-   * the given parentSelector.
+   * the given parentSelector, until reach the end element.
    *
-   * @param {Element} start
-   *        The starting node.
-   * @param {Node} end
-   *        The ending node.
-   * @param parentSelector
-   *        A valid CSS selector.
+   * @param  {Element} start
+   *         The starting node.
+   * @param  {Element} end
+   *         The ending node.
+   * @param  {string} parentSelector
+   *         A valid CSS selector.
    *
-   * @returns {Node|undefined}
+   * @return {Element|undefined}
+   *         The first parent element that matches the given selector.
    */
   function getParent( start, end, parentSelector ) {
     while ( start !== end ) {
@@ -788,29 +829,31 @@ if (!Element.prototype.matches) {
   }
 
   /**
-   * Loop over the start element parents looking for active elements, until
-   * reach the end element.
+   * Loop over the start element parents looking for the element that matches
+   * the given selector, until reach the end element.
    *
-   * @param  {Node} start
+   * @param  {Element} start
    *         The starting element.
    * @param  {Element} end
    *         The ending element.
+   * @param  {string} parentSelector
+   *         A valid CSS selector.
    *
    * @return {Array}
    *         An array containing active elements, parents of the start element.
    */
-  function getActiveParents( start, end ) {
-    var activeItems = [];
+  function getParents( start, end, parentSelector ) {
+    var itemsActive = [];
 
     while ( start !== end ) {
-      if ( start.classList.contains( 'droppy__drop--active' ) ) {
-        activeItems.push( start );
+      if ( start.matches( parentSelector ) ) {
+        itemsActive.push( start );
       }
 
       start = start.parentNode;
     }
 
-    return activeItems;
+    return itemsActive;
   }
 
   /**
@@ -826,11 +869,11 @@ if (!Element.prototype.matches) {
    *         An array of active elements that aren't parents of the starting
    *         element.
    */
-  function getItemsToClose( start, end ) {
-    var parentsActive = getActiveParents( start, end ),
-        itemsActive = [].slice.call( end.querySelectorAll( '.droppy__drop--active' ) );
+  function getOthersToClose( start, end ) {
+    var parentsActive = getParents( start, end, '.droppy__drop--active' ),
+        othersActive = getFirstLevelDropdown( end, '.droppy__drop--active' );
 
-    return itemsActive.filter( function( item ) {
+    return othersActive.filter( function( item ) {
       return this.every( function( parent ) {
         return item !== parent;
       } );
@@ -841,7 +884,7 @@ if (!Element.prototype.matches) {
    * Loop over start element's parents looking for the droppy__parent class,
    * then return the drop element.
    *
-   * @param  {Node} start
+   * @param  {Element} start
    *         The starting node.
    * @param  {Element} end
    *         The ending node.
@@ -860,6 +903,96 @@ if (!Element.prototype.matches) {
     }
 
     return false;
+  }
+
+  /**
+   * Returns the first level elments children of the given element, that matches
+   * the given selector.
+   *
+   * @param  {Element} element
+   *         A parent element.
+   * @param  {string} selector
+   *         A valid CSS selector.
+   *
+   * @return {Array|undefined}
+   *         An array containing the first level of elements that matchets the
+   *         given selector.
+   */
+  function getFirstLevelDropdown( element, selector ) {
+    var items = Array.prototype.slice.call( element.querySelectorAll( selector ) ),
+        children = Array.prototype.slice.call( element.querySelectorAll( selector + ' ' + selector ) );
+
+    return items.filter( function ( item ) {
+      return this.indexOf( item ) === -1;
+    }, children );
+  }
+
+  /**
+   * Check if browser support animation.
+   *
+   * @return {boolean}
+   *         Return true if the browser support CSS animation, false otherwise.
+   */
+  function detectAnimationSupport() {
+    var support = false,
+        element = document.createElement( 'div' ),
+        domPrefixes = 'Webkit';
+
+    if ( element.style.animationName !== undefined ) {
+      support = true;
+    }
+
+    if ( !support ) {
+      if ( element.style[ domPrefixes + 'AnimationName' ] !== undefined ) {
+        support = true;
+      }
+    }
+
+    return support;
+  }
+
+  /**
+   * Add the CSS class .droppy__drop--active to the given element and relative
+   * drop-downs descendants.
+   *
+   * @param {Element} element
+   *        The element to which adds the CSS class .droppy__drop--active.
+   * @param {Boolean} desc
+   *        True if add the CSS class to the descendants drop-down.
+   */
+  function open( element, desc ) {
+    if ( desc ) {
+      var items = element.querySelectorAll( '.droppy__drop' ),
+          i = items.length;
+
+      while ( i-- ) {
+        items[ i ].classList.add( 'droppy__drop--active' );
+      }
+    }
+
+    element.classList.add( 'droppy__drop--active' );
+  }
+
+  /**
+   * Remove the CSS class .droppy__drop--active to the given element and
+   * relative drop-downs descendants.
+   *
+   * @param {Element} element
+   *        The element to which adds the CSS class .droppy__drop--active.
+   * @param {Boolean} desc
+   *        True if remove the CSS class to the descendants drop-down.
+   */
+  function close( element, desc ) {
+    element.classList.remove( 'droppy__drop--active' );
+
+    if ( desc ) {
+      var items = element.querySelectorAll( '.droppy__drop--active' ),
+          i = items.length;
+
+      while ( i-- ) {
+        items[ i ].classList.remove( 'droppy__drop--active' );
+      }
+    }
   }
 
 
@@ -896,7 +1029,7 @@ if (!Element.prototype.matches) {
      if the click event was generated in the current menu. If true, then the
      current menu should not be closed, otherwise close it.
      */
-    var toClose = droppyStore.map( function ( droppy ) {
+    var closing = droppyStore.filter( function ( droppy ) {
 
       // If clickOutToClose is false, then the menu should not be closed.
       if ( !droppy.options.clickOutToClose ) {
@@ -904,7 +1037,7 @@ if (!Element.prototype.matches) {
       }
 
       var element = event.target,
-        currentTarget = event.currentTarget;
+          currentTarget = event.currentTarget;
 
       while ( element !== currentTarget ) {
         if ( element === droppy.element ) {
@@ -914,14 +1047,14 @@ if (!Element.prototype.matches) {
         element = element.parentNode;
       }
 
-      return droppy;
+      return true;
     } );
 
-    toClose.forEach( function ( droppy ) {
-      if ( droppy ) {
-        droppy.closeAll();
-      }
-    } );
+    var i = closing.length;
+
+    while ( i-- ) {
+      closing[ i ].closeAll();
+    }
   }
 
   /**
@@ -937,32 +1070,6 @@ if (!Element.prototype.matches) {
           droppy.closeAll();
         }
       } );
-    }
-  }
-
-  /**
-   * Remove the animation CSS class. If the menu is closing, remove the
-   * .droppy__drop--active and the animation CSS class.
-   *
-   * @param {Event} event
-   *        The event object.
-   */
-  function animationEndHandler( event ) {
-
-    if ( event.target.classList.contains( this.options.animationIn ) ) {
-      event.target.classList.remove( this.options.animationIn );
-    }
-    else if ( event.target.classList.contains( this.options.animationOut ) ) {
-      event.target.classList.remove( 'droppy__drop--active' );
-      event.target.classList.remove( this.options.animationOut );
-
-      // Close all the children of the current drop-down.
-      var itemsClose = event.target.querySelectorAll( '.droppy__drop--active' ),
-          i = itemsClose.length;
-
-      while ( i-- ) {
-        itemsClose[ i ].classList.remove( 'droppy__drop--active' );
-      }
     }
   }
 
