@@ -21,16 +21,18 @@ control the menu appearance, just editing the `.droppy_drop` and
     <li><a href="#">First level - Link #3</a></li>
   </ul>
 </nav>
-
 ```
 
 ## Quick Start
 
 Start using Droppy in three steps.
 
-1. Download latest Droppy package from [Github][836c3e46] or via NPM.
+1. Download latest Droppy package from [Github][836c3e46] or via NPM or Bower.
   ```sh
+  # NPM
   npm install droppy-menu --save
+  # Bower
+  bower install droppy-menu --save
   ```
 
 2. Add `dist/droppy.min.css` and `dist/droppy.min.js` to your web page.
@@ -48,12 +50,7 @@ Start using Droppy in three steps.
   var droppy = new Droppy( element, {
     parentSelector: 'li',
     dropdownSelector: 'li > ul.menu',
-    triggerSelector: 'a',
-    closeOthers: true,
-    clickOutToClose: true,
-    clickEscToClose: true,
-    animationIn: '',
-    animationOut: ''
+    triggerSelector: 'a'
   } );
   ```
 
@@ -88,7 +85,7 @@ var droppy = new Droppy( element, {
   clickEscToClose: true,
   animationIn: '',
   animationOut: ''
-} );
+}, callbacks );
 ```
 
 ```html
@@ -175,7 +172,7 @@ events.
 droppy.destroy();
 ```
 
-### open( dropdown, withDescendants, closeOthers )
+### open( dropdown, withDescendants )
 
 Open the given drop-down. If `closeOthers` is set to `true`, the other
 drop-downs will be closed before opening the current one.
@@ -183,8 +180,6 @@ drop-downs will be closed before opening the current one.
 - `{Element} dropdown` - The drop-down element to open.
 - `{Boolean} [withDescendants=false]` - Should open or not all the drop-downs
 in the given drop-down.
-- `{Boolean} [closeOthers=this.options.closeOthers]` - Should close others
-drop-downs on opening the current one.
 
 ```js
 var dropdown = document.querySelector( '#menu-main .droppy__drop' )
@@ -271,6 +266,32 @@ way you can easily get an instance initialized via HTML.
 ```js
 // Get the store
 var droppyStore = Droppy.prototype.getStore();
+```
+
+## Callbacks
+
+Callbacks are function called at a specific point of execution. Callbacks does
+not wait for animation end, this may cause the execution of `afterOpen`,
+`afterClose`, `afterOpenAll` and `afterCloseAll` when the drop-down is not
+completely opened or closed yet.
+
+```js
+var droppy = new Droppy( element, options, {
+  beforeOpen: null,
+  afterOpen: null,
+  beforeClose: function() {
+    alert( 'Before close.' );
+  },
+  afterClose: null,
+  beforeOpenAll: null,
+  afterOpenAll: null,
+  beforeCloseAll: null,
+  afterCloseAll: null,
+  beforeInit: null,
+  afterInit: null,
+  beforeDestroy: null,
+  afterDestroy: null
+} );
 ```
 
 ## Polyfills

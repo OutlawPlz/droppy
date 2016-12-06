@@ -403,14 +403,11 @@ if (!Element.prototype.matches) {
 /*
  * Droppy - Pure JavaScript multi-level dropdown menu.
  *
- * TODO - [x] Implements animations.
  * TODO - [ ] Implements UMD.
  * TODO - [ ] Init via jQuery.
- * TODO - [ ] ? Init open or close.
- * TODO - [x] Change options.
- * TODO - [x] Implements destroy().
- * TODO - [x] Click esc to close.
- * TODO - [x] Get instance by element.
+ * TODO - [ ] Bower.
+ * TODO - [ ] Accessibility.
+ * TODO - [x] Callbacks.
  */
 
 ( function() {
@@ -432,11 +429,13 @@ if (!Element.prototype.matches) {
    *         The element on which Droppy will act.
    * @param  {Object} options
    *         An object containing Droppy options.
+   * @param {Object} callbacks
+   *        An object containing callback functions.
    *
    * @return {Droppy|undefined}
    *         A new Droppy object.
    */
-  function Droppy( element, options )  {
+  function Droppy( element, options, callbacks )  {
 
     // Check Droppy element.
     if ( element.nodeType !== Node.ELEMENT_NODE ) {
@@ -479,7 +478,7 @@ if (!Element.prototype.matches) {
     }
 
     // Default options
-    var defaults = {
+    var defaultOptions = {
       parentSelector: 'li',
       dropdownSelector: 'li > ul',
       triggerSelector: 'a',
@@ -492,10 +491,34 @@ if (!Element.prototype.matches) {
 
     // Init options.
     if ( arguments[ 1 ] && typeof arguments[ 1 ] === 'object' ) {
-      this.options = extendDefaults( defaults, arguments[ 1 ] );
+      this.options = extendDefaults( defaultOptions, arguments[ 1 ] );
     }
     else {
-      this.options = defaults;
+      this.options = defaultOptions;
+    }
+
+    // Callbacks
+    var defaultCallbacks = {
+      beforeOpen: null,
+      afterOpen: null,
+      beforeClose: null,
+      afterClose: null,
+      beforeOpenAll: null,
+      afterOpenAll: null,
+      beforeCloseAll: null,
+      afterCloseAll: null,
+      beforeInit: null,
+      afterInit: null,
+      beforeDestroy: null,
+      afterDestroy: null
+    };
+
+    // Init callbacks.
+    if ( arguments[ 2 ] && typeof arguments[ 2 ] === 'object' ) {
+      this.callbacks = extendDefaults( defaultCallbacks, arguments[ 2 ] );
+    }
+    else {
+      this.callbacks = defaultCallbacks;
     }
 
     // Define handlers.
@@ -524,6 +547,10 @@ if (!Element.prototype.matches) {
       return;
     }
 
+    if ( typeof this.callbacks.beforeInit === 'function' ) {
+      this.callbacks.beforeInit();
+    }
+
     // Add Droppy CSS classes.
     this.element.classList.add( 'droppy' );
 
@@ -548,6 +575,10 @@ if (!Element.prototype.matches) {
 
     // Add instance to the store.
     droppyStore.push( this );
+
+    if ( typeof this.callbacks.afterInit === 'function' ) {
+      this.callbacks.afterInit();
+    }
   };
 
   /**
@@ -558,6 +589,10 @@ if (!Element.prototype.matches) {
 
     if ( !Droppy.prototype.isInitialized( this ) ) {
       return;
+    }
+
+    if ( typeof this.callbacks.beforeDestroy === 'function' ) {
+      this.callbacks.beforeDestroy();
     }
 
     // Remove Droppy CSS classes.
@@ -583,6 +618,8 @@ if (!Element.prototype.matches) {
       document.body.removeEventListener( 'keyup', this.handler.esc );
     }
 
+    delete this.handler;
+
     // Remove instance from the store.
     i = droppyStore.length;
 
@@ -590,6 +627,10 @@ if (!Element.prototype.matches) {
       if ( droppyStore[ i ] === this ) {
         droppyStore.splice( i, 1);
       }
+    }
+
+    if ( typeof this.callbacks.afterDestroy === 'function' ) {
+      this.callbacks.afterDestroy();
     }
   };
 
@@ -600,46 +641,31 @@ if (!Element.prototype.matches) {
    *         The drop-down element to open.
    * @param  {Boolean} [withDescendants=false]
    *         Should open or not all the drop-downs in the given drop-down.
-   * @param  {Boolean} [closeOthers=this.options.closeOthers]
-   *         Should close others drop-downs when open the current one.
    */
-  Droppy.prototype.open = function( dropdown, withDescendants, closeOthers ) {
+  Droppy.prototype.open = function( dropdown, withDescendants ) {
+
+    if ( typeof this.callbacks.beforeOpen === 'function' ) {
+      this.callbacks.beforeOpen();
+    }
 
     if ( typeof withDescendants !== 'boolean' ) {
       withDescendants = false;
     }
 
-    if ( typeof closeOthers !== 'boolean') {
-      closeOthers = this.options.closeOthers;
-    }
-
-    if ( closeOthers ) {
+    if ( this.options.closeOthers ) {
       var closing = getOthersToClose( dropdown, this.element ),
-          i = closing.length;
+        i = closing.length;
 
       while ( i-- ) {
-        this.close( closing[ i ] );
+        close( closing[ i ], true, this.options.animationOut );
       }
     }
 
-    var animationIn = this.options.animationIn;
+    open( dropdown, withDescendants, this.options.animationIn );
 
-    if ( animationSupport && animationIn ) {
-      // During animation, abort open().
-      if ( dropdown.classList.contains( animationIn ) ) {
-        return;
-      }
-
-      // At animation end, remove animation CSS class.
-      dropdown.addEventListener( 'animationend', function() {
-        dropdown.classList.remove( animationIn )
-      }, { once: true } );
-
-      dropdown.classList.add( animationIn );
+    if ( typeof this.callbacks.afterOpen === 'function' ) {
+      this.callbacks.afterOpen();
     }
-
-    // Open the drop-down.
-    open( dropdown, withDescendants );
   };
 
   /**
@@ -652,28 +678,18 @@ if (!Element.prototype.matches) {
    */
   Droppy.prototype.close = function( dropdown, withDescendants ) {
 
+    if ( typeof this.callbacks.beforeClose === 'function' ) {
+      this.callbacks.beforeClose();
+    }
+
     if ( typeof withDescendants !== 'boolean' ) {
       withDescendants = true;
     }
 
-    var animationOut = this.options.animationOut;
+    close( dropdown, withDescendants, this.options.animationOut );
 
-    if ( animationSupport && animationOut ) {
-      // Durign animation, abort close().
-      if ( dropdown.classList.contains( this.options.animationIn ) ) {
-        return;
-      }
-
-      // At animation end, remove animation CSS class and close the drop.down.
-      dropdown.addEventListener( 'animationend', function() {
-        close( dropdown, withDescendants );
-        dropdown.classList.remove( animationOut );
-      }, { once: true } );
-
-      dropdown.classList.add( animationOut );
-    }
-    else {
-      close( dropdown, withDescendants );
+    if ( typeof this.callbacks.afterClose === 'function' ) {
+      this.callbacks.afterClose();
     }
   };
 
@@ -687,15 +703,9 @@ if (!Element.prototype.matches) {
    */
   Droppy.prototype.toggle = function( dropdown, withDescendants ) {
     if ( dropdown.classList.contains( 'droppy__drop--active' ) ) {
-      if ( typeof withDescendants !== 'boolean' ) {
-        this.close( dropdown );
-      }
       this.close( dropdown, withDescendants );
     }
     else if ( dropdown.classList.contains( 'droppy__drop' ) ) {
-      if ( typeof  withDescendants !== 'boolean' ) {
-        this.open( dropdown );
-      }
       this.open( dropdown, withDescendants );
     }
   };
@@ -705,11 +715,19 @@ if (!Element.prototype.matches) {
    */
   Droppy.prototype.closeAll = function() {
 
+    if ( typeof this.callbacks.beforeCloseAll === 'function' ) {
+      this.callbacks.beforeCloseAll();
+    }
+
     var dropdowns = getFirstLevelDropdown( this.element, '.droppy__drop--active' ),
         i = dropdowns.length;
 
     while ( i-- ) {
-      this.close( dropdowns[ i ], true );
+      close( dropdowns[ i ], true, this.options.animationOut );
+    }
+
+    if ( typeof this.callbacks.afterCloseAll === 'function' ) {
+      this.callbacks.afterCloseAll();
     }
   };
 
@@ -719,11 +737,19 @@ if (!Element.prototype.matches) {
    */
   Droppy.prototype.openAll = function() {
 
+    if ( typeof this.callbacks.beforeOpenAll === 'function' ) {
+      this.callbacks.beforeOpenAll();
+    }
+
     var dropdowns = getFirstLevelDropdown( this.element, '.droppy__drop' ),
         i = dropdowns.length;
 
     while ( i-- ) {
-      this.open( dropdowns[ i ], true, false );
+      open( dropdowns[ i ], true, this.options.animationIn );
+    }
+
+    if ( typeof this.callbacks.afterOpenAll === 'function' ) {
+      this.callbacks.afterOpenAll();
     }
   };
 
@@ -957,11 +983,22 @@ if (!Element.prototype.matches) {
    *
    * @param {Element} element
    *        The element to which adds the CSS class .droppy__drop--active.
-   * @param {Boolean} desc
+   * @param {Boolean} withDescendants
    *        True if add the CSS class to the descendants drop-down.
+   * @param {string} animation
+   *        A CSS class where is declared an animation.
    */
-  function open( element, desc ) {
-    if ( desc ) {
+  function open( element, withDescendants, animation ) {
+
+    if ( animationSupport && animation ) {
+      element.addEventListener( 'animationend', function () {
+        element.classList.remove( animation );
+      }, { once: true } );
+
+      element.classList.add( animation );
+    }
+
+    if ( withDescendants ) {
       var items = element.querySelectorAll( '.droppy__drop' ),
           i = items.length;
 
@@ -979,18 +1016,39 @@ if (!Element.prototype.matches) {
    *
    * @param {Element} element
    *        The element to which adds the CSS class .droppy__drop--active.
-   * @param {Boolean} desc
+   * @param {Boolean} withDescendants
    *        True if remove the CSS class to the descendants drop-down.
+   * @param {string} animation
+   *        A CSS class where is declared an animation.
    */
-  function close( element, desc ) {
-    element.classList.remove( 'droppy__drop--active' );
+  function close( element, withDescendants, animation ) {
 
-    if ( desc ) {
-      var items = element.querySelectorAll( '.droppy__drop--active' ),
+    if ( animationSupport && animation ) {
+      element.addEventListener( 'animationend', function () {
+        element.classList.remove( 'droppy__drop--active', animation );
+
+        if ( withDescendants ) {
+          var items = element.querySelectorAll( '.droppy__drop--active' ),
+            i = items.length;
+
+          while ( i-- ) {
+            items[ i ].classList.remove( 'droppy__drop--active' );
+          }
+        }
+      }, { once: true } );
+
+      element.classList.add( animation );
+    }
+    else {
+      element.classList.remove( 'droppy__drop--active' );
+
+      if ( withDescendants ) {
+        var items = element.querySelectorAll( '.droppy__drop--active' ),
           i = items.length;
 
-      while ( i-- ) {
-        items[ i ].classList.remove( 'droppy__drop--active' );
+        while ( i-- ) {
+          items[ i ].classList.remove( 'droppy__drop--active' );
+        }
       }
     }
   }
