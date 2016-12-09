@@ -276,12 +276,11 @@ not wait for animation end, this may cause the execution of `afterOpen`,
 completely opened or closed yet.
 
 ```js
+// Default callbacks.
 var droppy = new Droppy( element, options, {
   beforeOpen: null,
   afterOpen: null,
-  beforeClose: function() {
-    alert( 'Before close.' );
-  },
+  beforeClose: null,
   afterClose: null,
   beforeOpenAll: null,
   afterOpenAll: null,
@@ -293,6 +292,29 @@ var droppy = new Droppy( element, options, {
   afterDestroy: null
 } );
 ```
+
+### Define a callback
+
+Define a callback in three steps.
+
+1. Create your callback function.
+  ```js
+  function alertCallback() {
+    alert( 'Before open.' );
+  }
+  ```
+
+2. Assign the function to the `callbacks` object.
+  ```js
+  var callbacks = {
+    beforeOpen: alertCallback
+  }
+  ```
+
+3. Create a Droppy object with the callbacks.
+  ```js
+  var droppy = new Droppy(element, options, callbacks);
+  ```
 
 ## Polyfills
 

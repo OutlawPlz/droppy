@@ -1,5 +1,5 @@
 /**
- * Droppy - v1.0.5
+ * Droppy - v1.0.6
  * Pure JavaScript multi-level dropdown menu.
  * By OutlawPlz, license GPL-3.0.
  * https://github.com/OutlawPlz/droppy.git
@@ -404,10 +404,10 @@ if (!Element.prototype.matches) {
  * Droppy - Pure JavaScript multi-level dropdown menu.
  *
  * TODO - [ ] Implements UMD.
- * TODO - [ ] Init via jQuery.
- * TODO - [ ] Bower.
- * TODO - [ ] Accessibility.
+ * TODO - [x] Bower.
+ * TODO - [x] Accessibility.
  * TODO - [x] Callbacks.
+ * TODO - [x] aria-controls.
  */
 
 ( function() {
@@ -556,13 +556,28 @@ if (!Element.prototype.matches) {
 
     var dropdowns = this.element.querySelectorAll( this.options.dropdownSelector ),
         i = dropdowns.length,
-        parent;
+        parent,
+        trigger;
 
     while ( i-- ) {
+      // Parent
       parent = getParent( dropdowns[ i ], this.element, this.options.parentSelector );
       parent.classList.add( 'droppy__parent' );
-      parent.querySelector( this.options.triggerSelector ).classList.add( 'droppy__trigger' );
+
+      // Drop-down
       dropdowns[ i ].classList.add( 'droppy__drop' );
+      dropdowns[ i ].setAttribute( 'aria-expanded', 'false' );
+      dropdowns[ i ].setAttribute( 'aria-hidden', 'true' );
+
+      if ( !dropdowns[ i ].id ) {
+        dropdowns[ i ].id = generateId();
+      }
+
+      // Trigger
+      trigger = parent.querySelector( this.options.triggerSelector );
+      trigger.classList.add( 'droppy__trigger' );
+      trigger.setAttribute( 'aria-haspopup', 'true' );
+      trigger.setAttribute( 'aria-controls', dropdowns[ i ].id )
     }
 
     // Add events.
@@ -605,9 +620,17 @@ if (!Element.prototype.matches) {
         i = dropdowns.length;
 
     while ( i-- ) {
+      // Dropdown
       dropdowns[ i ].classList.remove( 'droppy__drop' );
+      dropdowns[ i ].removeAttribute( 'aria-expanded' );
+      dropdowns[ i ].removeAttribute( 'aria-hidden' );
+
+      // Parent
       parents[ i ].classList.remove( 'droppy__parent' );
+
+      // Trigger
       triggers[ i ].classList.remove( 'droppy__trigger' );
+      triggers[ i ].removeAttribute( 'aria-haspopup' );
     }
 
     // Remove events.
@@ -772,15 +795,16 @@ if (!Element.prototype.matches) {
     } );
   };
 
-  /**
+  /*
    * Return an array containing all Droppy's instances.
    *
    * @return {Array}
    *         An array containing all Droppy's instances.
-   */
+   *
   Droppy.prototype.getStore = function() {
     return droppyStore;
   };
+   */
 
   /**
    * Return the Droppy instance used by the given element.
@@ -999,15 +1023,19 @@ if (!Element.prototype.matches) {
     }
 
     if ( withDescendants ) {
-      var items = element.querySelectorAll( '.droppy__drop' ),
-          i = items.length;
+      var elements = element.querySelectorAll( '.droppy__drop' ),
+          i = elements.length;
 
       while ( i-- ) {
-        items[ i ].classList.add( 'droppy__drop--active' );
+        elements[ i ].classList.add( 'droppy__drop--active' );
+        elements[ i ].setAttribute( 'aria-expanded', 'true' );
+        elements[ i ].setAttribute( 'aria-hidden', 'false' );
       }
     }
 
     element.classList.add( 'droppy__drop--active' );
+    element.setAttribute( 'aria-expanded', 'true' );
+    element.setAttribute( 'aria-hidden', 'false' );
   }
 
   /**
@@ -1026,13 +1054,17 @@ if (!Element.prototype.matches) {
     if ( animationSupport && animation ) {
       element.addEventListener( 'animationend', function () {
         element.classList.remove( 'droppy__drop--active', animation );
+        element.setAttribute( 'aria-expanded', 'false' );
+        element.setAttribute( 'aria-hidden', 'true' );
 
         if ( withDescendants ) {
-          var items = element.querySelectorAll( '.droppy__drop--active' ),
-            i = items.length;
+          var elements = element.querySelectorAll( '.droppy__drop--active' ),
+              i = elements.length;
 
           while ( i-- ) {
-            items[ i ].classList.remove( 'droppy__drop--active' );
+            elements[ i ].classList.remove( 'droppy__drop--active' );
+            elements[ i ].setAttribute( 'aria-expanded', 'false' );
+            elements[ i ].setAttribute( 'aria-hidden', 'true');
           }
         }
       }, { once: true } );
@@ -1041,16 +1073,35 @@ if (!Element.prototype.matches) {
     }
     else {
       element.classList.remove( 'droppy__drop--active' );
+      element.setAttribute( 'aria-expanded', 'false' );
+      element.setAttribute( 'aria-hidden', 'true' );
 
       if ( withDescendants ) {
-        var items = element.querySelectorAll( '.droppy__drop--active' ),
-          i = items.length;
+        var elements = element.querySelectorAll( '.droppy__drop--active' ),
+            i = elements.length;
 
         while ( i-- ) {
-          items[ i ].classList.remove( 'droppy__drop--active' );
+          elements[ i ].classList.remove( 'droppy__drop--active' );
+          elements[ i ].setAttribute( 'aria-expanded', 'false' );
+          elements[ i ].setAttribute( 'aria-hidden', 'true' );
         }
       }
     }
+  }
+
+  function generateId() {
+
+    function generator() {
+      return '_' + Math.floor( ( 1 + Math.random() ) * 0x10000 ).toString( 16 );
+    }
+
+    var id = generator();
+
+    while ( document.getElementById( id )  ) {
+      id = generator();
+    }
+
+    return id;
   }
 
 
