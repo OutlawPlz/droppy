@@ -2,10 +2,6 @@
  * Droppy - Pure JavaScript multi-level dropdown menu.
  *
  * TODO - [ ] Implements UMD.
- * TODO - [x] Bower.
- * TODO - [x] Accessibility.
- * TODO - [x] Callbacks.
- * TODO - [x] aria-controls.
  */
 
 ( function() {
@@ -164,18 +160,12 @@
 
       // Drop-down
       dropdowns[ i ].classList.add( 'droppy__drop' );
-      dropdowns[ i ].setAttribute( 'aria-expanded', 'false' );
-      dropdowns[ i ].setAttribute( 'aria-hidden', 'true' );
-
-      if ( !dropdowns[ i ].id ) {
-        dropdowns[ i ].id = generateId();
-      }
 
       // Trigger
       trigger = parent.querySelector( this.options.triggerSelector );
       trigger.classList.add( 'droppy__trigger' );
       trigger.setAttribute( 'aria-haspopup', 'true' );
-      trigger.setAttribute( 'aria-controls', dropdowns[ i ].id )
+      trigger.setAttribute( 'aria-expanded', 'false' );
     }
 
     // Add events.
@@ -220,8 +210,6 @@
     while ( i-- ) {
       // Dropdown
       dropdowns[ i ].classList.remove( 'droppy__drop' );
-      dropdowns[ i ].removeAttribute( 'aria-expanded' );
-      dropdowns[ i ].removeAttribute( 'aria-hidden' );
 
       // Parent
       parents[ i ].classList.remove( 'droppy__parent' );
@@ -229,6 +217,7 @@
       // Trigger
       triggers[ i ].classList.remove( 'droppy__trigger' );
       triggers[ i ].removeAttribute( 'aria-haspopup' );
+      triggers[ i ].removeAttribute( 'aria-expanded' );
     }
 
     // Remove events.
@@ -612,10 +601,14 @@
    */
   function open( element, withDescendants, animation ) {
 
+    var trigger = getParent( element, document.body, '.droppy__parent' ). querySelector( '.droppy__trigger' );
+    trigger.setAttribute( 'aria-expanded', 'true' );
+
     if ( animationSupport && animation ) {
-      element.addEventListener( 'animationend', function () {
+      element.addEventListener( 'animationend', function handler () {
         element.classList.remove( animation );
-      }, { once: true } );
+        element.removeEventListener( 'animationend', handler );
+      } );
 
       element.classList.add( animation );
     }
@@ -626,14 +619,10 @@
 
       while ( i-- ) {
         elements[ i ].classList.add( 'droppy__drop--active' );
-        elements[ i ].setAttribute( 'aria-expanded', 'true' );
-        elements[ i ].setAttribute( 'aria-hidden', 'false' );
       }
     }
 
     element.classList.add( 'droppy__drop--active' );
-    element.setAttribute( 'aria-expanded', 'true' );
-    element.setAttribute( 'aria-hidden', 'false' );
   }
 
   /**
@@ -649,11 +638,12 @@
    */
   function close( element, withDescendants, animation ) {
 
+    var trigger = getParent( element, document.body, '.droppy__parent' ). querySelector( '.droppy__trigger' );
+    trigger.setAttribute( 'aria-expanded', 'false' );
+
     if ( animationSupport && animation ) {
-      element.addEventListener( 'animationend', function () {
+      element.addEventListener( 'animationend', function handler () {
         element.classList.remove( 'droppy__drop--active', animation );
-        element.setAttribute( 'aria-expanded', 'false' );
-        element.setAttribute( 'aria-hidden', 'true' );
 
         if ( withDescendants ) {
           var elements = element.querySelectorAll( '.droppy__drop--active' ),
@@ -661,18 +651,16 @@
 
           while ( i-- ) {
             elements[ i ].classList.remove( 'droppy__drop--active' );
-            elements[ i ].setAttribute( 'aria-expanded', 'false' );
-            elements[ i ].setAttribute( 'aria-hidden', 'true');
           }
         }
-      }, { once: true } );
+
+        element.removeEventListener( 'animationend', handler );
+      } );
 
       element.classList.add( animation );
     }
     else {
       element.classList.remove( 'droppy__drop--active' );
-      element.setAttribute( 'aria-expanded', 'false' );
-      element.setAttribute( 'aria-hidden', 'true' );
 
       if ( withDescendants ) {
         var elements = element.querySelectorAll( '.droppy__drop--active' ),
@@ -680,26 +668,9 @@
 
         while ( i-- ) {
           elements[ i ].classList.remove( 'droppy__drop--active' );
-          elements[ i ].setAttribute( 'aria-expanded', 'false' );
-          elements[ i ].setAttribute( 'aria-hidden', 'true' );
         }
       }
     }
-  }
-
-  function generateId() {
-
-    function generator() {
-      return '_' + Math.floor( ( 1 + Math.random() ) * 0x10000 ).toString( 16 );
-    }
-
-    var id = generator();
-
-    while ( document.getElementById( id )  ) {
-      id = generator();
-    }
-
-    return id;
   }
 
 
