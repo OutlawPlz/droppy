@@ -1,5 +1,5 @@
 /**
- * Droppy - v1.0.6
+ * Droppy - v1.0.7
  * Pure JavaScript multi-level dropdown menu.
  * By OutlawPlz, license GPL-3.0.
  * https://github.com/OutlawPlz/droppy.git
@@ -403,10 +403,23 @@ if (!Element.prototype.matches) {
 /*
  * Droppy - Pure JavaScript multi-level dropdown menu.
  *
- * TODO - [ ] Implements UMD.
+ * TODO - [x] Implements UMD.
+ * TODO - [x] BUG - Remove animationend listener.
  */
 
-( function() {
+( function ( window, factory ) {
+
+  if ( typeof define === 'function' && define.amd ) {
+    define( [], factory );
+  }
+  else if ( typeof exports === 'object' ) {
+    module.exports = factory();
+  }
+  else {
+    window.Droppy = factory();
+  }
+
+} ( window, function () {
 
   'use strict';
 
@@ -1157,9 +1170,6 @@ if (!Element.prototype.matches) {
   // Expose & Init
   // ---------------------------------------------------------------------------
 
-  // Expose Droppy to the global object.
-  window.Droppy = Droppy;
-
   // Init via HTML.
   var elements = document.querySelectorAll( '[data-droppy]' );
 
@@ -1167,4 +1177,7 @@ if (!Element.prototype.matches) {
     new Droppy( elements[ i ], JSON.parse( elements[ i ].getAttribute( 'data-droppy' ) ) );
   }
 
-} () );
+  // Expose Droppy to the global object.
+  return Droppy;
+
+} ) );

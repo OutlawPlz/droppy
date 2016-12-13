@@ -164,7 +164,7 @@ droppy.init();
 
 ### destroy()
 
-Reset a Droppy instance to a pre-init state. It remove Droppy CSS classes and
+Reset a Droppy instance to a pre-init state. It removes Droppy CSS classes and
 events.
 
 ```js
@@ -236,7 +236,7 @@ droppy.closeAll();
 ### Droppy.prototype.isInitialized( droppy )
 
 It's a **static method**. It returns true if the given Droppy instance is
-active, false otherwise.
+initialized, false otherwise.
 
 ```js
 var droppy = new Droppy( element, options );
@@ -253,19 +253,6 @@ element.
 var element = document.querySelector( '[data-droppy]' );
 // Get the instance
 var droppy = Droppy.prototype.getInstance( element );
-```
-
-### Droppy.prototype.getStore()
-
-It's a **static method**. It returns an array containing every Droppy instance.
-When you create a new Droppy object, the instance is saved in an array. This
-way you can easily get an instance initialized via HTML.
-
-**DEPRECATED** - This function will be removed in Droppy v1.0.6.
-
-```js
-// Get the store
-var droppyStore = Droppy.prototype.getStore();
 ```
 
 ## Callbacks

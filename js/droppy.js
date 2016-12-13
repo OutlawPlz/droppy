@@ -1,10 +1,23 @@
 /*
  * Droppy - Pure JavaScript multi-level dropdown menu.
  *
- * TODO - [ ] Implements UMD.
+ * TODO - [x] Implements UMD.
+ * TODO - [x] BUG - Remove animationend listener.
  */
 
-( function() {
+( function ( window, factory ) {
+
+  if ( typeof define === 'function' && define.amd ) {
+    define( [], factory );
+  }
+  else if ( typeof exports === 'object' ) {
+    module.exports = factory();
+  }
+  else {
+    window.Droppy = factory();
+  }
+
+} ( window, function () {
 
   'use strict';
 
@@ -755,9 +768,6 @@
   // Expose & Init
   // ---------------------------------------------------------------------------
 
-  // Expose Droppy to the global object.
-  window.Droppy = Droppy;
-
   // Init via HTML.
   var elements = document.querySelectorAll( '[data-droppy]' );
 
@@ -765,4 +775,7 @@
     new Droppy( elements[ i ], JSON.parse( elements[ i ].getAttribute( 'data-droppy' ) ) );
   }
 
-} () );
+  // Expose Droppy to the global object.
+  return Droppy;
+
+} ) );
