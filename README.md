@@ -65,7 +65,7 @@ menu element. Options can be set in its value using **valid JSON**.
 
 ```html
 <!-- Init with HTML -->
-<nav class="dropdown-menu" data-droppy='{ "parentSelector": "li", "dropdownSelector": "li > ul.menu", "triggerSelector": "a", "closeOthers": true, "clickOutToClose": true, "clickEscToClose": true, "animationIn": '', "animationOut": '' }'>
+<nav class="dropdown-menu" data-droppy='{ "parentSelector": "li", "dropdownSelector": "li > ul.menu", "triggerSelector": "a", "closeOthers": true, "clickOutToClose": true, "clickEscToClose": true, "animationIn": '', "animationOut": '', "preventDefault": true }'>
 ```
 
 ## Options
@@ -84,7 +84,8 @@ var droppy = new Droppy( element, {
   clickOutToClose: true,
   clickEscToClose: true,
   animationIn: '',
-  animationOut: ''
+  animationOut: '',
+  preventDefault: true
 }, callbacks );
 ```
 
@@ -105,10 +106,10 @@ var droppy = new Droppy( element, {
 ```
 
 - ***parentSelector*** - It's a valid CSS selector of your parent element. The
-parent element **have to contain** the trigger element and the dropdown element.
-It should be the closest parent. In the example above the closest parent of
-both - `dropdownSelector` and `triggerSelector` - is the `<li>` element. That's
-why the `parentSelector` is set to `li`.
+parent element **have to contain** the trigger element and the drop-down
+element. It should be the closest parent. In the example above the closest
+parent of both - `dropdownSelector` and `triggerSelector` - is the `<li>`
+element. That's why the `parentSelector` is set to `li`.
 
 - ***dropdownSelector*** - It's a valid CSS selector of your drop-down. In the
 example above I have a drop-down when there is a `<ul class="menu">` son of a
@@ -134,6 +135,12 @@ animation.
 - ***animationOut*** - A CSS class where is declared an animation. This class
 will be applied at the close of a drop-down and removed at the end of the
 animation.
+
+- ***preventDefault*** - A boolean value. If the `triggerSelector` is an element
+that fires an event, you can prevent the execution of the default behavior
+setting this option to `true`. E.g. If `triggerSelector` is a link, we want the
+browser opens the drop-down, not follows the link. Setting `preventDefault` to
+`true` prevents the browser to follow the link.
 
 ## Methods
 

@@ -403,8 +403,8 @@ if (!Element.prototype.matches) {
 /*
  * Droppy - Pure JavaScript multi-level dropdown menu.
  *
- * TODO - [x] Implements UMD.
- * TODO - [x] BUG - Remove animationend listener.
+ * TODO - [x] Nested Droppy.
+ * TODO - [x] preventDefault as option.
  */
 
 ( function ( window, factory ) {
@@ -471,7 +471,7 @@ if (!Element.prototype.matches) {
 
     if ( !parent ) {
       if ( console ) {
-        console.err( 'Droppy: the given parentSelector returns no value.', options.parentSelector );
+        console.error( 'Droppy: the given parentSelector returns no value.', options.parentSelector );
       }
       return;
     }
@@ -481,7 +481,7 @@ if (!Element.prototype.matches) {
 
     if ( !trigger ) {
       if ( console ) {
-        console.err( 'Droppy: the given triggerSelector returns no value.', options.triggerSelector );
+        console.error( 'Droppy: the given triggerSelector returns no value.', options.triggerSelector );
       }
       return;
     }
@@ -495,7 +495,8 @@ if (!Element.prototype.matches) {
       clickOutToClose: true,
       clickEscToClose: true,
       animationIn: '',
-      animationOut: ''
+      animationOut: '',
+      preventDefault: true
     };
 
     // Init options.
@@ -532,8 +533,7 @@ if (!Element.prototype.matches) {
 
     // Define handlers.
     this.handler = {
-      clickTrigger: clickHandler.bind( this ),
-      clickOut: clickOutHandler,
+      click: clickHandler,
       esc: escHandler
     };
 
@@ -584,10 +584,8 @@ if (!Element.prototype.matches) {
     }
 
     // Add events.
-    this.element.addEventListener( 'click', this.handler.clickTrigger );
-
     if ( droppyStore.length === 0 ) {
-      document.body.addEventListener( 'click', this.handler.clickOut );
+      document.body.addEventListener( 'click', this.handler.click );
       document.body.addEventListener( 'keyup', this.handler.esc );
     }
 
@@ -636,10 +634,9 @@ if (!Element.prototype.matches) {
     }
 
     // Remove events.
-    this.element.removeEventListener( 'click', this.handler.clickTrigger );
-
     if ( droppyStore.length === 1 ) {
-      document.body.removeEventListener( 'click', this.handler.clickOut );
+      document.body.removeEventListener( 'click', this.handler.click );
+      // document.body.removeEventListener( 'click', this.handler.clickOut );
       document.body.removeEventListener( 'keyup', this.handler.esc );
     }
 
@@ -933,32 +930,7 @@ if (!Element.prototype.matches) {
   }
 
   /**
-   * Loop over start element's parents looking for the droppy__parent class,
-   * then return the drop element.
-   *
-   * @param  {Element} start
-   *         The starting node.
-   * @param  {Element} end
-   *         The ending node.
-   *
-   * @return {Element|Boolean}
-   *         The element to drop or false.
-   */
-  function getItemToOpen( start, end ) {
-
-    while ( start !== end ) {
-      if ( start.classList.contains( 'droppy__trigger' ) ) {
-        return start.parentNode.querySelector( '.droppy__drop' );
-      }
-
-      start = start.parentNode;
-    }
-
-    return false;
-  }
-
-  /**
-   * Returns the first level elments children of the given element, that matches
+   * Returns the first level elements children of the given element, that matches
    * the given selector.
    *
    * @param  {Element} element
@@ -971,8 +943,18 @@ if (!Element.prototype.matches) {
    *         given selector.
    */
   function getFirstLevelDropdown( element, selector ) {
+
+    if ( !element.id ) {
+      element.id = generateCssId();
+    }
+
+    /*
+    We need an ID on the element to select the right children. Instead of an ID,
+    I should use the :scope pseudo-selector, but it is not supported by IE.
+    @see https://developer.mozilla.org/it/docs/Web/API/Element/querySelectorAll#Quirks
+     */
     var items = Array.prototype.slice.call( element.querySelectorAll( selector ) ),
-        children = Array.prototype.slice.call( element.querySelectorAll( selector + ' ' + selector ) );
+        children = Array.prototype.slice.call( element.querySelectorAll( element.id + ' ' + selector + ' ' + selector ) );
 
     return items.filter( function ( item ) {
       return this.indexOf( item ) === -1;
@@ -1001,6 +983,27 @@ if (!Element.prototype.matches) {
     }
 
     return support;
+  }
+
+  /**
+   * Return a valid CSS Id.
+   *
+   * @return {string}
+   *         The CSS Id selector.
+   */
+  function generateCssId() {
+
+    function generator() {
+      return '_' + Math.floor( ( 1 + Math.random() ) * 0x10000 ).toString( 16 );
+    }
+
+    var id = generator();
+
+    while ( document.getElementById( id )  ) {
+      id = generator();
+    }
+
+    return id;
   }
 
   /**
@@ -1093,65 +1096,58 @@ if (!Element.prototype.matches) {
   // ---------------------------------------------------------------------------
 
   /**
-   * Calls toggle when a trigger is clicked.
+   * Calls toggle when a trigger is clicked. If clickOutToClose, close others
+   * menu.
    *
    * @param {Event} event
    *        The event object.
    */
   function clickHandler( event ) {
-    var dropdown = getItemToOpen( event.target, this.element );
 
-    if ( dropdown ) {
-      if ( event.cancelable ) {
-        event.preventDefault();
+    var trigger = getParent( event.target, document.body, '.droppy__trigger' ),
+        roots = getParents( event.target, document.body, '.droppy' );
+
+    // I've clicked in a trigger! Let's toggle some drop-down.
+    if ( trigger ) {
+      var droppy = Droppy.prototype.getInstance( roots[ 0 ] ),
+          parent = getParent( event.target, document.body, '.droppy__parent' );
+
+      if ( droppy && parent ) {
+        var dropdown = parent.querySelector( '.droppy__drop' );
+
+        if ( droppy.options.preventDefault && event.cancelable ) {
+          event.preventDefault();
+        }
+
+        droppy.toggle( dropdown );
       }
-
-      this.toggle( dropdown );
     }
-  }
 
-  /**
-   * Close dropdown when click outside.
-   *
-   * @param {Event} event
-   *        The event object.
-   */
-  function clickOutHandler( event ) {
-    /*
-     For each Droppy instance in droppyStore it loops over the parents, to see
-     if the click event was generated in the current menu. If true, then the
-     current menu should not be closed, otherwise close it.
-     */
+    // Now I should close the menu with clickOutToClose set to true.
     var closing = droppyStore.filter( function ( droppy ) {
 
-      // If clickOutToClose is false, then the menu should not be closed.
       if ( !droppy.options.clickOutToClose ) {
         return false;
       }
 
-      var element = event.target,
-          currentTarget = event.currentTarget;
+      var i = this.length;
 
-      while ( element !== currentTarget ) {
-        if ( element === droppy.element ) {
+      while ( i-- ) {
+        if ( this[ i ] === droppy.element ) {
           return false;
         }
-
-        element = element.parentNode;
       }
 
       return true;
+    }, roots );
+
+    closing.forEach( function ( droppy ) {
+      droppy.closeAll();
     } );
-
-    var i = closing.length;
-
-    while ( i-- ) {
-      closing[ i ].closeAll();
-    }
   }
 
   /**
-   * Close dropdowns when click ESC.
+   * Close drop-downs when click ESC.
    *
    * @param {Event} event
    *        The event object.

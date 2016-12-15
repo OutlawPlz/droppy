@@ -12,40 +12,51 @@
     <h1>Droppy</h1>
     <p>Testing Droppy script.</p>
     <p>Init via script.</p>
-    <ul class="menu">
-      <li class="menu-item">
-        <a href="#"><span>Prodotti</span></a>
-        <ul class="menu" id="asdro">
-          <li class="menu-item"><a href="#">Economici</a></li>
-          <li class="menu-item">
-            <a href="#">Costosi</a>
-            <ul class="menu">
-              <li class="menu-item"><a href="#">Nuovo</a></li>
-              <li class="menu-item"><a href="#">Usato</a></li>
-            </ul>
-          </li>
-          <li class="menu-item"><a href="#">Via di mezzo</a></li>
-        </ul>
-      </li>
-      <li class="menu-item">
-        <a href="#">Novità</a>
-        <ul class="menu">
-          <li class="menu-item"><a href="#">Aprile</a></li>
-          <li class="menu-item"><a href="#">Marzo</a></li>
-          <li class="menu-item"><a href="#">Febbraio</a></li>
-          <li class="menu-item"><a href="#">Gennaio</a></li>
-        </ul>
-      </li>
-      <li class="menu-item">
-        <a href="#">Azienda</a>
-        <ul class="menu">
-          <li class="menu-item"><a href="#">Chi siamo</a></li>
-          <li class="menu-item"><a href="#">Dove siamo</a></li>
-          <li class="menu-item"><a href="#">Cosa facciamo</a></li>
-        </ul>
-      </li>
-      <li class="menu-item"><a href="#">Contatti</a></li>
-    </ul>
+
+
+    <div class="test" data-droppy='{ "parentSelector": ".wrapper", "dropdownSelector": "nav", "triggerSelector": "button", "closeOthers": false, "clickOutToClose": false }'>
+      <div class="wrapper">
+        <button>Menu</button>
+        <nav role="navigation">
+          <ul class="menu">
+            <li class="menu-item">
+              <a href="#"><span>Prodotti</span></a>
+              <p>Pippo</p>
+              <ul class="menu" id="asdro">
+                <li class="menu-item"><a href="#">Economici</a></li>
+                <li class="menu-item">
+                  <a href="#">Costosi</a>
+                  <ul class="menu">
+                    <li class="menu-item"><a href="#">Nuovo</a></li>
+                    <li class="menu-item"><a href="#">Usato</a></li>
+                  </ul>
+                </li>
+                <li class="menu-item"><a href="#">Via di mezzo</a></li>
+              </ul>
+            </li>
+            <li class="menu-item">
+              <a href="#">Novità</a>
+              <ul class="menu">
+                <li class="menu-item"><a href="#">Aprile</a></li>
+                <li class="menu-item"><a href="#">Marzo</a></li>
+                <li class="menu-item"><a href="#">Febbraio</a></li>
+                <li class="menu-item"><a href="#">Gennaio</a></li>
+              </ul>
+            </li>
+            <li class="menu-item">
+              <a href="#">Azienda</a>
+              <ul class="menu">
+                <li class="menu-item"><a href="#">Chi siamo</a></li>
+                <li class="menu-item"><a href="#">Dove siamo</a></li>
+                <li class="menu-item"><a href="#">Cosa facciamo</a></li>
+              </ul>
+            </li>
+            <li class="menu-item"><a href="#">Contatti</a></li>
+          </ul>
+        </nav>
+      </div>
+    </div>
+
     <p>Init via HTML.</p>
     <ul class="menu" data-droppy='{ "parentSelector": "li", "dropdownSelector": "li > ul.menu", "triggerSelector": "a", "closeOthers": false, "clickOutToClose": false }'>
       <li class="menu-item">
