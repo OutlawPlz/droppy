@@ -1,1 +1,1 @@
-.fadeIn,.fadeOut{animation-duration:.3s;animation-fill-mode:both}@keyframes fadeIn{from{opacity:0}to{opacity:1}}@keyframes fadeOut{from{opacity:1}to{opacity:0}}.droppy__drop{display:none}.droppy__drop--active{display:block}.fadeIn{animation-name:fadeIn}.fadeOut{animation-name:fadeOut}
+.droppy__drop{display:none}.droppy__drop--active{display:block}

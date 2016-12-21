@@ -1,4 +1,22 @@
 @import url(https://fonts.googleapis.com/css?family=Open+Sans:400,300,300italic,400italic,700,700italic);
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
 html {
   font-size: 100%;
   line-height: 1.5;
@@ -43,4 +61,14 @@ p {
 .wrapper-page {
   margin: 0 auto;
   max-width: 960px;
+}
+
+.fade-in {
+  animation-name: fadeIn;
+  animation-duration: .3s;
+}
+
+.fade-out {
+  animation-name: fadeOut;
+  animation-duration: .3s;
 }

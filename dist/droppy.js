@@ -1,164 +1,9 @@
 /**
- * Droppy - v1.0.7
+ * Droppy - v1.1.0
  * Pure JavaScript multi-level dropdown menu.
  * By OutlawPlz, license GPL-3.0.
  * https://github.com/OutlawPlz/droppy.git
  */
-// Production steps of ECMA-262, Edition 5, 15.4.4.18
-// Reference: http://es5.github.io/#x15.4.4.18
-if (!Array.prototype.forEach) {
-
-  Array.prototype.forEach = function(callback, thisArg) {
-
-    var T, k;
-
-    if (this === null) {
-      throw new TypeError(' this is null or not defined');
-    }
-
-    // 1. Let O be the result of calling toObject() passing the
-    // |this| value as the argument.
-    var O = Object(this);
-
-    // 2. Let lenValue be the result of calling the Get() internal
-    // method of O with the argument "length".
-    // 3. Let len be toUint32(lenValue).
-    var len = O.length >>> 0;
-
-    // 4. If isCallable(callback) is false, throw a TypeError exception.
-    // See: http://es5.github.com/#x9.11
-    if (typeof callback !== "function") {
-      throw new TypeError(callback + ' is not a function');
-    }
-
-    // 5. If thisArg was supplied, let T be thisArg; else let
-    // T be undefined.
-    if (arguments.length > 1) {
-      T = thisArg;
-    }
-
-    // 6. Let k be 0
-    k = 0;
-
-    // 7. Repeat, while k < len
-    while (k < len) {
-
-      var kValue;
-
-      // a. Let Pk be ToString(k).
-      //    This is implicit for LHS operands of the in operator
-      // b. Let kPresent be the result of calling the HasProperty
-      //    internal method of O with argument Pk.
-      //    This step can be combined with c
-      // c. If kPresent is true, then
-      if (k in O) {
-
-        // i. Let kValue be the result of calling the Get internal
-        // method of O with argument Pk.
-        kValue = O[k];
-
-        // ii. Call the Call internal method of callback with T as
-        // the this value and argument list containing kValue, k, and O.
-        callback.call(T, kValue, k, O);
-      }
-      // d. Increase k by 1.
-      k++;
-    }
-    // 8. return undefined
-  };
-}
-
-// Production steps of ECMA-262, Edition 5, 15.4.4.19
-// Reference: http://es5.github.io/#x15.4.4.19
-if (!Array.prototype.map) {
-
-  Array.prototype.map = function(callback, thisArg) {
-
-    var T, A, k;
-
-    if (this == null) {
-      throw new TypeError(' this is null or not defined');
-    }
-
-    // 1. Let O be the result of calling ToObject passing the |this|
-    //    value as the argument.
-    var O = Object(this);
-
-    // 2. Let lenValue be the result of calling the Get internal
-    //    method of O with the argument "length".
-    // 3. Let len be ToUint32(lenValue).
-    var len = O.length >>> 0;
-
-    // 4. If IsCallable(callback) is false, throw a TypeError exception.
-    // See: http://es5.github.com/#x9.11
-    if (typeof callback !== 'function') {
-      throw new TypeError(callback + ' is not a function');
-    }
-
-    // 5. If thisArg was supplied, let T be thisArg; else let T be undefined.
-    if (arguments.length > 1) {
-      T = thisArg;
-    }
-
-    // 6. Let A be a new array created as if by the expression new Array(len)
-    //    where Array is the standard built-in constructor with that name and
-    //    len is the value of len.
-    A = new Array(len);
-
-    // 7. Let k be 0
-    k = 0;
-
-    // 8. Repeat, while k < len
-    while (k < len) {
-
-      var kValue, mappedValue;
-
-      // a. Let Pk be ToString(k).
-      //   This is implicit for LHS operands of the in operator
-      // b. Let kPresent be the result of calling the HasProperty internal
-      //    method of O with argument Pk.
-      //   This step can be combined with c
-      // c. If kPresent is true, then
-      if (k in O) {
-
-        // i. Let kValue be the result of calling the Get internal
-        //    method of O with argument Pk.
-        kValue = O[k];
-
-        // ii. Let mappedValue be the result of calling the Call internal
-        //     method of callback with T as the this value and argument
-        //     list containing kValue, k, and O.
-        mappedValue = callback.call(T, kValue, k, O);
-
-        // iii. Call the DefineOwnProperty internal method of A with arguments
-        // Pk, Property Descriptor
-        // { Value: mappedValue,
-        //   Writable: true,
-        //   Enumerable: true,
-        //   Configurable: true },
-        // and false.
-
-        // In browsers that support Object.defineProperty, use the following:
-        // Object.defineProperty(A, k, {
-        //   value: mappedValue,
-        //   writable: true,
-        //   enumerable: true,
-        //   configurable: true
-        // });
-
-        // For best browser support, use the following:
-        A[k] = mappedValue;
-      }
-      // d. Increase k by 1.
-      k++;
-    }
-
-    // 9. return A
-    return A;
-  };
-}
-
-
 // Implements Element.prototype.classList() - v1.1.20150312
 // By Eli Grey, http://eligrey.com
 if ("document" in self) {
@@ -405,6 +250,10 @@ if (!Element.prototype.matches) {
  *
  * TODO - [x] Nested Droppy.
  * TODO - [x] preventDefault as option.
+ * TODO - [x] Implements a tree instead of querying DOM every click.
+ * TODO - [x] Remove unused shims.
+ * TODO - [x] Do not instance twice on same element.
+ * TODO - [ ] Open a drop-down with a parent closed.
  */
 
 ( function ( window, factory ) {
@@ -434,17 +283,23 @@ if (!Element.prototype.matches) {
   /**
    * Instantiate a new Droppy object.
    *
-   * @param  {Element} element
-   *         The element on which Droppy will act.
-   * @param  {Object} options
-   *         An object containing Droppy options.
+   * @param {Element} element
+   *        The element on which Droppy will act.
+   * @param {Object} options
+   *        An object containing Droppy options.
    * @param {Object} callbacks
    *        An object containing callback functions.
-   *
-   * @return {Droppy|undefined}
-   *         A new Droppy object.
+   * @constructor
    */
-  function Droppy( element, options, callbacks )  {
+  function Droppy ( element, options, callbacks )  {
+
+    // Do not instantiate twice on same element.
+    if ( Droppy.prototype.getInstance( element ) ) {
+      if ( console ) {
+        console.error( 'Droppy: another Droppy instance was found for this element.', element );
+      }
+      return;
+    }
 
     // Check Droppy element.
     if ( element.nodeType !== Node.ELEMENT_NODE ) {
@@ -486,7 +341,7 @@ if (!Element.prototype.matches) {
       return;
     }
 
-    // Default options
+    // Default options.
     var defaultOptions = {
       parentSelector: 'li',
       dropdownSelector: 'li > ul',
@@ -500,14 +355,14 @@ if (!Element.prototype.matches) {
     };
 
     // Init options.
-    if ( arguments[ 1 ] && typeof arguments[ 1 ] === 'object' ) {
-      this.options = extendDefaults( defaultOptions, arguments[ 1 ] );
+    if ( options && typeof options === 'object' ) {
+      this.options = extendDefaults( defaultOptions, options );
     }
     else {
       this.options = defaultOptions;
     }
 
-    // Callbacks
+    // Default callbacks.
     var defaultCallbacks = {
       beforeOpen: null,
       afterOpen: null,
@@ -524,21 +379,31 @@ if (!Element.prototype.matches) {
     };
 
     // Init callbacks.
-    if ( arguments[ 2 ] && typeof arguments[ 2 ] === 'object' ) {
-      this.callbacks = extendDefaults( defaultCallbacks, arguments[ 2 ] );
+    if ( callbacks && typeof callbacks === 'object' ) {
+      this.callbacks = extendDefaults( defaultCallbacks, callbacks );
     }
     else {
       this.callbacks = defaultCallbacks;
     }
 
-    // Define handlers.
-    this.handler = {
-      click: clickHandler,
-      esc: escHandler
-    };
-
     // Init Droppy.
     this.init();
+  }
+
+  /**
+   * Instantiate a new DroppyNode object.
+   *
+   * @constructor
+   */
+  function DroppyNode () {
+
+    this.dropdown = '';
+    this.parent = '';
+    this.dropdown = '';
+    this.parentsNode = [];
+    this.descendantsNode = [];
+    this.level = 0;
+    this.status = false;
   }
 
 
@@ -547,51 +412,52 @@ if (!Element.prototype.matches) {
 
   /**
    * Initialize a Droppy object. This function is called when a new Droppy
-   * object is created. Adds classes 'droppy__parent', 'droppy__trigger' and
-   * 'droppy__drop'. Adds events.
+   * object is created. It adds CSS classes, aria attributes and events.
    */
-  Droppy.prototype.init = function() {
+  Droppy.prototype.init = function () {
 
+    // Do not initialize twice.
     if ( Droppy.prototype.isInitialized( this ) ) {
       return;
     }
 
+    // Before callback.
     if ( typeof this.callbacks.beforeInit === 'function' ) {
       this.callbacks.beforeInit();
     }
 
-    // Add Droppy CSS classes.
+    // Generate the tree.
+    this.tree = generateTree(
+      this.element,
+      this.options.dropdownSelector,
+      this.options.parentSelector,
+      this.options.triggerSelector
+    );
+
+    // Add Droppy attributes.
     this.element.classList.add( 'droppy' );
 
-    var dropdowns = this.element.querySelectorAll( this.options.dropdownSelector ),
-        i = dropdowns.length,
-        parent,
-        trigger;
+    for ( var i = this.tree.length, node; i--, node = this.tree[ i ]; ) {
 
-    while ( i-- ) {
-      // Parent
-      parent = getParent( dropdowns[ i ], this.element, this.options.parentSelector );
-      parent.classList.add( 'droppy__parent' );
+      node.dropdown.classList.add( 'droppy__drop' );
 
-      // Drop-down
-      dropdowns[ i ].classList.add( 'droppy__drop' );
+      node.parent.classList.add( 'droppy__parent' );
 
-      // Trigger
-      trigger = parent.querySelector( this.options.triggerSelector );
-      trigger.classList.add( 'droppy__trigger' );
-      trigger.setAttribute( 'aria-haspopup', 'true' );
-      trigger.setAttribute( 'aria-expanded', 'false' );
+      node.trigger.classList.add( 'droppy__trigger' );
+      node.trigger.setAttribute( 'aria-haspopup', 'true' );
+      node.trigger.setAttribute( 'aria-expanded', 'false' );
     }
 
     // Add events.
     if ( droppyStore.length === 0 ) {
-      document.body.addEventListener( 'click', this.handler.click );
-      document.body.addEventListener( 'keyup', this.handler.esc );
+      document.body.addEventListener( 'click', clickHandler );
+      document.body.addEventListener( 'keyup', escHandler );
     }
 
     // Add instance to the store.
     droppyStore.push( this );
 
+    // After callback.
     if ( typeof this.callbacks.afterInit === 'function' ) {
       this.callbacks.afterInit();
     }
@@ -599,116 +465,140 @@ if (!Element.prototype.matches) {
 
   /**
    * Reset a Droppy instance to a pre-init state. It remove Droppy CSS classes,
-   * events and the instance from the store.
+   * aria attributes and events.
    */
-  Droppy.prototype.destroy = function() {
+  Droppy.prototype.destroy = function () {
 
+    // If not initialized, do not destroy.
     if ( !Droppy.prototype.isInitialized( this ) ) {
       return;
     }
 
+    // Before callback.
     if ( typeof this.callbacks.beforeDestroy === 'function' ) {
       this.callbacks.beforeDestroy();
     }
 
-    // Remove Droppy CSS classes.
-    this.closeAll();
+    // Remove Droppy attributes.
     this.element.classList.remove( 'droppy' );
 
-    var dropdowns = this.element.querySelectorAll( '.droppy__drop' ),
-        parents = this.element.querySelectorAll( '.droppy__parent' ),
-        triggers = this.element.querySelectorAll( '.droppy__trigger' ),
-        i = dropdowns.length;
+    for ( var i = this.tree.length, node; i--, node = this.tree[ i ]; ) {
 
-    while ( i-- ) {
-      // Dropdown
-      dropdowns[ i ].classList.remove( 'droppy__drop' );
+      node.dropdown.classList.remove( 'droppy__drop', 'droppy__drop--active' );
 
-      // Parent
-      parents[ i ].classList.remove( 'droppy__parent' );
+      node.parent.classList.remove( 'droppy__parent' );
 
-      // Trigger
-      triggers[ i ].classList.remove( 'droppy__trigger' );
-      triggers[ i ].removeAttribute( 'aria-haspopup' );
-      triggers[ i ].removeAttribute( 'aria-expanded' );
+      node.trigger.classList.remove( 'droppy__trigger' );
+      node.trigger.removeAttribute( 'aria-haspopup' );
+      node.trigger.removeAttribute( 'aria-expanded' );
     }
+
+    delete this.tree;
 
     // Remove events.
     if ( droppyStore.length === 1 ) {
-      document.body.removeEventListener( 'click', this.handler.click );
-      // document.body.removeEventListener( 'click', this.handler.clickOut );
-      document.body.removeEventListener( 'keyup', this.handler.esc );
+      document.body.removeEventListener( 'click', clickHandler );
+      document.body.removeEventListener( 'keyup', escHandler );
     }
 
     delete this.handler;
 
     // Remove instance from the store.
-    i = droppyStore.length;
-
-    while ( i-- ) {
-      if ( droppyStore[ i ] === this ) {
-        droppyStore.splice( i, 1);
+    for ( var j = droppyStore.length, droppy; j--, droppy = droppyStore[ j ]; ) {
+      if ( droppy === this ) {
+        droppyStore.splice( j, 1 );
       }
     }
 
+    // After callback.
     if ( typeof this.callbacks.afterDestroy === 'function' ) {
       this.callbacks.afterDestroy();
     }
   };
 
   /**
-   * Open the given dropdown.
+   * Open the given drop-down.
    *
-   * @param  {Element} dropdown
-   *         The drop-down element to open.
-   * @param  {Boolean} [withDescendants=false]
-   *         Should open or not all the drop-downs in the given drop-down.
+   * @param {Element|DroppyNode} dropdown
+   *        The drop-down element to open.
+   * @param {Boolean} [withDescendants=false]
+   *        Should open or not all the drop-downs in the given drop-down.
    */
-  Droppy.prototype.open = function( dropdown, withDescendants ) {
+  Droppy.prototype.open = function ( dropdown, withDescendants ) {
 
+    var node;
+
+    // Check if dropdown is a node or an element. We need a node.
+    if ( dropdown instanceof DroppyNode ) {
+      node = dropdown;
+    }
+    else {
+      node = getNodeByProperty( 'dropdown', dropdown, this.tree );
+    }
+
+    // If opened yet, return.
+    if ( node.status ) {
+      return;
+    }
+
+    // Before callback.
     if ( typeof this.callbacks.beforeOpen === 'function' ) {
       this.callbacks.beforeOpen();
     }
 
-    if ( typeof withDescendants !== 'boolean' ) {
-      withDescendants = false;
-    }
-
+    // If closeOthers set to true, close all open siblings of the current node.
     if ( this.options.closeOthers ) {
-      var closing = getOthersToClose( dropdown, this.element ),
-        i = closing.length;
 
-      while ( i-- ) {
-        close( closing[ i ], true, this.options.animationOut );
+      var siblings = getNodesByProperty( 'level', node.level, this.tree );
+
+      for ( var i = siblings.length, sibling; i--, sibling = siblings[ i ]; ) {
+        if ( sibling.status ) {
+          close( sibling, true, this.options.animationOut );
+        }
       }
     }
 
-    open( dropdown, withDescendants, this.options.animationIn );
+    // Call open().
+    open( node, withDescendants, this.options.animationIn );
 
+    // After callback.
     if ( typeof this.callbacks.afterOpen === 'function' ) {
       this.callbacks.afterOpen();
     }
   };
 
   /**
-   * Close the given dropdown.
+   * Close the given drop-down.
    *
-   * @param  {Element} dropdown
+   * @param  {Element|DroppyNode} dropdown
    *         The dropdown element to close.
    * @param  {Boolean} [withDescendants=true]
    *         Should close or not all the drop-downs in the given drop-down.
    */
-  Droppy.prototype.close = function( dropdown, withDescendants ) {
+  Droppy.prototype.close = function ( dropdown, withDescendants ) {
 
+    var node;
+
+    // Check if dropdown is a node or an element. We need a node.
+    if ( dropdown instanceof DroppyNode ) {
+      node = dropdown;
+    }
+    else {
+      node = getNodeByProperty( 'dropdown', dropdown, this.tree );
+    }
+
+    // If closed yet, return.
+    if ( !node.status ) {
+      return;
+    }
+
+    // Before callback.
     if ( typeof this.callbacks.beforeClose === 'function' ) {
       this.callbacks.beforeClose();
     }
 
-    if ( typeof withDescendants !== 'boolean' ) {
-      withDescendants = true;
-    }
-
-    close( dropdown, withDescendants, this.options.animationOut );
+    // Call close().
+    close( node, withDescendants, this.options.animationOut );
 
     if ( typeof this.callbacks.afterClose === 'function' ) {
       this.callbacks.afterClose();
@@ -716,60 +606,106 @@ if (!Element.prototype.matches) {
   };
 
   /**
-   * Open or close the given dropdown.
+   * Open or close the given drop-down.
    *
-   * @param  {Element} dropdown
-   *         The dropdown element to open or close.
+   * @param  {Element|DroppyNode} dropdown
+   *         The drop-down element to open or close.
    * @param  {Boolean|undefined} withDescendants
    *         Should open/close or not all the drop-downs in the given drop-down.
    */
-  Droppy.prototype.toggle = function( dropdown, withDescendants ) {
-    if ( dropdown.classList.contains( 'droppy__drop--active' ) ) {
-      this.close( dropdown, withDescendants );
+  Droppy.prototype.toggle = function ( dropdown, withDescendants ) {
+
+    var node;
+
+    // Check if dropdown is a node or an element. We need a node.
+    if ( dropdown instanceof DroppyNode ) {
+      node = dropdown;
     }
-    else if ( dropdown.classList.contains( 'droppy__drop' ) ) {
-      this.open( dropdown, withDescendants );
+    else {
+      node = getNodeByProperty( 'dropdown', dropdown, this.tree );
+    }
+
+    // If open call close, call open otherwise.
+    if ( node.status ) {
+      this.close( node, withDescendants );
+    }
+    else {
+      this.open( node, withDescendants );
     }
   };
 
   /**
-   * Close all dropdown in a Droppy menu.
+   * Close all drop-down in a Droppy menu.
    */
-  Droppy.prototype.closeAll = function() {
+  Droppy.prototype.closeAll = function () {
 
+    // If no node is open, return.
+    var openNode = getNodeByProperty( 'status', true, this.tree );
+
+    if ( !openNode ) {
+      return;
+    }
+
+    // Before callback.
     if ( typeof this.callbacks.beforeCloseAll === 'function' ) {
       this.callbacks.beforeCloseAll();
     }
 
-    var dropdowns = getFirstLevelDropdown( this.element, '.droppy__drop--active' ),
-        i = dropdowns.length;
+    // Close the drop-downs.
+    var nodes = getNodesByProperty( 'level', 0, this.tree );
 
-    while ( i-- ) {
-      close( dropdowns[ i ], true, this.options.animationOut );
+    for ( var i = nodes.length, node; i--, node = nodes[ i ]; ) {
+      if ( node.status ) {
+        close( node, true, this.options.animationOut );
+      }
     }
 
+    // After callback.
     if ( typeof this.callbacks.afterCloseAll === 'function' ) {
       this.callbacks.afterCloseAll();
     }
   };
 
-
   /**
-   * Open all dropdown in a Droppy menu.
+   * Open all drop-down in a Droppy menu.
    */
-  Droppy.prototype.openAll = function() {
+  Droppy.prototype.openAll = function () {
 
+    // If no node is closed, return.
+    var closedNode = getNodeByProperty( 'status', false, this.tree );
+
+    if ( !closedNode ) {
+      return;
+    }
+
+    // Before callback.
     if ( typeof this.callbacks.beforeOpenAll === 'function' ) {
       this.callbacks.beforeOpenAll();
     }
 
-    var dropdowns = getFirstLevelDropdown( this.element, '.droppy__drop' ),
-        i = dropdowns.length;
+    // Open the drop-downs.
+    var nodes = getNodesByProperty( 'level', 0, this.tree );
 
-    while ( i-- ) {
-      open( dropdowns[ i ], true, this.options.animationIn );
+    for ( var i = nodes.length, node; i--, node = nodes[ i ]; ) {
+      if ( !node.status ) {
+        open( node, true, this.options.animationIn );
+
+        continue;
+      }
+
+      /*
+       If node is open, check the descendants. If a descendant is not open,
+       open it.
+       */
+      for ( var j = 0, l = node.descendantsNode.length, descendant;
+            j < l, descendant = node.descendantsNode[ j ]; ++j ) {
+        if ( !descendant.status ) {
+          open( descendant, true, this.options.animationIn );
+        }
+      }
     }
 
+    // After callback.
     if ( typeof this.callbacks.afterOpenAll === 'function' ) {
       this.callbacks.afterOpenAll();
     }
@@ -782,45 +718,36 @@ if (!Element.prototype.matches) {
   /**
    * Check if the given Droppy instance was initialized.
    *
-   * @param {Droppy} droppy
-   *        A Droppy instance to check.
-   *
-   * @return {boolean}
+   * @param  {Droppy} droppy
+   *         A Droppy instance to check.
+   * @return {Boolean}
    *         True if the given Droppy instance was initialized, false otherwise.
    */
-  Droppy.prototype.isInitialized = function( droppy ) {
-    return droppyStore.some( function( obj ) {
-      return obj === droppy;
-    } );
-  };
+  Droppy.prototype.isInitialized = function ( droppy ) {
 
-  /*
-   * Return an array containing all Droppy's instances.
-   *
-   * @return {Array}
-   *         An array containing all Droppy's instances.
-   *
-  Droppy.prototype.getStore = function() {
-    return droppyStore;
+    for ( var i = droppyStore.length, inStore; i--, inStore = droppyStore[ i ]; ) {
+      if ( droppy === inStore ) {
+        return true;
+      }
+    }
+
+    return false;
   };
-   */
 
   /**
    * Return the Droppy instance used by the given element.
    *
-   * @param {Node} element
-   *        The element used at Droppy creation.
-   *
+   * @param  {Element} element
+   *         The element used at Droppy creation.
    * @return {Droppy|undefined}
    *         The Droppy instance used by the given element. If none instance is
    *         found, return undefined.
    */
   Droppy.prototype.getInstance = function ( element ) {
-    var i = droppyStore.length;
 
-    while ( i-- ) {
-      if ( droppyStore[ i ].element === element ) {
-        return droppyStore[ i ];
+    for ( var i = droppyStore.length, droppy; i--, droppy = droppyStore[ i ]; ) {
+      if ( droppy.element === element ) {
+        return droppy;
       }
     }
   };
@@ -837,11 +764,11 @@ if (!Element.prototype.matches) {
    *         An object representing the default options.
    * @param  {Object} properties
    *         An object representing the user options.
-   *
    * @return {Object} source
    *         An updated object with merged options.
    */
   function extendDefaults( source, properties ) {
+
     var property;
 
     for ( property in properties ) {
@@ -854,20 +781,26 @@ if (!Element.prototype.matches) {
   }
 
   /**
-   * Loop over the start element parents looking for the element that matches
-   * the given parentSelector, until reach the end element.
+   * Returns the element that matches the given CSS selector in the given range
+   * of elements.
    *
    * @param  {Element} start
-   *         The starting node.
+   *         The starting element.
    * @param  {Element} end
-   *         The ending node.
-   * @param  {string} parentSelector
+   *         The ending element.
+   * @param  {String} parentSelector
    *         A valid CSS selector.
-   *
-   * @return {Element|undefined}
-   *         The first parent element that matches the given selector.
+   * @param  {Boolean} includeSelf
+   *         A boolean indicating if include start element or not.
+   * @return {Element}
+   *         The parent element that matches the given CSS selector.
    */
-  function getParent( start, end, parentSelector ) {
+  function getParent ( start, end, parentSelector, includeSelf ) {
+
+    if ( !includeSelf ) {
+      start = start.parentNode;
+    }
+
     while ( start !== end ) {
       if ( start.matches( parentSelector ) ) {
         return start;
@@ -878,96 +811,140 @@ if (!Element.prototype.matches) {
   }
 
   /**
-   * Loop over the start element parents looking for the element that matches
-   * the given selector, until reach the end element.
+   * Returns an array of elements that matches the given CSS selector in the
+   * given range of elements.
    *
    * @param  {Element} start
    *         The starting element.
    * @param  {Element} end
    *         The ending element.
-   * @param  {string} parentSelector
+   * @param  {String} parentSelector
    *         A valid CSS selector.
-   *
+   * @param  {Boolean} includeSelf
+   *         A boolean indicating if include start element or not.
    * @return {Array}
-   *         An array containing active elements, parents of the start element.
+   *         An array of elements that matches the given CSS selector.
    */
-  function getParents( start, end, parentSelector ) {
-    var itemsActive = [];
+  function getParents ( start, end, parentSelector, includeSelf ) {
+
+    if ( !includeSelf ) {
+      start = start.parentNode
+    }
+
+    var parents = [];
 
     while ( start !== end ) {
       if ( start.matches( parentSelector ) ) {
-        itemsActive.push( start );
+        parents.push( start );
       }
 
       start = start.parentNode;
     }
 
-    return itemsActive;
+    return parents;
   }
 
   /**
-   * In the given range of elements, looks for active elements that aren't
-   * parents of the starting element.
-   *
-   * @param  {Element} start
-   *         The starting node.
-   * @param  {Element} end
-   *         The ending node.
-   *
-   * @return {Array}
-   *         An array of active elements that aren't parents of the starting
-   *         element.
-   */
-  function getOthersToClose( start, end ) {
-    var parentsActive = getParents( start, end, '.droppy__drop--active' ),
-        othersActive = getFirstLevelDropdown( end, '.droppy__drop--active' );
-
-    return othersActive.filter( function( item ) {
-      return this.every( function( parent ) {
-        return item !== parent;
-      } );
-    }, parentsActive );
-  }
-
-  /**
-   * Returns the first level elements children of the given element, that matches
-   * the given selector.
+   * Build a tree of drop-downs, triggers and parents.
    *
    * @param  {Element} element
-   *         A parent element.
-   * @param  {string} selector
+   *         The element on which Droppy will act.
+   * @param  {String} dropdownSelector
    *         A valid CSS selector.
-   *
-   * @return {Array|undefined}
-   *         An array containing the first level of elements that matchets the
-   *         given selector.
+   * @param  {String} parentSelector
+   *         A valid CSS selector.
+   * @param  {String} triggerSelector
+   *         A valid CSS selector.
+   * @return {Array}
+   *         The tree.
    */
-  function getFirstLevelDropdown( element, selector ) {
+  function generateTree ( element, dropdownSelector, parentSelector, triggerSelector ) {
 
-    if ( !element.id ) {
-      element.id = generateCssId();
+    // Get all drop-downs.
+    var dropdowns = Array.prototype.slice.call( element.querySelectorAll( dropdownSelector ) ),
+        tree = [];
+
+    // For each drop-down, build a DroppyNode.
+    for ( var i = 0, l = dropdowns.length, dropdown; i < l, dropdown = dropdowns[ i ]; i++ ) {
+
+      var node = new DroppyNode();
+
+      node.dropdown = dropdown;
+      node.parent = getParent( dropdown, element, parentSelector, false );
+      node.trigger = node.parent.querySelector( triggerSelector );
+
+      var parentsDropdowns = getParents( dropdown, element, dropdownSelector, false ),
+          parentNode;
+
+      for ( var j = parentsDropdowns.length, parentDropdown; j--, parentDropdown = parentsDropdowns[ j ]; ) {
+        parentNode = getNodeByProperty( 'dropdown', parentDropdown, tree );
+        node.parentsNode.push( parentNode );
+        parentNode.descendantsNode.push( node );
+      }
+
+      node.level = node.parentsNode.length;
+      tree.push( node );
     }
 
-    /*
-    We need an ID on the element to select the right children. Instead of an ID,
-    I should use the :scope pseudo-selector, but it is not supported by IE.
-    @see https://developer.mozilla.org/it/docs/Web/API/Element/querySelectorAll#Quirks
-     */
-    var items = Array.prototype.slice.call( element.querySelectorAll( selector ) ),
-        children = Array.prototype.slice.call( element.querySelectorAll( element.id + ' ' + selector + ' ' + selector ) );
+    return tree;
+  }
 
-    return items.filter( function ( item ) {
-      return this.indexOf( item ) === -1;
-    }, children );
+  /**
+   * Return the node corresponding to the given property and value in the given
+   * tree.
+   *
+   * @param  {String} property
+   *         The property of a node.
+   * @param  {*} value
+   *         The value of the given property.
+   * @param  {Array} tree
+   *         The tree on which search for the node.
+   * @return {DroppyNode}
+   *         The node corresponding to the given property and value.
+   */
+  function getNodeByProperty ( property, value, tree ) {
+
+    for ( var i = tree.length, node; i--, node = tree[ i ]; ) {
+      if ( node[ property ] === value ) {
+        return node;
+      }
+    }
+  }
+
+  /**
+   * Return an array of nodes corresponding to the given property and value in
+   * the given tree.
+   *
+   * @param  {String} property
+   *         The property of a node.
+   * @param  {*} value
+   *         The value of the given property.
+   * @param  {Array} tree
+   *         The tree on which search for the node.
+   * @return {Array}
+   *         An array of nodes corresponding to the given property and value.
+   */
+  function getNodesByProperty ( property, value, tree ) {
+
+    var nodes = [];
+
+    for ( var i = tree.length, node; i--, node = tree[ i ]; ) {
+      if ( node[ property ] === value ) {
+        nodes.push( node );
+      }
+    }
+
+    return nodes;
   }
 
   /**
    * Check if browser support animation.
    *
-   * @return {boolean}
+   * @return {Boolean}
    *         Return true if the browser support CSS animation, false otherwise.
    */
-  function detectAnimationSupport() {
+  function detectAnimationSupport () {
+
     var support = false,
         element = document.createElement( 'div' ),
         domPrefixes = 'Webkit';
@@ -986,107 +963,167 @@ if (!Element.prototype.matches) {
   }
 
   /**
-   * Return a valid CSS Id.
+   * Check if the open should be animated, set withDescendants and then call
+   * open.
    *
-   * @return {string}
-   *         The CSS Id selector.
-   */
-  function generateCssId() {
-
-    function generator() {
-      return '_' + Math.floor( ( 1 + Math.random() ) * 0x10000 ).toString( 16 );
-    }
-
-    var id = generator();
-
-    while ( document.getElementById( id )  ) {
-      id = generator();
-    }
-
-    return id;
-  }
-
-  /**
-   * Add the CSS class .droppy__drop--active to the given element and relative
-   * drop-downs descendants.
-   *
-   * @param {Element} element
+   * @param {DroppyNode} node
    *        The element to which adds the CSS class .droppy__drop--active.
    * @param {Boolean} withDescendants
    *        True if add the CSS class to the descendants drop-down.
-   * @param {string} animation
+   * @param {String} animation
    *        A CSS class where is declared an animation.
    */
-  function open( element, withDescendants, animation ) {
+  function open ( node, withDescendants, animation ) {
 
-    var trigger = getParent( element, document.body, '.droppy__parent' ). querySelector( '.droppy__trigger' );
-    trigger.setAttribute( 'aria-expanded', 'true' );
+    // If withDescendants is not set, set it to default.
+    if ( typeof withDescendants !== 'boolean' ) {
+      withDescendants = false;
+    }
 
+    /*
+     If browser support animation and there is an animation, animate it and
+     call open.
+     */
     if ( animationSupport && animation ) {
-      element.addEventListener( 'animationend', function handler () {
-        element.classList.remove( animation );
-        element.removeEventListener( 'animationend', handler );
-      } );
-
-      element.classList.add( animation );
+      handleOpenAnimation( node, animation );
     }
 
-    if ( withDescendants ) {
-      var elements = element.querySelectorAll( '.droppy__drop' ),
-          i = elements.length;
-
-      while ( i-- ) {
-        elements[ i ].classList.add( 'droppy__drop--active' );
-      }
-    }
-
-    element.classList.add( 'droppy__drop--active' );
+    setOpenAttributes( node, withDescendants );
   }
 
   /**
-   * Remove the CSS class .droppy__drop--active to the given element and
-   * relative drop-downs descendants.
+   * Check if the close should be animated, set withDescendants and then call
+   * setCloseAttributes().
    *
-   * @param {Element} element
+   * @param {DroppyNode} node
    *        The element to which adds the CSS class .droppy__drop--active.
    * @param {Boolean} withDescendants
    *        True if remove the CSS class to the descendants drop-down.
-   * @param {string} animation
+   * @param {String} animation
    *        A CSS class where is declared an animation.
    */
-  function close( element, withDescendants, animation ) {
+  function close ( node, withDescendants, animation ) {
 
-    var trigger = getParent( element, document.body, '.droppy__parent' ). querySelector( '.droppy__trigger' );
-    trigger.setAttribute( 'aria-expanded', 'false' );
+    // If withDescendants is not set, set it to default.
+    if ( typeof withDescendants !== 'boolean' ) {
+      withDescendants = true;
+    }
 
+    /*
+     If browser support animation and there is an animation, animate it.
+     Otherwise call close. As opposed to open, the close should be called at
+     the animation end.
+     */
     if ( animationSupport && animation ) {
-      element.addEventListener( 'animationend', function handler () {
-        element.classList.remove( 'droppy__drop--active', animation );
-
-        if ( withDescendants ) {
-          var elements = element.querySelectorAll( '.droppy__drop--active' ),
-              i = elements.length;
-
-          while ( i-- ) {
-            elements[ i ].classList.remove( 'droppy__drop--active' );
-          }
-        }
-
-        element.removeEventListener( 'animationend', handler );
-      } );
-
-      element.classList.add( animation );
+      handleCloseAnimation( node,withDescendants, animation );
     }
     else {
-      element.classList.remove( 'droppy__drop--active' );
+      setCloseAttributes( node, withDescendants );
+    }
+  }
 
-      if ( withDescendants ) {
-        var elements = element.querySelectorAll( '.droppy__drop--active' ),
-            i = elements.length;
+  /**
+   * Add animation CSS class and removes it when animation ends.
+   *
+   * @param {DroppyNode} node
+   *        The node to animate.
+   * @param {String} animation
+   *        The animation CSS class.
+   */
+  function handleOpenAnimation ( node, animation ) {
 
-        while ( i-- ) {
-          elements[ i ].classList.remove( 'droppy__drop--active' );
+    node.dropdown.addEventListener( 'animationend', function handler () {
+
+      // At animation end, remove animation class.
+      node.dropdown.classList.remove( animation );
+      node.dropdown.removeEventListener( 'animationend', handler );
+    } );
+
+    node.dropdown.classList.add( animation );
+  }
+
+  /**
+   * Add animation CSS class and removes it when animation ends. Then call
+   * setCloseAttributes().
+   *
+   * @param {DroppyNode} node
+   *        The node to animate.
+   * @param {Boolean} withDescendants
+   *        Close all drop-downs descendants of the current drop-down.
+   * @param {String} animation
+   *        The animation CSS class.
+   */
+  function handleCloseAnimation ( node, withDescendants, animation ) {
+
+    node.dropdown.addEventListener( 'animationend', function handler () {
+
+      // In animation end, remove animation class and set close attributes.
+      node.dropdown.classList.remove( animation );
+      setCloseAttributes( node, withDescendants );
+
+      node.dropdown.removeEventListener( 'animationend', handler );
+    } );
+
+    node.dropdown.classList.add( animation );
+  }
+
+  /**
+   * Set open attributes on the given DroppyNode. Attributes are
+   * .droppy__drop--active on drop-down, and aria-expanded on trigger.
+   *
+   * @param {DroppyNode} node
+   *        The element to which adds the CSS class .droppy__drop--active.
+   * @param {Boolean} withDescendants
+   *        True if add the CSS class to the descendants drop-down.
+   */
+  function setOpenAttributes ( node, withDescendants ) {
+
+    if ( withDescendants ) {
+
+      for ( var i = node.descendantsNode.length, descendant; i--, descendant = node.descendantsNode[ i ]; ) {
+
+        if ( descendant.status ) {
+          continue;
         }
+
+        descendant.dropdown.classList.add( 'droppy__drop--active' );
+        descendant.trigger.setAttribute( 'aria-expanded', 'true' );
+        descendant.status = true;
+      }
+    }
+
+    node.dropdown.classList.add( 'droppy__drop--active' );
+    node.trigger.setAttribute( 'aria-expanded', 'true' );
+    node.status = true;
+  }
+
+  /**
+   * Set close attributes on the given DroppyNode. Attributes are
+   * .droppy__drop--active on drop-down, and aria-expanded on trigger.
+   *
+   * @param {DroppyNode} node
+   *        The drop-down to close.
+   * @param {Boolean} withDescendants
+   *        Close all drop-downs descendants of the current drop-down.
+   */
+  function setCloseAttributes ( node, withDescendants ) {
+
+    node.dropdown.classList.remove( 'droppy__drop--active' );
+    node.trigger.setAttribute( 'aria-expanded', 'false' );
+    node.status = false;
+
+
+    if ( withDescendants ) {
+
+      for ( var i = node.descendantsNode.length, descendant; i--, descendant = node.descendantsNode[ i ]; ) {
+
+        if ( !descendant.status ) {
+          continue;
+        }
+
+        descendant.dropdown.classList.remove( 'droppy__drop--active' );
+        descendant.trigger.setAttribute( 'aria-expanded', 'false' );
+        descendant.status = false;
       }
     }
   }
@@ -1102,38 +1139,27 @@ if (!Element.prototype.matches) {
    * @param {Event} event
    *        The event object.
    */
-  function clickHandler( event ) {
+  function clickHandler ( event ) {
 
-    var trigger = getParent( event.target, document.body, '.droppy__trigger' ),
-        roots = getParents( event.target, document.body, '.droppy' );
+    var trigger = getParent( event.target, document.body, '.droppy__trigger', true ),
+        roots = getParents( event.target, document.body, '.droppy', false ),
+        droppiesToClose = [];
 
-    // I've clicked in a trigger! Let's toggle some drop-down.
-    if ( trigger ) {
-      var droppy = Droppy.prototype.getInstance( roots[ 0 ] ),
-          parent = getParent( event.target, document.body, '.droppy__parent' );
-
-      if ( droppy && parent ) {
-        var dropdown = parent.querySelector( '.droppy__drop' );
-
-        if ( droppy.options.preventDefault && event.cancelable ) {
-          event.preventDefault();
-        }
-
-        droppy.toggle( dropdown );
+    /*
+     Populate droppiesToClose with Droppy instances that has cliOutToClose set
+     to true.
+     */
+    for ( var k = droppyStore.length, droppy; k--, droppy = droppyStore[ k ]; ) {
+      if ( droppy.options.clickOutToClose ) {
+        droppiesToClose.push( droppy );
       }
     }
 
-    // Now I should close the menu with clickOutToClose set to true.
-    var closing = droppyStore.filter( function ( droppy ) {
+    // From droppiesToClose remove the Droppy instance I'm in and all its parents.
+    droppiesToClose = droppiesToClose.filter( function ( droppyToClose ) {
 
-      if ( !droppy.options.clickOutToClose ) {
-        return false;
-      }
-
-      var i = this.length;
-
-      while ( i-- ) {
-        if ( this[ i ] === droppy.element ) {
+      for ( var i = this.length, root; i--, root = this[ i ]; ) {
+        if ( Droppy.prototype.getInstance( root ) === droppyToClose ) {
           return false;
         }
       }
@@ -1141,9 +1167,25 @@ if (!Element.prototype.matches) {
       return true;
     }, roots );
 
-    closing.forEach( function ( droppy ) {
-      droppy.closeAll();
-    } );
+    // I've clicked in a trigger! Let's toggle some drop-downs.
+    if ( trigger ) {
+
+      droppy = Droppy.prototype.getInstance( getParent( event.target, document.body, '.droppy', false ) );
+
+      var withDescendants = event.shiftKey ? true : undefined,
+          node = getNodeByProperty( 'trigger', trigger, droppy.tree );
+
+      droppy.toggle( node, withDescendants );
+
+      if ( droppy.options.preventDefault ) {
+        event.preventDefault();
+      }
+    }
+
+    // Now I should close the menu with clickOutToClose set to true.
+    for ( var i = droppiesToClose.length, droppyToClose; i--, droppyToClose = droppiesToClose[ i ]; ) {
+      droppyToClose.closeAll();
+    }
   }
 
   /**
@@ -1152,13 +1194,15 @@ if (!Element.prototype.matches) {
    * @param {Event} event
    *        The event object.
    */
-  function escHandler( event ) {
+  function escHandler ( event ) {
+
     if ( event.which === 27 ) {
-      droppyStore.forEach( function( droppy ) {
+
+      for ( var i = droppyStore.length, droppy; i--, droppy = droppyStore[ i ]; ) {
         if ( droppy.options.clickEscToClose ) {
           droppy.closeAll();
         }
-      } );
+      }
     }
   }
 

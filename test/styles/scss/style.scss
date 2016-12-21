@@ -1,12 +1,5 @@
 
-// Custom font.
-@import url(https://fonts.googleapis.com/css?family=Open+Sans:400,300,300italic,400italic,700,700italic);
-
-
-// Variables
-// -----------------------------------------------------------------------------
-
-$text: #333;
+@import "animations";
 
 
 // Base
@@ -60,4 +53,18 @@ p {
 .wrapper-page {
   margin: 0 auto;
   max-width: 960px;
+}
+
+
+// Animations
+// -----------------------------------------------------------------------------
+
+.fade-in {
+  animation-name: fadeIn;
+  animation-duration: .3s;
+}
+
+.fade-out {
+  animation-name: fadeOut;
+  animation-duration: .3s;
 }

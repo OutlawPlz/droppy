@@ -1,5 +1,3 @@
-@import "mixins";
-
 
 // Droppy
 // -----------------------------------------------------------------------------
@@ -14,14 +12,6 @@
   }
 }
 
-.fadeIn {
-  animation-name: fadeIn;
-  animation-duration: .3s;
-  animation-fill-mode: both;
-}
+.droppy__trigger {}
 
-.fadeOut {
-  animation-name: fadeOut;
-  animation-duration: .3s;
-  animation-fill-mode: both;
-}
+.droppy__parent {}

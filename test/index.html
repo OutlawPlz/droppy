@@ -12,26 +12,37 @@
     <h1>Droppy</h1>
     <p>Testing Droppy script.</p>
     <p>Init via script.</p>
-
-
     <div class="test" data-droppy='{ "parentSelector": ".wrapper", "dropdownSelector": "nav", "triggerSelector": "button", "closeOthers": false, "clickOutToClose": false }'>
       <div class="wrapper">
         <button>Menu</button>
         <nav role="navigation">
           <ul class="menu">
+            <button class="open-all">Open All</button>
+            <button class="close-all">Close All</button>
             <li class="menu-item">
               <a href="#"><span>Prodotti</span></a>
-              <p>Pippo</p>
               <ul class="menu" id="asdro">
                 <li class="menu-item"><a href="#">Economici</a></li>
                 <li class="menu-item">
                   <a href="#">Costosi</a>
                   <ul class="menu">
-                    <li class="menu-item"><a href="#">Nuovo</a></li>
+                    <li class="menu-item">
+                      <a href="#">Nuovo</a>
+                      <ul class="menu">
+                        <li class="menu-item"><a href="#">Di zecca</a></li>
+                        <li class="menu-item"><a href="#">Boh</a></li>
+                      </ul>
+                    </li>
                     <li class="menu-item"><a href="#">Usato</a></li>
                   </ul>
                 </li>
-                <li class="menu-item"><a href="#">Via di mezzo</a></li>
+                <li class="menu-item">
+                  <a href="#">Via di mezzo</a>
+                  <ul class="menu">
+                    <li><a href="#">Come nuovo</a></li>
+                    <li><a href="#">Qualche graffio</a></li>
+                  </ul>
+                </li>
               </ul>
             </li>
             <li class="menu-item">
@@ -56,7 +67,6 @@
         </nav>
       </div>
     </div>
-
     <p>Init via HTML.</p>
     <ul class="menu" data-droppy='{ "parentSelector": "li", "dropdownSelector": "li > ul.menu", "triggerSelector": "a", "closeOthers": false, "clickOutToClose": false }'>
       <li class="menu-item">
@@ -94,7 +104,7 @@
     </ul>
   </div>
     <!-- Attach scripts. -->
-  <script src="../dist/droppy.js"></script>
+  <script src="../js/droppy.js"></script>
   <script src="js/generic.js"></script>
 </body>
 </html>

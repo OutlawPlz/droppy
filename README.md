@@ -105,15 +105,15 @@ var droppy = new Droppy( element, {
 </nav>
 ```
 
+- ***dropdownSelector*** - It's a valid CSS selector of your drop-down. In the
+example above I have a drop-down when there is a `<ul class="menu">` son of a
+`<li>`. That's why the `dropdownSelector` is set to `li > ul.menu`.
+
 - ***parentSelector*** - It's a valid CSS selector of your parent element. The
 parent element **have to contain** the trigger element and the drop-down
 element. It should be the closest parent. In the example above the closest
 parent of both - `dropdownSelector` and `triggerSelector` - is the `<li>`
 element. That's why the `parentSelector` is set to `li`.
-
-- ***dropdownSelector*** - It's a valid CSS selector of your drop-down. In the
-example above I have a drop-down when there is a `<ul class="menu">` son of a
-`<li>`. That's why the `dropdownSelector` is set to `li > ul.menu`.
 
 - ***triggerSelector*** - It's a valid CSS selector of the element that triggers
 the open or close event. In the example above the trigger is the `<a>` element.
@@ -148,16 +148,7 @@ Methods are actions done by Droppy instances.
 
 ```js
 // Instantiate
-var droppy = new Droppy( element, {
-  parentSelector: 'li',
-  dropdownSelector: 'ul > li',
-  triggerSelector: 'a',
-  closeOthers: true,
-  clickOutToClose: true,
-  clickEscToClose: true,
-  animationIn: '',
-  animationOut: ''
-} );
+var droppy = new Droppy( element, options, callbacks );
 ```
 
 ### init()
@@ -213,7 +204,7 @@ droppy.close( dropdown );
 Open or close the given drop-down.
 
 - `{Element} dropdown` - The drop-down element to toggle.
-- `{Boolean} [withDescendants=true]` - Should toggle or not all the drop-downs
+- `{Boolean} [withDescendants=undefined]` - Should toggle or not all the drop-downs
 in the given drop-down.
 
 ```js
@@ -242,7 +233,7 @@ droppy.closeAll();
 
 ### Droppy.prototype.isInitialized( droppy )
 
-It's a **static method**. It returns true if the given Droppy instance is
+It returns true if the given Droppy instance is
 initialized, false otherwise.
 
 ```js
@@ -253,7 +244,7 @@ var initialized = Droppy.prototype.isInitialized( droppy );
 
 ### Droppy.prototype.getInstance( element )
 
-It's a **static method**. It returns the Droppy instance used by a given
+It returns the Droppy instance used by the given
 element.
 
 ```js
@@ -310,17 +301,34 @@ Define a callback in three steps.
   var droppy = new Droppy(element, options, callbacks);
   ```
 
+## Detect drop-down structure
+
+Understanding how Droppy detect your drop-down menu structure, can help you set
+`*Selector` options correctly.
+
+Droppy starts from `dropdownSelector` to detect your drop-down menu structure.
+For each drop-down, Droppy loops through element parents until reach the first
+element that matches the `parentSelector`. Once got the parent element, Droppy
+selects the first element child of the parent element that matches the
+`triggerSelector`.
+
+Instead of querying at every click the DOM, Droppy stores your drop-down menu
+structure in the `tree` property. The `tree` is an array of `DroppyNode`
+instances.
+
+```js
+var droppy = new Droppy( element, options, callbacks );
+// Print the tree
+console.log( droppy.tree );
+```
+
 ## Polyfills
 
 Droppy uses a bunch of polyfills to be compatible with old browsers. Here's a
 list of polyfills used.
 
-- [Array.prototype.forEach()][9a8a4327]
-- [Array.prototype.map()][548b200b]
 - [Element.prototype.classList()][ad792cb7]
 - [Element.prototype.matches()][92b6fcf0]
 
-  [9a8a4327]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/forEach#Polyfill "Polyfill Array.prototype.forEach()"
-  [548b200b]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/map#Polyfill "Polyfill Array.prototype.map()"
   [ad792cb7]: https://github.com/eligrey/classList.js "Polyfill Element.prototype.classList()"
   [92b6fcf0]: https://developer.mozilla.org/it/docs/Web/API/Element/matches#Polyfill "Polyfill Element.prototype.matches()"
