@@ -70,9 +70,8 @@ menu element. Options can be set in its value using **valid JSON**.
 
 ## Options
 
-None of Droppy's options are required, but to make it work properly you should
-describe your menu structure by setting the options `parentSelector`,
-`dropdownSelector` and `triggerSelector`.
+To make Droppy work properly you have to describe your menu structure by
+setting the options `parentSelector`, `dropdownSelector` and `triggerSelector`.
 
 ```js
 // Default options.
