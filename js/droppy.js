@@ -6,7 +6,8 @@
  * TODO - [x] Implements a tree instead of querying DOM every click.
  * TODO - [x] Remove unused shims.
  * TODO - [x] Do not instance twice on same element.
- * TODO - [ ] Open a drop-down with a parent closed.
+ * TODO - [x] Open a drop-down with a parent closed.
+ * TODO - [ ] Replace callbacks with events.
  */
 
 ( function ( window, factory ) {
@@ -152,11 +153,11 @@
 
     this.dropdown = '';
     this.parent = '';
-    this.dropdown = '';
-    this.parentsNode = [];
-    this.descendantsNode = [];
+    this.trigger = '';
+    this.parentNodes = [];
+    this.descendantNodes = [];
     this.level = 0;
-    this.status = false;
+    this.open = false;
   }
 
 
@@ -279,6 +280,7 @@
    */
   Droppy.prototype.open = function ( dropdown, withDescendants ) {
 
+    /** @var DroppyNode node */
     var node;
 
     // Check if dropdown is a node or an element. We need a node.
@@ -290,7 +292,7 @@
     }
 
     // If opened yet, return.
-    if ( node.status ) {
+    if ( node.open ) {
       return;
     }
 
@@ -305,7 +307,7 @@
       var siblings = getNodesByProperty( 'level', node.level, this.tree );
 
       for ( var i = siblings.length, sibling; i--, sibling = siblings[ i ]; ) {
-        if ( sibling.status ) {
+        if ( sibling.open ) {
           close( sibling, true, this.options.animationOut );
         }
       }
@@ -341,7 +343,7 @@
     }
 
     // If closed yet, return.
-    if ( !node.status ) {
+    if ( !node.open ) {
       return;
     }
 
@@ -379,7 +381,7 @@
     }
 
     // If open call close, call open otherwise.
-    if ( node.status ) {
+    if ( node.open ) {
       this.close( node, withDescendants );
     }
     else {
@@ -393,7 +395,7 @@
   Droppy.prototype.closeAll = function () {
 
     // If no node is open, return.
-    var openNode = getNodeByProperty( 'status', true, this.tree );
+    var openNode = getNodeByProperty( 'open', true, this.tree );
 
     if ( !openNode ) {
       return;
@@ -408,7 +410,7 @@
     var nodes = getNodesByProperty( 'level', 0, this.tree );
 
     for ( var i = nodes.length, node; i--, node = nodes[ i ]; ) {
-      if ( node.status ) {
+      if ( node.open ) {
         close( node, true, this.options.animationOut );
       }
     }
@@ -425,7 +427,7 @@
   Droppy.prototype.openAll = function () {
 
     // If no node is closed, return.
-    var closedNode = getNodeByProperty( 'status', false, this.tree );
+    var closedNode = getNodeByProperty( 'open', false, this.tree );
 
     if ( !closedNode ) {
       return;
@@ -440,7 +442,7 @@
     var nodes = getNodesByProperty( 'level', 0, this.tree );
 
     for ( var i = nodes.length, node; i--, node = nodes[ i ]; ) {
-      if ( !node.status ) {
+      if ( !node.open ) {
         open( node, true, this.options.animationIn );
 
         continue;
@@ -450,9 +452,9 @@
        If node is open, check the descendants. If a descendant is not open,
        open it.
        */
-      for ( var j = 0, l = node.descendantsNode.length, descendant;
-            j < l, descendant = node.descendantsNode[ j ]; ++j ) {
-        if ( !descendant.status ) {
+      for ( var j = 0, l = node.descendantNodes.length, descendant;
+            j < l, descendant = node.descendantNodes[ j ]; ++j ) {
+        if ( !descendant.open ) {
           open( descendant, true, this.options.animationIn );
         }
       }
@@ -631,11 +633,11 @@
 
       for ( var j = parentsDropdowns.length, parentDropdown; j--, parentDropdown = parentsDropdowns[ j ]; ) {
         parentNode = getNodeByProperty( 'dropdown', parentDropdown, tree );
-        node.parentsNode.push( parentNode );
-        parentNode.descendantsNode.push( node );
+        node.parentNodes.push( parentNode );
+        parentNode.descendantNodes.push( node );
       }
 
-      node.level = node.parentsNode.length;
+      node.level = node.parentNodes.length;
       tree.push( node );
     }
 
@@ -733,15 +735,30 @@
       withDescendants = false;
     }
 
-    /*
-     If browser support animation and there is an animation, animate it and
-     call open.
-     */
-    if ( animationSupport && animation ) {
-      handleOpenAnimation( node, animation );
+    var root = node,
+        openIt = [ node ];
+
+    // Check if parents are open.
+    for ( var i = node.parentNodes.length, parent; i--, parent = node.parentNodes[ i ]; ) {
+
+      if ( !parent.open ) {
+        openIt.push( parent );
+        root = parent;
+      }
     }
 
-    setOpenAttributes( node, withDescendants );
+    // Invert order. Last dropdown to open should be the root.
+    openIt = openIt.reverse();
+
+    // If browser support animation and there is an animation, animate it and
+    // call open.
+    if ( animationSupport && animation ) {
+      handleOpenAnimation( root, animation );
+    }
+
+    for ( i = openIt.length, node; i--, node = openIt[ i ]; ) {
+      setOpenAttributes( node, withDescendants );
+    }
   }
 
   /**
@@ -833,21 +850,21 @@
 
     if ( withDescendants ) {
 
-      for ( var i = node.descendantsNode.length, descendant; i--, descendant = node.descendantsNode[ i ]; ) {
+      for ( var i = node.descendantNodes.length, descendant; i--, descendant = node.descendantNodes[ i ]; ) {
 
-        if ( descendant.status ) {
+        if ( descendant.open ) {
           continue;
         }
 
         descendant.dropdown.classList.add( 'droppy__drop--active' );
         descendant.trigger.setAttribute( 'aria-expanded', 'true' );
-        descendant.status = true;
+        descendant.open = true;
       }
     }
 
     node.dropdown.classList.add( 'droppy__drop--active' );
     node.trigger.setAttribute( 'aria-expanded', 'true' );
-    node.status = true;
+    node.open = true;
   }
 
   /**
@@ -863,20 +880,20 @@
 
     node.dropdown.classList.remove( 'droppy__drop--active' );
     node.trigger.setAttribute( 'aria-expanded', 'false' );
-    node.status = false;
+    node.open = false;
 
 
     if ( withDescendants ) {
 
-      for ( var i = node.descendantsNode.length, descendant; i--, descendant = node.descendantsNode[ i ]; ) {
+      for ( var i = node.descendantNodes.length, descendant; i--, descendant = node.descendantNodes[ i ]; ) {
 
-        if ( !descendant.status ) {
+        if ( !descendant.open ) {
           continue;
         }
 
         descendant.dropdown.classList.remove( 'droppy__drop--active' );
         descendant.trigger.setAttribute( 'aria-expanded', 'false' );
-        descendant.status = false;
+        descendant.open = false;
       }
     }
   }
@@ -894,14 +911,18 @@
    */
   function clickHandler ( event ) {
 
-    var trigger = getParent( event.target, document.body, '.droppy__trigger', true ),
-        roots = getParents( event.target, document.body, '.droppy', false ),
+    var trigger = getParent( event.target, document.body, '.droppy__trigger', true );
+
+    // We're not in a trigger... Do nothing.
+    if ( !trigger ) {
+      return;
+    }
+
+    var roots = getParents( event.target, document.body, '.droppy', false),
         droppiesToClose = [];
 
-    /*
-     Populate droppiesToClose with Droppy instances that has cliOutToClose set
-     to true.
-     */
+    // Populate droppiesToClose with Droppy instances that has cliOutToClose set
+    // to true.
     for ( var k = droppyStore.length, droppy; k--, droppy = droppyStore[ k ]; ) {
       if ( droppy.options.clickOutToClose ) {
         droppiesToClose.push( droppy );
@@ -966,8 +987,8 @@
   // Init via HTML.
   var elements = document.querySelectorAll( '[data-droppy]' );
 
-  for ( var i = 0; i < elements.length; ++i ) {
-    new Droppy( elements[ i ], JSON.parse( elements[ i ].getAttribute( 'data-droppy' ) ) );
+  for ( var i = elements.length, element; i--, element = elements[ i ]; ) {
+    new Droppy( element, JSON.parse( element.getAttribute( 'data-droppy' ) ) );
   }
 
   // Expose Droppy to the global object.
