@@ -1,5 +1,3 @@
-'use strict';
-
 var gulp = require('gulp'),
     uglifyjs2 = require( 'gulp-uglify' ),
     sass = require( 'gulp-sass' ),
@@ -35,6 +33,7 @@ var src = {
   js: {
     glob: [
       './js/shims/**/*.js',
+      './node_modules/tiny-emitter/dist/tinyemitter.js',
       './js/droppy.js'
     ]
   },

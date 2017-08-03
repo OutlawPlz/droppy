@@ -38,8 +38,6 @@ Start using Droppy in three steps.
 2. Add `dist/droppy.min.css` and `dist/droppy.min.js` to your web page.
   ```html
   <link href="/path/to/droppy/dist/droppy.min.css" rel="stylesheet" media="screen">
-  ```
-  ```html
   <script src="/path/to/droppy/dist/droppy.min.js"></script>
   ```
 
@@ -174,7 +172,7 @@ droppy.destroy();
 Open the given drop-down. If `closeOthers` is set to `true`, the other
 drop-downs will be closed before opening the current one.
 
-- `{Element} dropdown` - The drop-down element to open.
+- `{Element|DroppyNode} dropdown` - The drop-down element to open.
 - `{Boolean} [withDescendants=false]` - Should open or not all the drop-downs
 in the given drop-down.
 
@@ -188,7 +186,7 @@ droppy.open( dropdown );
 
 Close the given drop-down and all its descendants.
 
-- `{Element} dropdown` - The drop-down element to close.
+- `{Element|DroppyNode} dropdown` - The drop-down element to close.
 - `{Boolean} [withDescendants=true]` - Should close or not all the drop-downs
 in the given drop-down.
 
@@ -202,9 +200,9 @@ droppy.close( dropdown );
 
 Open or close the given drop-down.
 
-- `{Element} dropdown` - The drop-down element to toggle.
-- `{Boolean} [withDescendants=undefined]` - Should toggle or not all the drop-downs
-in the given drop-down.
+- `{Element|DroppyNode} dropdown` - The drop-down element to toggle.
+- `{Boolean} [withDescendants=undefined]` - Should toggle or not all the
+drop-downs in the given drop-down.
 
 ```js
 var dropdown = document.querySelector( '#menu-main .droppy__drop' )
@@ -230,6 +228,51 @@ Close all drop-downs of a menu.
 droppy.closeAll();
 ```
 
+### on( event, callback, context )
+
+Subscribe to an event.
+
+- `{string} event` - The name of the event to subscribe to.
+- `{function} callback` - The function to call when the event is emitted.
+- `context` - The context to bind to the callback.
+
+```js
+// The callback function.
+function alertOpen( event ) {
+  alert( 'Open!' );
+  console.log( event );
+}
+
+// Subscribe to open event.
+droppy.on( 'open', alertOpen );
+```
+
+### once( event, callback, context )
+
+Subscribe to an event once.
+
+- `{string} event` - The name of the event to subscribe to.
+- `{function} callback` - The function to call when the event is emitted.
+- `context` - The context to bind to the callback.
+
+```js
+// SUbscribe to open event once.
+droppy.once( 'open', alertOpen );
+```
+
+### off( event, callback )
+
+Unsubscribe to an event. If no callback is provided, unsubscribe from all
+events.
+
+- `{string} event` - The name of the event to unsubscribe from.
+- `{function} callback` - The function used when binding to the event.
+
+```js
+// Unsubscribe to open event.
+droppy.off( 'open', alertOpen );
+```
+
 ### Droppy.prototype.isInitialized( droppy )
 
 It returns true if the given Droppy instance is
@@ -252,7 +295,22 @@ var element = document.querySelector( '[data-droppy]' );
 var droppy = Droppy.prototype.getInstance( element );
 ```
 
+## Events
+
+Events are "things" that happen at a specific point of execution. You
+can listen to Droppy's events and react to them. Here's a list of Droppy's
+events.
+
+- `init` - Dispatched when a Droppy object is initialized.
+- `destroy` - Dispatched when a Droppy object is destroyed.
+- `open` - Dispatched when a drop-down is opened.
+- `close` - Dispatched when a drop-down is closed.
+- `openAll` - Dispatched when all drop-downs of a menu are opened.
+- `closeAll` - Dispatched when all drop-downs of a menu are closed.
+
 ## Callbacks
+
+**DEPRECATED** - Callbacks will be removed in v2.0.0 in favor of events.
 
 Callbacks are function called at a specific point of execution. Callbacks does
 not wait for animation end, this may cause the execution of `afterOpen`,

@@ -1,5 +1,5 @@
 /**
- * Droppy - v1.2.0
+ * Droppy - v1.1.0
  * Pure JavaScript multi-level dropdown menu.
  * By OutlawPlz, license GPL-3.0.
  * https://github.com/OutlawPlz/droppy.git
@@ -245,31 +245,101 @@ if (!Element.prototype.matches) {
       return i > -1;
     };
 }
+(function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.TinyEmitter = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+function E () {
+  // Keep this empty so it's easier to inherit from
+  // (via https://github.com/lipsmack from https://github.com/scottcorgan/tiny-emitter/issues/3)
+}
+
+E.prototype = {
+  on: function (name, callback, ctx) {
+    var e = this.e || (this.e = {});
+
+    (e[name] || (e[name] = [])).push({
+      fn: callback,
+      ctx: ctx
+    });
+
+    return this;
+  },
+
+  once: function (name, callback, ctx) {
+    var self = this;
+    function listener () {
+      self.off(name, listener);
+      callback.apply(ctx, arguments);
+    };
+
+    listener._ = callback
+    return this.on(name, listener, ctx);
+  },
+
+  emit: function (name) {
+    var data = [].slice.call(arguments, 1);
+    var evtArr = ((this.e || (this.e = {}))[name] || []).slice();
+    var i = 0;
+    var len = evtArr.length;
+
+    for (i; i < len; i++) {
+      evtArr[i].fn.apply(evtArr[i].ctx, data);
+    }
+
+    return this;
+  },
+
+  off: function (name, callback) {
+    var e = this.e || (this.e = {});
+    var evts = e[name];
+    var liveEvents = [];
+
+    if (evts && callback) {
+      for (var i = 0, len = evts.length; i < len; i++) {
+        if (evts[i].fn !== callback && evts[i].fn._ !== callback)
+          liveEvents.push(evts[i]);
+      }
+    }
+
+    // Remove event from queue to prevent memory leak
+    // Suggested by https://github.com/lazd
+    // Ref: https://github.com/scottcorgan/tiny-emitter/commit/c6ebfaa9bc973b33d110a84a307742b7cf94c953#commitcomment-5024910
+
+    (liveEvents.length)
+      ? e[name] = liveEvents
+      : delete e[name];
+
+    return this;
+  }
+};
+
+module.exports = E;
+
+},{}]},{},[1])(1)
+});
 /*
  * Droppy - Pure JavaScript multi-level dropdown menu.
- *
- * TODO - [x] Nested Droppy.
- * TODO - [x] preventDefault as option.
- * TODO - [x] Implements a tree instead of querying DOM every click.
- * TODO - [x] Remove unused shims.
- * TODO - [x] Do not instance twice on same element.
- * TODO - [x] Open a drop-down with a parent closed.
- * TODO - [ ] Replace callbacks with events.
  */
 
 ( function ( window, factory ) {
 
+  // AMD
   if ( typeof define === 'function' && define.amd ) {
-    define( [], factory );
+    define( [
+      'tiny-emitter'
+    ], factory );
   }
+  // CommonJS
   else if ( typeof exports === 'object' ) {
-    module.exports = factory();
+    module.exports = factory(
+      require('tiny-emitter')
+    );
   }
+  // Browser global
   else {
-    window.Droppy = factory();
+    window.Droppy = factory(
+      window.TinyEmitter
+    );
   }
-
-} ( window, function () {
+} ( window, function ( TinyEmitter ) {
 
   'use strict';
 
@@ -391,6 +461,10 @@ if (!Element.prototype.matches) {
     this.init();
   }
 
+  // Inherit methods from TinyEmitter.
+  Droppy.prototype = Object.create( TinyEmitter.prototype );
+  Droppy.prototype.constructor = Droppy;
+
   /**
    * Instantiate a new DroppyNode object.
    *
@@ -462,6 +536,11 @@ if (!Element.prototype.matches) {
     if ( typeof this.callbacks.afterInit === 'function' ) {
       this.callbacks.afterInit();
     }
+
+    // Dispatch event.
+    this.emit( 'init', {
+      droppy: this
+    } );
   };
 
   /**
@@ -502,8 +581,6 @@ if (!Element.prototype.matches) {
       document.body.removeEventListener( 'keyup', escHandler );
     }
 
-    delete this.handler;
-
     // Remove instance from the store.
     for ( var j = droppyStore.length, droppy; j--, droppy = droppyStore[ j ]; ) {
       if ( droppy === this ) {
@@ -515,6 +592,11 @@ if (!Element.prototype.matches) {
     if ( typeof this.callbacks.afterDestroy === 'function' ) {
       this.callbacks.afterDestroy();
     }
+
+    // Dispatch event.
+    this.emit( 'destroy', {
+      droppy: this
+    } );
   };
 
   /**
@@ -567,6 +649,12 @@ if (!Element.prototype.matches) {
     if ( typeof this.callbacks.afterOpen === 'function' ) {
       this.callbacks.afterOpen();
     }
+
+    // Dispatch event.
+    this.emit( 'open', {
+      droppy: this,
+      dropdown: node
+    } );
   };
 
   /**
@@ -605,6 +693,12 @@ if (!Element.prototype.matches) {
     if ( typeof this.callbacks.afterClose === 'function' ) {
       this.callbacks.afterClose();
     }
+
+    // Dispatch event.
+    this.emit( 'close', {
+      droppy: this,
+      dropdown: node
+    } );
   };
 
   /**
@@ -666,6 +760,11 @@ if (!Element.prototype.matches) {
     if ( typeof this.callbacks.afterCloseAll === 'function' ) {
       this.callbacks.afterCloseAll();
     }
+
+    // Dispatch event.
+    this.emit( 'closeAll', {
+      droppy: this
+    } );
   };
 
   /**
@@ -711,6 +810,11 @@ if (!Element.prototype.matches) {
     if ( typeof this.callbacks.afterOpenAll === 'function' ) {
       this.callbacks.afterOpenAll();
     }
+
+    // Dispatch event.
+    this.emit( 'openAll', {
+      droppy: this
+    } );
   };
 
 
@@ -733,7 +837,7 @@ if (!Element.prototype.matches) {
       }
     }
 
-    return false;
+    return false
   };
 
   /**
@@ -749,7 +853,7 @@ if (!Element.prototype.matches) {
 
     for ( var i = droppyStore.length, droppy; i--, droppy = droppyStore[ i ]; ) {
       if ( droppy.element === element ) {
-        return droppy;
+        return droppy
       }
     }
   };
@@ -771,15 +875,15 @@ if (!Element.prototype.matches) {
    */
   function extendDefaults( source, properties ) {
 
-    var property;
+    var property
 
     for ( property in properties ) {
       if ( source.hasOwnProperty( property ) ) {
-        source[ property ] = properties[ property ];
+        source[ property ] = properties[ property ]
       }
     }
 
-    return source;
+    return source
   }
 
   /**
@@ -800,15 +904,15 @@ if (!Element.prototype.matches) {
   function getParent ( start, end, parentSelector, includeSelf ) {
 
     if ( !includeSelf ) {
-      start = start.parentNode;
+      start = start.parentNode
     }
 
     while ( start !== end ) {
       if ( start.matches( parentSelector ) ) {
-        return start;
+        return start
       }
 
-      start = start.parentNode;
+      start = start.parentNode
     }
   }
 
@@ -833,17 +937,17 @@ if (!Element.prototype.matches) {
       start = start.parentNode
     }
 
-    var parents = [];
+    var parents = []
 
     while ( start !== end ) {
       if ( start.matches( parentSelector ) ) {
-        parents.push( start );
+        parents.push( start )
       }
 
-      start = start.parentNode;
+      start = start.parentNode
     }
 
-    return parents;
+    return parents
   }
 
   /**
@@ -864,31 +968,31 @@ if (!Element.prototype.matches) {
 
     // Get all drop-downs.
     var dropdowns = Array.prototype.slice.call( element.querySelectorAll( dropdownSelector ) ),
-        tree = [];
+        tree = []
 
     // For each drop-down, build a DroppyNode.
     for ( var i = 0, l = dropdowns.length, dropdown; i < l, dropdown = dropdowns[ i ]; i++ ) {
 
-      var node = new DroppyNode();
+      var node = new DroppyNode()
 
-      node.dropdown = dropdown;
-      node.parent = getParent( dropdown, element, parentSelector, false );
-      node.trigger = node.parent.querySelector( triggerSelector );
+      node.dropdown = dropdown
+      node.parent = getParent( dropdown, element, parentSelector, false )
+      node.trigger = node.parent.querySelector( triggerSelector )
 
       var parentsDropdowns = getParents( dropdown, element, dropdownSelector, false ),
-          parentNode;
+          parentNode
 
       for ( var j = parentsDropdowns.length, parentDropdown; j--, parentDropdown = parentsDropdowns[ j ]; ) {
-        parentNode = getNodeByProperty( 'dropdown', parentDropdown, tree );
-        node.parentNodes.push( parentNode );
-        parentNode.descendantNodes.push( node );
+        parentNode = getNodeByProperty( 'dropdown', parentDropdown, tree )
+        node.parentNodes.push( parentNode )
+        parentNode.descendantNodes.push( node )
       }
 
       node.level = node.parentNodes.length;
-      tree.push( node );
+      tree.push( node )
     }
 
-    return tree;
+    return tree
   }
 
   /**
@@ -908,7 +1012,7 @@ if (!Element.prototype.matches) {
 
     for ( var i = tree.length, node; i--, node = tree[ i ]; ) {
       if ( node[ property ] === value ) {
-        return node;
+        return node
       }
     }
   }
@@ -928,15 +1032,15 @@ if (!Element.prototype.matches) {
    */
   function getNodesByProperty ( property, value, tree ) {
 
-    var nodes = [];
+    var nodes = []
 
     for ( var i = tree.length, node; i--, node = tree[ i ]; ) {
       if ( node[ property ] === value ) {
-        nodes.push( node );
+        nodes.push( node )
       }
     }
 
-    return nodes;
+    return nodes
   }
 
   /**
@@ -949,19 +1053,19 @@ if (!Element.prototype.matches) {
 
     var support = false,
         element = document.createElement( 'div' ),
-        domPrefixes = 'Webkit';
+        domPrefixes = 'Webkit'
 
     if ( element.style.animationName !== undefined ) {
-      support = true;
+      support = true
     }
 
     if ( !support ) {
       if ( element.style[ domPrefixes + 'AnimationName' ] !== undefined ) {
-        support = true;
+        support = true
       }
     }
 
-    return support;
+    return support
   }
 
   /**
@@ -979,32 +1083,32 @@ if (!Element.prototype.matches) {
 
     // If withDescendants is not set, set it to default.
     if ( typeof withDescendants !== 'boolean' ) {
-      withDescendants = false;
+      withDescendants = false
     }
 
     var root = node,
-        openIt = [ node ];
+        openIt = [ node ]
 
     // Check if parents are open.
     for ( var i = node.parentNodes.length, parent; i--, parent = node.parentNodes[ i ]; ) {
 
       if ( !parent.open ) {
-        openIt.push( parent );
-        root = parent;
+        openIt.push( parent )
+        root = parent
       }
     }
 
     // Invert order. Last dropdown to open should be the root.
-    openIt = openIt.reverse();
+    openIt = openIt.reverse()
 
     // If browser support animation and there is an animation, animate it and
     // call open.
     if ( animationSupport && animation ) {
-      handleOpenAnimation( root, animation );
+      handleOpenAnimation( root, animation )
     }
 
     for ( i = openIt.length, node; i--, node = openIt[ i ]; ) {
-      setOpenAttributes( node, withDescendants );
+      setOpenAttributes( node, withDescendants )
     }
   }
 
@@ -1023,19 +1127,19 @@ if (!Element.prototype.matches) {
 
     // If withDescendants is not set, set it to default.
     if ( typeof withDescendants !== 'boolean' ) {
-      withDescendants = true;
+      withDescendants = true
     }
 
     /*
      If browser support animation and there is an animation, animate it.
-     Otherwise call close. As opposed to open, the close should be called at
+     Otherwise call close. As opposed to open, the close should be called in
      the animation end.
      */
     if ( animationSupport && animation ) {
-      handleCloseAnimation( node,withDescendants, animation );
+      handleCloseAnimation( node,withDescendants, animation )
     }
     else {
-      setCloseAttributes( node, withDescendants );
+      setCloseAttributes( node, withDescendants )
     }
   }
 
@@ -1052,11 +1156,11 @@ if (!Element.prototype.matches) {
     node.dropdown.addEventListener( 'animationend', function handler () {
 
       // At animation end, remove animation class.
-      node.dropdown.classList.remove( animation );
-      node.dropdown.removeEventListener( 'animationend', handler );
+      node.dropdown.classList.remove( animation )
+      node.dropdown.removeEventListener( 'animationend', handler )
     } );
 
-    node.dropdown.classList.add( animation );
+    node.dropdown.classList.add( animation )
   }
 
   /**
@@ -1075,13 +1179,13 @@ if (!Element.prototype.matches) {
     node.dropdown.addEventListener( 'animationend', function handler () {
 
       // In animation end, remove animation class and set close attributes.
-      node.dropdown.classList.remove( animation );
-      setCloseAttributes( node, withDescendants );
+      node.dropdown.classList.remove( animation )
+      setCloseAttributes( node, withDescendants )
 
-      node.dropdown.removeEventListener( 'animationend', handler );
+      node.dropdown.removeEventListener( 'animationend', handler )
     } );
 
-    node.dropdown.classList.add( animation );
+    node.dropdown.classList.add( animation )
   }
 
   /**
@@ -1100,18 +1204,18 @@ if (!Element.prototype.matches) {
       for ( var i = node.descendantNodes.length, descendant; i--, descendant = node.descendantNodes[ i ]; ) {
 
         if ( descendant.open ) {
-          continue;
+          continue
         }
 
-        descendant.dropdown.classList.add( 'droppy__drop--active' );
-        descendant.trigger.setAttribute( 'aria-expanded', 'true' );
-        descendant.open = true;
+        descendant.dropdown.classList.add( 'droppy__drop--active' )
+        descendant.trigger.setAttribute( 'aria-expanded', 'true' )
+        descendant.open = true
       }
     }
 
-    node.dropdown.classList.add( 'droppy__drop--active' );
-    node.trigger.setAttribute( 'aria-expanded', 'true' );
-    node.open = true;
+    node.dropdown.classList.add( 'droppy__drop--active' )
+    node.trigger.setAttribute( 'aria-expanded', 'true' )
+    node.open = true
   }
 
   /**
@@ -1125,22 +1229,21 @@ if (!Element.prototype.matches) {
    */
   function setCloseAttributes ( node, withDescendants ) {
 
-    node.dropdown.classList.remove( 'droppy__drop--active' );
-    node.trigger.setAttribute( 'aria-expanded', 'false' );
-    node.open = false;
-
+    node.dropdown.classList.remove( 'droppy__drop--active' )
+    node.trigger.setAttribute( 'aria-expanded', 'false' )
+    node.open = false
 
     if ( withDescendants ) {
 
       for ( var i = node.descendantNodes.length, descendant; i--, descendant = node.descendantNodes[ i ]; ) {
 
         if ( !descendant.open ) {
-          continue;
+          continue
         }
 
-        descendant.dropdown.classList.remove( 'droppy__drop--active' );
-        descendant.trigger.setAttribute( 'aria-expanded', 'false' );
-        descendant.open = false;
+        descendant.dropdown.classList.remove( 'droppy__drop--active' )
+        descendant.trigger.setAttribute( 'aria-expanded', 'false' )
+        descendant.open = false
       }
     }
   }
@@ -1158,21 +1261,21 @@ if (!Element.prototype.matches) {
    */
   function clickHandler ( event ) {
 
-    var trigger = getParent( event.target, document.body, '.droppy__trigger', true );
+    var trigger = getParent( event.target, document.body, '.droppy__trigger', true )
 
     // We're not in a trigger... Do nothing.
     if ( !trigger ) {
-      return;
+      return
     }
 
     var roots = getParents( event.target, document.body, '.droppy', false),
-        droppiesToClose = [];
+        droppiesToClose = []
 
     // Populate droppiesToClose with Droppy instances that has cliOutToClose set
     // to true.
     for ( var k = droppyStore.length, droppy; k--, droppy = droppyStore[ k ]; ) {
       if ( droppy.options.clickOutToClose ) {
-        droppiesToClose.push( droppy );
+        droppiesToClose.push( droppy )
       }
     }
 
@@ -1181,31 +1284,28 @@ if (!Element.prototype.matches) {
 
       for ( var i = this.length, root; i--, root = this[ i ]; ) {
         if ( Droppy.prototype.getInstance( root ) === droppyToClose ) {
-          return false;
+          return false
         }
       }
 
-      return true;
-    }, roots );
+      return true
+    }, roots )
 
     // I've clicked in a trigger! Let's toggle some drop-downs.
-    if ( trigger ) {
+    droppy = Droppy.prototype.getInstance( getParent( event.target, document.body, '.droppy', false ) )
 
-      droppy = Droppy.prototype.getInstance( getParent( event.target, document.body, '.droppy', false ) );
+    var withDescendants = event.shiftKey ? true : undefined,
+        node = getNodeByProperty( 'trigger', trigger, droppy.tree )
 
-      var withDescendants = event.shiftKey ? true : undefined,
-          node = getNodeByProperty( 'trigger', trigger, droppy.tree );
+    droppy.toggle( node, withDescendants )
 
-      droppy.toggle( node, withDescendants );
-
-      if ( droppy.options.preventDefault ) {
-        event.preventDefault();
-      }
+    if ( droppy.options.preventDefault && !event.ctrlKey ) {
+      event.preventDefault()
     }
 
     // Now I should close the menu with clickOutToClose set to true.
     for ( var i = droppiesToClose.length, droppyToClose; i--, droppyToClose = droppiesToClose[ i ]; ) {
-      droppyToClose.closeAll();
+      droppyToClose.closeAll()
     }
   }
 
@@ -1235,7 +1335,7 @@ if (!Element.prototype.matches) {
   var elements = document.querySelectorAll( '[data-droppy]' );
 
   for ( var i = elements.length, element; i--, element = elements[ i ]; ) {
-    new Droppy( element, JSON.parse( element.getAttribute( 'data-droppy' ) ) );
+    new Droppy( element, JSON.parse( element.getAttribute( 'data-droppy' ) ) )
   }
 
   // Expose Droppy to the global object.

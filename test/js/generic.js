@@ -36,6 +36,10 @@
 
   testButton.addEventListener( 'click', function() {
     droppy.open( testDroprown );
-  } )
+  } );
 
+  droppy.on( 'open', function( event ) {
+    console.log( event );
+    console.log( this );
+  } );
 } () );

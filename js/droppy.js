@@ -1,28 +1,28 @@
 /*
  * Droppy - Pure JavaScript multi-level dropdown menu.
- *
- * TODO - [x] Nested Droppy.
- * TODO - [x] preventDefault as option.
- * TODO - [x] Implements a tree instead of querying DOM every click.
- * TODO - [x] Remove unused shims.
- * TODO - [x] Do not instance twice on same element.
- * TODO - [x] Open a drop-down with a parent closed.
- * TODO - [ ] Replace callbacks with events.
  */
 
 ( function ( window, factory ) {
 
+  // AMD
   if ( typeof define === 'function' && define.amd ) {
-    define( [], factory );
+    define( [
+      'tiny-emitter'
+    ], factory );
   }
+  // CommonJS
   else if ( typeof exports === 'object' ) {
-    module.exports = factory();
+    module.exports = factory(
+      require('tiny-emitter')
+    );
   }
+  // Browser global
   else {
-    window.Droppy = factory();
+    window.Droppy = factory(
+      window.TinyEmitter
+    );
   }
-
-} ( window, function () {
+} ( window, function ( TinyEmitter ) {
 
   'use strict';
 
@@ -144,6 +144,10 @@
     this.init();
   }
 
+  // Inherit methods from TinyEmitter.
+  Droppy.prototype = Object.create( TinyEmitter.prototype );
+  Droppy.prototype.constructor = Droppy;
+
   /**
    * Instantiate a new DroppyNode object.
    *
@@ -215,6 +219,11 @@
     if ( typeof this.callbacks.afterInit === 'function' ) {
       this.callbacks.afterInit();
     }
+
+    // Dispatch event.
+    this.emit( 'init', {
+      droppy: this
+    } );
   };
 
   /**
@@ -255,8 +264,6 @@
       document.body.removeEventListener( 'keyup', escHandler );
     }
 
-    delete this.handler;
-
     // Remove instance from the store.
     for ( var j = droppyStore.length, droppy; j--, droppy = droppyStore[ j ]; ) {
       if ( droppy === this ) {
@@ -268,6 +275,11 @@
     if ( typeof this.callbacks.afterDestroy === 'function' ) {
       this.callbacks.afterDestroy();
     }
+
+    // Dispatch event.
+    this.emit( 'destroy', {
+      droppy: this
+    } );
   };
 
   /**
@@ -320,6 +332,12 @@
     if ( typeof this.callbacks.afterOpen === 'function' ) {
       this.callbacks.afterOpen();
     }
+
+    // Dispatch event.
+    this.emit( 'open', {
+      droppy: this,
+      dropdown: node
+    } );
   };
 
   /**
@@ -358,6 +376,12 @@
     if ( typeof this.callbacks.afterClose === 'function' ) {
       this.callbacks.afterClose();
     }
+
+    // Dispatch event.
+    this.emit( 'close', {
+      droppy: this,
+      dropdown: node
+    } );
   };
 
   /**
@@ -419,6 +443,11 @@
     if ( typeof this.callbacks.afterCloseAll === 'function' ) {
       this.callbacks.afterCloseAll();
     }
+
+    // Dispatch event.
+    this.emit( 'closeAll', {
+      droppy: this
+    } );
   };
 
   /**
@@ -464,6 +493,11 @@
     if ( typeof this.callbacks.afterOpenAll === 'function' ) {
       this.callbacks.afterOpenAll();
     }
+
+    // Dispatch event.
+    this.emit( 'openAll', {
+      droppy: this
+    } );
   };
 
 
@@ -486,7 +520,7 @@
       }
     }
 
-    return false;
+    return false
   };
 
   /**
@@ -502,7 +536,7 @@
 
     for ( var i = droppyStore.length, droppy; i--, droppy = droppyStore[ i ]; ) {
       if ( droppy.element === element ) {
-        return droppy;
+        return droppy
       }
     }
   };
@@ -524,15 +558,15 @@
    */
   function extendDefaults( source, properties ) {
 
-    var property;
+    var property
 
     for ( property in properties ) {
       if ( source.hasOwnProperty( property ) ) {
-        source[ property ] = properties[ property ];
+        source[ property ] = properties[ property ]
       }
     }
 
-    return source;
+    return source
   }
 
   /**
@@ -553,15 +587,15 @@
   function getParent ( start, end, parentSelector, includeSelf ) {
 
     if ( !includeSelf ) {
-      start = start.parentNode;
+      start = start.parentNode
     }
 
     while ( start !== end ) {
       if ( start.matches( parentSelector ) ) {
-        return start;
+        return start
       }
 
-      start = start.parentNode;
+      start = start.parentNode
     }
   }
 
@@ -586,17 +620,17 @@
       start = start.parentNode
     }
 
-    var parents = [];
+    var parents = []
 
     while ( start !== end ) {
       if ( start.matches( parentSelector ) ) {
-        parents.push( start );
+        parents.push( start )
       }
 
-      start = start.parentNode;
+      start = start.parentNode
     }
 
-    return parents;
+    return parents
   }
 
   /**
@@ -617,31 +651,31 @@
 
     // Get all drop-downs.
     var dropdowns = Array.prototype.slice.call( element.querySelectorAll( dropdownSelector ) ),
-        tree = [];
+        tree = []
 
     // For each drop-down, build a DroppyNode.
     for ( var i = 0, l = dropdowns.length, dropdown; i < l, dropdown = dropdowns[ i ]; i++ ) {
 
-      var node = new DroppyNode();
+      var node = new DroppyNode()
 
-      node.dropdown = dropdown;
-      node.parent = getParent( dropdown, element, parentSelector, false );
-      node.trigger = node.parent.querySelector( triggerSelector );
+      node.dropdown = dropdown
+      node.parent = getParent( dropdown, element, parentSelector, false )
+      node.trigger = node.parent.querySelector( triggerSelector )
 
       var parentsDropdowns = getParents( dropdown, element, dropdownSelector, false ),
-          parentNode;
+          parentNode
 
       for ( var j = parentsDropdowns.length, parentDropdown; j--, parentDropdown = parentsDropdowns[ j ]; ) {
-        parentNode = getNodeByProperty( 'dropdown', parentDropdown, tree );
-        node.parentNodes.push( parentNode );
-        parentNode.descendantNodes.push( node );
+        parentNode = getNodeByProperty( 'dropdown', parentDropdown, tree )
+        node.parentNodes.push( parentNode )
+        parentNode.descendantNodes.push( node )
       }
 
       node.level = node.parentNodes.length;
-      tree.push( node );
+      tree.push( node )
     }
 
-    return tree;
+    return tree
   }
 
   /**
@@ -661,7 +695,7 @@
 
     for ( var i = tree.length, node; i--, node = tree[ i ]; ) {
       if ( node[ property ] === value ) {
-        return node;
+        return node
       }
     }
   }
@@ -681,15 +715,15 @@
    */
   function getNodesByProperty ( property, value, tree ) {
 
-    var nodes = [];
+    var nodes = []
 
     for ( var i = tree.length, node; i--, node = tree[ i ]; ) {
       if ( node[ property ] === value ) {
-        nodes.push( node );
+        nodes.push( node )
       }
     }
 
-    return nodes;
+    return nodes
   }
 
   /**
@@ -702,19 +736,19 @@
 
     var support = false,
         element = document.createElement( 'div' ),
-        domPrefixes = 'Webkit';
+        domPrefixes = 'Webkit'
 
     if ( element.style.animationName !== undefined ) {
-      support = true;
+      support = true
     }
 
     if ( !support ) {
       if ( element.style[ domPrefixes + 'AnimationName' ] !== undefined ) {
-        support = true;
+        support = true
       }
     }
 
-    return support;
+    return support
   }
 
   /**
@@ -732,32 +766,32 @@
 
     // If withDescendants is not set, set it to default.
     if ( typeof withDescendants !== 'boolean' ) {
-      withDescendants = false;
+      withDescendants = false
     }
 
     var root = node,
-        openIt = [ node ];
+        openIt = [ node ]
 
     // Check if parents are open.
     for ( var i = node.parentNodes.length, parent; i--, parent = node.parentNodes[ i ]; ) {
 
       if ( !parent.open ) {
-        openIt.push( parent );
-        root = parent;
+        openIt.push( parent )
+        root = parent
       }
     }
 
     // Invert order. Last dropdown to open should be the root.
-    openIt = openIt.reverse();
+    openIt = openIt.reverse()
 
     // If browser support animation and there is an animation, animate it and
     // call open.
     if ( animationSupport && animation ) {
-      handleOpenAnimation( root, animation );
+      handleOpenAnimation( root, animation )
     }
 
     for ( i = openIt.length, node; i--, node = openIt[ i ]; ) {
-      setOpenAttributes( node, withDescendants );
+      setOpenAttributes( node, withDescendants )
     }
   }
 
@@ -776,19 +810,19 @@
 
     // If withDescendants is not set, set it to default.
     if ( typeof withDescendants !== 'boolean' ) {
-      withDescendants = true;
+      withDescendants = true
     }
 
     /*
      If browser support animation and there is an animation, animate it.
-     Otherwise call close. As opposed to open, the close should be called at
+     Otherwise call close. As opposed to open, the close should be called in
      the animation end.
      */
     if ( animationSupport && animation ) {
-      handleCloseAnimation( node,withDescendants, animation );
+      handleCloseAnimation( node,withDescendants, animation )
     }
     else {
-      setCloseAttributes( node, withDescendants );
+      setCloseAttributes( node, withDescendants )
     }
   }
 
@@ -805,11 +839,11 @@
     node.dropdown.addEventListener( 'animationend', function handler () {
 
       // At animation end, remove animation class.
-      node.dropdown.classList.remove( animation );
-      node.dropdown.removeEventListener( 'animationend', handler );
+      node.dropdown.classList.remove( animation )
+      node.dropdown.removeEventListener( 'animationend', handler )
     } );
 
-    node.dropdown.classList.add( animation );
+    node.dropdown.classList.add( animation )
   }
 
   /**
@@ -828,13 +862,13 @@
     node.dropdown.addEventListener( 'animationend', function handler () {
 
       // In animation end, remove animation class and set close attributes.
-      node.dropdown.classList.remove( animation );
-      setCloseAttributes( node, withDescendants );
+      node.dropdown.classList.remove( animation )
+      setCloseAttributes( node, withDescendants )
 
-      node.dropdown.removeEventListener( 'animationend', handler );
+      node.dropdown.removeEventListener( 'animationend', handler )
     } );
 
-    node.dropdown.classList.add( animation );
+    node.dropdown.classList.add( animation )
   }
 
   /**
@@ -853,18 +887,18 @@
       for ( var i = node.descendantNodes.length, descendant; i--, descendant = node.descendantNodes[ i ]; ) {
 
         if ( descendant.open ) {
-          continue;
+          continue
         }
 
-        descendant.dropdown.classList.add( 'droppy__drop--active' );
-        descendant.trigger.setAttribute( 'aria-expanded', 'true' );
-        descendant.open = true;
+        descendant.dropdown.classList.add( 'droppy__drop--active' )
+        descendant.trigger.setAttribute( 'aria-expanded', 'true' )
+        descendant.open = true
       }
     }
 
-    node.dropdown.classList.add( 'droppy__drop--active' );
-    node.trigger.setAttribute( 'aria-expanded', 'true' );
-    node.open = true;
+    node.dropdown.classList.add( 'droppy__drop--active' )
+    node.trigger.setAttribute( 'aria-expanded', 'true' )
+    node.open = true
   }
 
   /**
@@ -878,22 +912,21 @@
    */
   function setCloseAttributes ( node, withDescendants ) {
 
-    node.dropdown.classList.remove( 'droppy__drop--active' );
-    node.trigger.setAttribute( 'aria-expanded', 'false' );
-    node.open = false;
-
+    node.dropdown.classList.remove( 'droppy__drop--active' )
+    node.trigger.setAttribute( 'aria-expanded', 'false' )
+    node.open = false
 
     if ( withDescendants ) {
 
       for ( var i = node.descendantNodes.length, descendant; i--, descendant = node.descendantNodes[ i ]; ) {
 
         if ( !descendant.open ) {
-          continue;
+          continue
         }
 
-        descendant.dropdown.classList.remove( 'droppy__drop--active' );
-        descendant.trigger.setAttribute( 'aria-expanded', 'false' );
-        descendant.open = false;
+        descendant.dropdown.classList.remove( 'droppy__drop--active' )
+        descendant.trigger.setAttribute( 'aria-expanded', 'false' )
+        descendant.open = false
       }
     }
   }
@@ -911,21 +944,21 @@
    */
   function clickHandler ( event ) {
 
-    var trigger = getParent( event.target, document.body, '.droppy__trigger', true );
+    var trigger = getParent( event.target, document.body, '.droppy__trigger', true )
 
     // We're not in a trigger... Do nothing.
     if ( !trigger ) {
-      return;
+      return
     }
 
     var roots = getParents( event.target, document.body, '.droppy', false),
-        droppiesToClose = [];
+        droppiesToClose = []
 
     // Populate droppiesToClose with Droppy instances that has cliOutToClose set
     // to true.
     for ( var k = droppyStore.length, droppy; k--, droppy = droppyStore[ k ]; ) {
       if ( droppy.options.clickOutToClose ) {
-        droppiesToClose.push( droppy );
+        droppiesToClose.push( droppy )
       }
     }
 
@@ -934,31 +967,28 @@
 
       for ( var i = this.length, root; i--, root = this[ i ]; ) {
         if ( Droppy.prototype.getInstance( root ) === droppyToClose ) {
-          return false;
+          return false
         }
       }
 
-      return true;
-    }, roots );
+      return true
+    }, roots )
 
     // I've clicked in a trigger! Let's toggle some drop-downs.
-    if ( trigger ) {
+    droppy = Droppy.prototype.getInstance( getParent( event.target, document.body, '.droppy', false ) )
 
-      droppy = Droppy.prototype.getInstance( getParent( event.target, document.body, '.droppy', false ) );
+    var withDescendants = event.shiftKey ? true : undefined,
+        node = getNodeByProperty( 'trigger', trigger, droppy.tree )
 
-      var withDescendants = event.shiftKey ? true : undefined,
-          node = getNodeByProperty( 'trigger', trigger, droppy.tree );
+    droppy.toggle( node, withDescendants )
 
-      droppy.toggle( node, withDescendants );
-
-      if ( droppy.options.preventDefault ) {
-        event.preventDefault();
-      }
+    if ( droppy.options.preventDefault && !event.ctrlKey ) {
+      event.preventDefault()
     }
 
     // Now I should close the menu with clickOutToClose set to true.
     for ( var i = droppiesToClose.length, droppyToClose; i--, droppyToClose = droppiesToClose[ i ]; ) {
-      droppyToClose.closeAll();
+      droppyToClose.closeAll()
     }
   }
 
@@ -988,7 +1018,7 @@
   var elements = document.querySelectorAll( '[data-droppy]' );
 
   for ( var i = elements.length, element; i--, element = elements[ i ]; ) {
-    new Droppy( element, JSON.parse( element.getAttribute( 'data-droppy' ) ) );
+    new Droppy( element, JSON.parse( element.getAttribute( 'data-droppy' ) ) )
   }
 
   // Expose Droppy to the global object.
