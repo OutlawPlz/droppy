@@ -1,6 +1,6 @@
 /**
- * Droppy - v1.1.0
- * Pure JavaScript multi-level dropdown menu.
+ * Droppy - v1.1.1
+ * Pure JavaScript multi-level drop-down menu.
  * By OutlawPlz, @license GPL-3.0.
  * https://github.com/OutlawPlz/droppy.git
  */
