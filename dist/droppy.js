@@ -1,7 +1,7 @@
 /**
  * Droppy - v1.1.0
  * Pure JavaScript multi-level dropdown menu.
- * By OutlawPlz, license GPL-3.0.
+ * By OutlawPlz, @license GPL-3.0.
  * https://github.com/OutlawPlz/droppy.git
  */
 // Implements Element.prototype.classList() - v1.1.20150312
@@ -316,7 +316,7 @@ module.exports = E;
 },{}]},{},[1])(1)
 });
 /*
- * Droppy - Pure JavaScript multi-level dropdown menu.
+ * Droppy - Pure JavaScript multi-level drop-down menu.
  */
 
 ( function ( window, factory ) {
@@ -888,62 +888,70 @@ module.exports = E;
 
   /**
    * Returns the element that matches the given CSS selector in the given range
-   * of elements.
+   * of elements. If it reaches the document body, interrupt.
    *
-   * @param  {Element} start
-   *         The starting element.
-   * @param  {Element} end
-   *         The ending element.
+   * @param  {Node} start
+   *   The starting element.
+   * @param  {Node} end
+   *   The ending element.
    * @param  {String} parentSelector
-   *         A valid CSS selector.
+   *   A valid CSS selector.
    * @param  {Boolean} includeSelf
-   *         A boolean indicating if include start element or not.
-   * @return {Element}
-   *         The parent element that matches the given CSS selector.
+   *   A boolean indicating if include start element or not.
+   *
+   * @return {Node}
+   *   The parent element that matches the given CSS selector.
    */
   function getParent ( start, end, parentSelector, includeSelf ) {
 
+    // If includeSelf is false, get the start's parent element.
     if ( !includeSelf ) {
       start = start.parentNode
     }
-
-    while ( start !== end ) {
+    // Loop over start elements's parents until it matches the parent selector.
+    // If it reaches the document body, interrupt.
+    while ( start !== end && start !== document.body ) {
+      /** @type start {Element} */
       if ( start.matches( parentSelector ) ) {
         return start
       }
-
+      // Get the parent element.
       start = start.parentNode
     }
   }
 
   /**
    * Returns an array of elements that matches the given CSS selector in the
-   * given range of elements.
+   * given range of elements. If it reaches the document body, interrupt.
    *
-   * @param  {Element} start
-   *         The starting element.
-   * @param  {Element} end
-   *         The ending element.
+   * @param  {Node} start
+   *   The starting element.
+   * @param  {Node} end
+   *   The ending element.
    * @param  {String} parentSelector
-   *         A valid CSS selector.
+   *   A valid CSS selector.
    * @param  {Boolean} includeSelf
-   *         A boolean indicating if include start element or not.
+   *   A boolean indicating if include start element or not.
+   *
    * @return {Array}
    *         An array of elements that matches the given CSS selector.
    */
   function getParents ( start, end, parentSelector, includeSelf ) {
 
+    // If includeSelf is false, get the start's parent element.
     if ( !includeSelf ) {
       start = start.parentNode
     }
 
     var parents = []
 
-    while ( start !== end ) {
+    // Loop over start elements's parents until it matches the parent selector.
+    // If it reaches the document body, interrupt.
+    while ( start !== end && start !== document.body ) {
       if ( start.matches( parentSelector ) ) {
         parents.push( start )
       }
-
+      // Get the parent element.
       start = start.parentNode
     }
 
@@ -1253,59 +1261,39 @@ module.exports = E;
   // ---------------------------------------------------------------------------
 
   /**
-   * Calls toggle when a trigger is clicked. If clickOutToClose, close others
-   * menu.
+   * Calls toggle when a trigger is clicked.
    *
    * @param {Event} event
-   *        The event object.
+   *   The event object.
    */
   function clickHandler ( event ) {
 
-    var trigger = getParent( event.target, document.body, '.droppy__trigger', true )
+    var trigger, withDescendants, node;
 
-    // We're not in a trigger... Do nothing.
-    if ( !trigger ) {
-      return
-    }
-
-    var roots = getParents( event.target, document.body, '.droppy', false),
-        droppiesToClose = []
-
-    // Populate droppiesToClose with Droppy instances that has cliOutToClose set
-    // to true.
-    for ( var k = droppyStore.length, droppy; k--, droppy = droppyStore[ k ]; ) {
-      if ( droppy.options.clickOutToClose ) {
-        droppiesToClose.push( droppy )
+    // For every Droppy in droppyStore...
+    for ( var i = droppyStore.length, droppy; i--, droppy = droppyStore[ i ]; ) {
+      // Check if I've clicked in a Droppy instance.
+      if ( !droppy.element.contains( event.target ) && droppy.options.clickOutToClose ) {
+        // I'm not in a Droppy instance, close this one and continue.
+        droppy.closeAll();
+        continue;
       }
-    }
-
-    // From droppiesToClose remove the Droppy instance I'm in and all its parents.
-    droppiesToClose = droppiesToClose.filter( function ( droppyToClose ) {
-
-      for ( var i = this.length, root; i--, root = this[ i ]; ) {
-        if ( Droppy.prototype.getInstance( root ) === droppyToClose ) {
-          return false
-        }
+      // I'm in a Droppy instance, get the trigger.
+      trigger = getParent( event.target, droppy.element, '.droppy__trigger', true );
+      // If I'm in a trigger, try to get the node.
+      trigger ? node = getNodeByProperty( 'trigger', trigger, droppy.tree ) : node = false;
+      // If node doesn't exists, I'm in a nested Droppy and the current instance
+      // must be a parent. Do nothing...
+      if ( !node ) {
+        continue;
       }
-
-      return true
-    }, roots )
-
-    // I've clicked in a trigger! Let's toggle some drop-downs.
-    droppy = Droppy.prototype.getInstance( getParent( event.target, document.body, '.droppy', false ) )
-
-    var withDescendants = event.shiftKey ? true : undefined,
-        node = getNodeByProperty( 'trigger', trigger, droppy.tree )
-
-    droppy.toggle( node, withDescendants )
-
-    if ( droppy.options.preventDefault && !event.ctrlKey ) {
-      event.preventDefault()
-    }
-
-    // Now I should close the menu with clickOutToClose set to true.
-    for ( var i = droppiesToClose.length, droppyToClose; i--, droppyToClose = droppiesToClose[ i ]; ) {
-      droppyToClose.closeAll()
+      // I'm in trigger and node exists. Let's toggle some drop-down!
+      withDescendants = event.shiftKey ? true : undefined;
+      droppy.toggle( node, withDescendants );
+      // If user wants it, prevent default behaviour.
+      if ( droppy.options.preventDefault && !event.ctrlKey ) {
+        event.preventDefault();
+      }
     }
   }
 
@@ -1317,9 +1305,10 @@ module.exports = E;
    */
   function escHandler ( event ) {
 
+    // Check if I've clicked ESC.
     if ( event.which === 27 ) {
-
       for ( var i = droppyStore.length, droppy; i--, droppy = droppyStore[ i ]; ) {
+        // If clickEscToClose is true, close all drop-downs.
         if ( droppy.options.clickEscToClose ) {
           droppy.closeAll();
         }

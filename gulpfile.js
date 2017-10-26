@@ -17,7 +17,7 @@ var jsHeader = [
   '/**',
   ' * Droppy - v<%= pkg.version %>',
   ' * <%= pkg.description %>',
-  ' * By <%= pkg.author %>, license <%= pkg.license %>.',
+  ' * By <%= pkg.author %>, @license <%= pkg.license %>.',
   ' * <%= pkg.repository.url %>',
   ' */\n'
 ].join( '\n' );
@@ -81,7 +81,9 @@ var opts = {
 
   // UglifyJS2 options.
   uglifyjs2: {
-    preserveComments: 'license'
+    output: {
+      comments: 'some'
+    }
   }
 };
 

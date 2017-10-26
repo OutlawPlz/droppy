@@ -17,17 +17,16 @@ Log of unreleased changes.
 
 ### Changed
 
-- Updated `README.md` adding *Events* section.
+- Updated `README.md` adding *Events* section and `TinyEmitter` inherited
+methods.
+- Updated Node.js dev-dependencies.
+- Simplified `clickHandler()` function. 
 
 ### Deprecated
 
 - Callbacks are deprecated in favor of events in `v2.0.0`.
-- Support for IE9 and IE10 will be removed in `v2.0.0`
+- Support for IE9 and IE10 will be removed in `v2.0.0`.
 
 ### Removed
 
 - Removed `.eslintrc.json` file.
-
-## v1.2.0
-
-...

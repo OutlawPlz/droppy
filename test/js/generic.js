@@ -16,7 +16,8 @@
     triggerSelector: 'a',
     animationIn: 'fade-in',
     animationOut: 'fade-out',
-    // closeOthers: false,
+    closeOthers: false,
+    clickOutToClose: false,
     preventDefault: true
   } );
 
@@ -28,8 +29,8 @@
     droppy.closeAll();
   } );
 
-  console.log( droppy );
-  console.log( droppy.tree );
+  // console.log( droppy );
+  // console.log( droppy.tree );
 
   var testButton = document.querySelector( '.test-button' ),
       testDroprown = document.querySelector( '.test-dropdown' );
