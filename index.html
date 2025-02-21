@@ -30,7 +30,14 @@
     <li data-wrapper="">
         <span data-trigger="">Primo</span>
         <ul data-submenu="" hidden>
-            <li><span>#1 - Primo</span></li>
+            <li data-wrapper="">
+                <span data-trigger="">#1 - Primo</span>
+                <ul data-submenu="" hidden>
+                    <li><span>#2 - Primo</span></li>
+                    <li><span>#2 - Secondo</span></li>
+                    <li><span>#2 - Terzo</span></li>
+                </ul>
+            </li>
             <li><span>#1 - Secondo</span></li>
             <li><span>#1 - Terzo</span></li>
         </ul>
@@ -38,9 +45,9 @@
     <li data-wrapper="">
         <span data-trigger="">Secondo</span>
         <ul data-submenu="" hidden>
-            <li><span>#2 - Primo</span></li>
-            <li><span>#2 - Secondo</span></li>
-            <li><span>#2 - Terzo</span></li>
+            <li><span>#1 - Primo</span></li>
+            <li><span>#1 - Secondo</span></li>
+            <li><span>#1 - Terzo</span></li>
         </ul>
     </li>
     <li><span>Terzo</span></li>
@@ -56,9 +63,7 @@
         const show = () => {
             submenu.classList.add('fade-in');
 
-            submenu.addEventListener('animationend', (event) => {
-                event.stopPropagation();
-
+            submenu.addEventListener('animationend', () => {
                 submenu.classList.remove('fade-in');
             }, { once: true });
 
@@ -66,9 +71,7 @@
         };
 
         const hide = () => {
-            submenu.addEventListener('animationend', (event) => {
-                event.stopPropagation();
-
+            submenu.addEventListener('animationend', () => {
                 submenu.setAttribute('hidden', '');
 
                 submenu.classList.remove('fade-out');
@@ -77,11 +80,11 @@
             submenu.classList.add('fade-out');
         };
 
-        trigger.addEventListener('click', () => {
-            console.log('Visible? ', submenu.checkVisibility());
-
+        const toggle = () => {
             submenu.checkVisibility() ? hide() : show();
-        });
+        }
+
+        trigger.addEventListener('click', () => toggle());
     });
 </script>
 </body>
