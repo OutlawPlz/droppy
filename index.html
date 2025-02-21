@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Document</title>
+
+    <style>
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes fadeOut {
+            from { opacity: 1; }
+            to { opacity: 0; }
+        }
+
+        .fade-in {
+            animation: .3s forwards fadeIn;
+        }
+
+        .fade-out {
+            animation: .3s forwards fadeOut;
+        }
+    </style>
+</head>
+<body>
+<ul>
+    <li data-wrapper="">
+        <span data-trigger="">Primo</span>
+        <ul data-submenu="" hidden>
+            <li><span>#1 - Primo</span></li>
+            <li><span>#1 - Secondo</span></li>
+            <li><span>#1 - Terzo</span></li>
+        </ul>
+    </li>
+    <li data-wrapper="">
+        <span data-trigger="">Secondo</span>
+        <ul data-submenu="" hidden>
+            <li><span>#2 - Primo</span></li>
+            <li><span>#2 - Secondo</span></li>
+            <li><span>#2 - Terzo</span></li>
+        </ul>
+    </li>
+    <li><span>Terzo</span></li>
+</ul>
+
+<script>
+    const nodes = document.querySelectorAll('[data-wrapper]');
+
+    nodes.forEach((node) => {
+        const trigger = node.querySelector('[data-trigger]');
+        const submenu = node.querySelector('[data-submenu]');
+
+        const show = () => {
+            submenu.classList.add('fade-in');
+
+            submenu.addEventListener('animationend', () => {
+                submenu.classList.remove('fade-in');
+            }, { once: true });
+
+            submenu.removeAttribute('hidden');
+        };
+
+        const hide = () => {
+            submenu.addEventListener('animationend', () => {
+                submenu.setAttribute('hidden', '');
+
+                submenu.classList.remove('fade-out');
+            }, { once: true });
+
+            submenu.classList.add('fade-out');
+        };
+
+        trigger.addEventListener('click', () => {
+            console.log('Visible? ', submenu.checkVisibility());
+
+            submenu.checkVisibility() ? hide() : show();
+        });
+    });
+</script>
+</body>
+</html>
