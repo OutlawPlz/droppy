@@ -28,11 +28,11 @@
 <body>
 <ul>
     <li data-wrapper="">
-        <span data-trigger="">Primo</span>
-        <ul data-submenu="" hidden>
+        <span data-trigger="" tabindex="0">Primo</span>
+        <ul data-drop="">
             <li data-wrapper="">
                 <span data-trigger="">#1 - Primo</span>
-                <ul data-submenu="" hidden>
+                <ul data-drop="">
                     <li><span>#2 - Primo</span></li>
                     <li><span>#2 - Secondo</span></li>
                     <li><span>#2 - Terzo</span></li>
@@ -44,7 +44,7 @@
     </li>
     <li data-wrapper="">
         <span data-trigger="">Secondo</span>
-        <ul data-submenu="" hidden>
+        <ul data-drop="">
             <li><span>#1 - Primo</span></li>
             <li><span>#1 - Secondo</span></li>
             <li><span>#1 - Terzo</span></li>
@@ -54,30 +54,48 @@
 </ul>
 
 <script>
-    const nodes = document.querySelectorAll('[data-wrapper]');
+    const options = {
+        wrapper: '[data-wrapper]',
+        trigger: '[data-trigger]',
+        drop: '[data-drop]',
+        animationIn: 'fade-in',
+        animationOut: 'fade-out',
+        display: 'block'
+    };
+
+    const nodes = document.querySelectorAll(options.wrapper);
 
     nodes.forEach((node) => {
-        const trigger = node.querySelector('[data-trigger]');
-        const submenu = node.querySelector('[data-submenu]');
+        const trigger = node.querySelector(options.trigger);
+
+        trigger.setAttribute('tabindex', '0');
+
+        const submenu = node.querySelector(options.drop);
 
         const show = () => {
-            submenu.classList.add('fade-in');
+            if (options.animationIn) {
+                submenu.addEventListener('animationend', () => {
+                    submenu.classList.remove(options.animationIn);
+                }, { once: true });
 
-            submenu.addEventListener('animationend', () => {
-                submenu.classList.remove('fade-in');
-            }, { once: true });
+                submenu.classList.add(options.animationIn);
+            }
 
-            submenu.removeAttribute('hidden');
+            submenu.style.display = options.display;
         };
 
         const hide = () => {
             submenu.addEventListener('animationend', () => {
-                submenu.setAttribute('hidden', '');
+                submenu.style.display = 'none';
 
-                submenu.classList.remove('fade-out');
+                if (options.animationOut) {
+                    submenu.classList.remove(options.animationOut);
+                }
             }, { once: true });
 
-            submenu.classList.add('fade-out');
+            options.animationOut
+                ? submenu.classList.add(options.animationOut)
+                : submenu.dispatchEvent(new Event('animationend'));
         };
 
         const toggle = () => {
@@ -85,6 +103,10 @@
         }
 
         trigger.addEventListener('click', () => toggle());
+
+        trigger.addEventListener('keyup', (event) => {
+            if (event.key === 'Enter') toggle();
+        });
     });
 </script>
 </body>
