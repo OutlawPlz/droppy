@@ -56,7 +56,9 @@
         const show = () => {
             submenu.classList.add('fade-in');
 
-            submenu.addEventListener('animationend', () => {
+            submenu.addEventListener('animationend', (event) => {
+                event.stopPropagation();
+
                 submenu.classList.remove('fade-in');
             }, { once: true });
 
@@ -64,7 +66,9 @@
         };
 
         const hide = () => {
-            submenu.addEventListener('animationend', () => {
+            submenu.addEventListener('animationend', (event) => {
+                event.stopPropagation();
+
                 submenu.setAttribute('hidden', '');
 
                 submenu.classList.remove('fade-out');
