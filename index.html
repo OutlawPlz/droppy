@@ -26,7 +26,7 @@
     </style>
 </head>
 <body>
-<ul>
+<ul data-root="">
     <li data-wrapper="">
         <span data-trigger="" tabindex="0">Primo</span>
         <ul data-drop="">
@@ -54,6 +54,8 @@
 </ul>
 
 <script>
+    'use strict';
+
     const options = {
         wrapper: '[data-wrapper]',
         trigger: '[data-trigger]',
@@ -63,51 +65,60 @@
         display: 'block'
     };
 
-    const nodes = document.querySelectorAll(options.wrapper);
+    class Droppy {
+        constructor(trigger, drop, options) {
+            this.trigger = trigger;
+            this.drop = drop;
+            this.options = options;
 
-    nodes.forEach((node) => {
-        const trigger = node.querySelector(options.trigger);
+            this.trigger.addEventListener('click', () => this.toggle());
+        }
 
-        trigger.setAttribute('tabindex', '0');
-
-        const submenu = node.querySelector(options.drop);
-
-        const show = () => {
-            if (options.animationIn) {
-                submenu.addEventListener('animationend', () => {
-                    submenu.classList.remove(options.animationIn);
+        show() {
+            if (this.options.animationIn) {
+                this.drop.addEventListener('animationend', () => {
+                    this.drop.classList.remove(this.options.animationIn);
                 }, { once: true });
 
-                submenu.classList.add(options.animationIn);
+                this.drop.classList.add(this.options.animationIn);
             }
 
-            submenu.style.display = options.display;
+            this.drop.style.display = this.options.display;
         };
 
-        const hide = () => {
-            submenu.addEventListener('animationend', () => {
-                submenu.style.display = 'none';
+        hide() {
+            this.drop.addEventListener('animationend', () => {
+                this.drop.style.display = 'none';
 
-                if (options.animationOut) {
-                    submenu.classList.remove(options.animationOut);
+                if (this.options.animationOut) {
+                    this.drop.classList.remove(this.options.animationOut);
                 }
             }, { once: true });
 
-            options.animationOut
-                ? submenu.classList.add(options.animationOut)
-                : submenu.dispatchEvent(new Event('animationend'));
+            this.options.animationOut
+                ? this.drop.classList.add(this.options.animationOut)
+                : this.drop.dispatchEvent(new Event('animationend'));
         };
 
-        const toggle = () => {
-            submenu.checkVisibility() ? hide() : show();
+        toggle() {
+            this.drop.checkVisibility() ? this.hide() : this.show();
         }
+    }
 
-        trigger.addEventListener('click', () => toggle());
+    const generator = (root, options) => {
+        const nodes = root.querySelectorAll(options.wrapper);
 
-        trigger.addEventListener('keyup', (event) => {
-            if (event.key === 'Enter') toggle();
-        });
-    });
+        nodes.forEach(node => {
+            const trigger = node.querySelector(options.trigger);
+            const drop = node.querySelector(options.drop);
+
+            new Droppy(trigger, drop, options);
+        })
+    }
+
+    const root = document.querySelector('[data-root]');
+
+    generator(root, options);
 </script>
 </body>
 </html>
