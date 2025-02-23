@@ -87,7 +87,7 @@
         }
     });
 
-    export default class Droppy {
+    class Droppy {
         /** @type {HTMLElement} */
         trigger;
         /** @type {HTMLElement} */
@@ -106,6 +106,8 @@
             this.trigger.addEventListener('click', () => this.toggle());
 
             this.drop = drop;
+
+            this.options = { ...defaultOptions, ...options };
 
             if (this.options.clickAwayToClose) droppies.push(this);
         }
