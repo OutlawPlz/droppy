@@ -30,7 +30,7 @@
     </style>
 </head>
 <body>
-<ul data-droppy="">
+<ul data-droppy='{"wrapper":"[data-wrapper]","trigger":"[data-trigger]","drop":"[data-drop]","animationIn":"fade-in","animationOut":"fade-out","display":"block","clickAwayToClose":true}'>
     <li data-wrapper="">
         <span data-trigger="" tabindex="0">Primo</span>
         <ul data-drop="">
@@ -143,31 +143,19 @@
         }
     }
 
-    const generator = (root, options) => {
+    const droppyRoots = document.querySelectorAll('[data-droppy]');
+
+    droppyRoots.forEach((root) => {
+        const options = JSON.parse(root.dataset.droppy);
+
         const nodes = root.querySelectorAll(options.wrapper);
 
-        nodes.forEach((node) => {
-            const trigger = node.querySelector(options.trigger);
-
-            const drop = node.querySelector(options.drop);
-
-            new Droppy(trigger, drop, options);
-        });
-    }
-
-    const roots = document.querySelectorAll('[data-droppy]');
-
-    const options = {
-        wrapper: '[data-wrapper]',
-        trigger: '[data-trigger]',
-        drop: '[data-drop]',
-        animationIn: 'fade-in',
-        animationOut: 'fade-out',
-        display: 'block',
-        clickAwayToClose: false,
-    };
-
-    roots.forEach(root => generator(root, options));
+        nodes.forEach((node) => new Droppy(
+            node.querySelector(options.trigger),
+            node.querySelector(options.drop),
+            options
+        ));
+    })
 </script>
 </body>
 </html>
