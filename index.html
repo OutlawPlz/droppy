@@ -65,16 +65,29 @@
      * @prop {string} animationIn
      * @prop {string} animationOut
      * @prop {string} display
+     * @prop {boolean} clickAwayToClose
      */
 
     /** @type DroppyOptions */
     const defaultOptions = {
         animationIn: '',
         animationOut: '',
-        display: 'block'
+        display: 'block',
+        clickAwayToClose: true,
     }
 
-    class Droppy {
+    /** @type Droppy[] */
+    const droppies = [];
+
+    document.body.addEventListener('click', (event) => {
+        for (const droppy of droppies) {
+            if (droppy.trigger !== event.target
+                && droppy.drop.checkVisibility()
+                && ! droppy.drop.contains(event.target)) droppy.hide();
+        }
+    });
+
+    export default class Droppy {
         /** @type {HTMLElement} */
         trigger;
         /** @type {HTMLElement} */
@@ -94,7 +107,7 @@
 
             this.drop = drop;
 
-            this.options = { ...defaultOptions, ...options };
+            if (this.options.clickAwayToClose) droppies.push(this);
         }
 
         show() {
@@ -131,12 +144,13 @@
     const generator = (root, options) => {
         const nodes = root.querySelectorAll(options.wrapper);
 
-        nodes.forEach(node => {
+        nodes.forEach((node) => {
             const trigger = node.querySelector(options.trigger);
+
             const drop = node.querySelector(options.drop);
 
             new Droppy(trigger, drop, options);
-        })
+        });
     }
 
     const roots = document.querySelectorAll('[data-droppy]');
@@ -147,7 +161,8 @@
         drop: '[data-drop]',
         animationIn: 'fade-in',
         animationOut: 'fade-out',
-        display: 'block'
+        display: 'block',
+        clickAwayToClose: false,
     };
 
     roots.forEach(root => generator(root, options));
