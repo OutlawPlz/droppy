@@ -68,7 +68,7 @@
      * @prop {boolean} clickAwayToClose
      */
 
-    /** @type DroppyOptions */
+    /** @type {DroppyOptions} */
     const defaultOptions = {
         animationIn: '',
         animationOut: '',
@@ -76,7 +76,7 @@
         clickAwayToClose: true,
     }
 
-    /** @type Droppy[] */
+    /** @type {Droppy[]} */
     const droppies = [];
 
     document.body.addEventListener('click', (event) => {
@@ -146,6 +146,7 @@
     const droppyRoots = document.querySelectorAll('[data-droppy]');
 
     droppyRoots.forEach((root) => {
+        /** @type {(DroppyOptions & { wrapper:string,trigger:string,drop:string })} */
         const options = JSON.parse(root.dataset.droppy);
 
         const nodes = root.querySelectorAll(options.wrapper);
