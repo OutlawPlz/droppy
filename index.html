@@ -23,10 +23,14 @@
         .fade-out {
             animation: .3s forwards fadeOut;
         }
+
+        [data-drop] {
+            display: none;
+        }
     </style>
 </head>
 <body>
-<ul data-root="">
+<ul data-droppy="">
     <li data-wrapper="">
         <span data-trigger="" tabindex="0">Primo</span>
         <ul data-drop="">
@@ -56,22 +60,41 @@
 <script>
     'use strict';
 
-    const options = {
-        wrapper: '[data-wrapper]',
-        trigger: '[data-trigger]',
-        drop: '[data-drop]',
-        animationIn: 'fade-in',
-        animationOut: 'fade-out',
+    /**
+     * @typedef {Object} DroppyOptions
+     * @prop {string} animationIn
+     * @prop {string} animationOut
+     * @prop {string} display
+     */
+
+    /** @type DroppyOptions */
+    const defaultOptions = {
+        animationIn: '',
+        animationOut: '',
         display: 'block'
-    };
+    }
 
     class Droppy {
+        /** @type {HTMLElement} */
+        trigger;
+        /** @type {HTMLElement} */
+        drop;
+        /** @type {DroppyOptions} */
+        options;
+
+        /**
+         * @param {HTMLElement} trigger
+         * @param {HTMLElement} drop
+         * @param {DroppyOptions} options
+         */
         constructor(trigger, drop, options) {
             this.trigger = trigger;
-            this.drop = drop;
-            this.options = options;
 
             this.trigger.addEventListener('click', () => this.toggle());
+
+            this.drop = drop;
+
+            this.options = { ...defaultOptions, ...options };
         }
 
         show() {
@@ -116,9 +139,18 @@
         })
     }
 
-    const root = document.querySelector('[data-root]');
+    const roots = document.querySelectorAll('[data-droppy]');
 
-    generator(root, options);
+    const options = {
+        wrapper: '[data-wrapper]',
+        trigger: '[data-trigger]',
+        drop: '[data-drop]',
+        animationIn: 'fade-in',
+        animationOut: 'fade-out',
+        display: 'block'
+    };
+
+    roots.forEach(root => generator(root, options));
 </script>
 </body>
 </html>
