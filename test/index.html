@@ -39,7 +39,9 @@
 
     window.Droppy = Droppy;
 
-    generator('[data-plpl]');
+    const root = document.querySelector("[data-plpl]");
+
+    generator(root, JSON.parse(root.dataset.plpl));
 </script>
 </body>
 </html>

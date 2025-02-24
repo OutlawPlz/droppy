@@ -2,9 +2,9 @@
 
 /**
  * @typedef {Object} DroppyOptions
- * @prop {string} animationIn
- * @prop {string} animationOut
- * @prop {string} display
+ * @prop {string} animationIn CSS class name
+ * @prop {string} animationOut CSS class name
+ * @prop {string} display CSS display property values
  * @prop {boolean} clickAwayToClose
  */
 
@@ -84,40 +84,36 @@ export default class Droppy {
 }
 
 /**
- * @typedef {Object} GeneratorOptions
- * @prop {string} wrapper
- * @prop {string} trigger
- * @prop {string} drop
+ * @typedef {DroppyOptions} GeneratorOptions
+ * @extends DroppyOptions
+ * @prop {string} wrapper CSS selector
+ * @prop {string} trigger CSS selector
+ * @prop {string} drop CSS selector
  */
 
 /**
- * @param {string} selector
+ * @param {HTMLElement} root
+ * @param {GeneratorOptions} options
  * @returns {Droppy[]}
  */
-export const generator = (selector) => {
+export const generator = (root, options) => {
     /** @type {Droppy[]} */
     const instances = [];
 
-    const data = selector.match(/\[data-(.*)]/)[1];
+    const nodes = root.querySelectorAll(options.wrapper);
 
-    const roots = document.querySelectorAll(selector);
-
-    for (const root of roots) {
-        /** @type {GeneratorOptions & DroppyOptions} */
-        const options = JSON.parse(root.dataset[data]);
-
-        const nodes = root.querySelectorAll(options.wrapper);
-
-        nodes.forEach(node => {
-            instances.push(new Droppy(
-                node.querySelector(options.trigger),
-                node.querySelector(options.drop),
-                options
-            ));
-        })
-    }
+    nodes.forEach(node => {
+        instances.push(new Droppy(
+            node.querySelector(options.trigger),
+            node.querySelector(options.drop),
+            options
+        ));
+    });
 
     return instances;
 }
 
-generator('[data-droppy]');
+document.querySelectorAll('[data-droppy]')
+    .forEach(root => {
+        generator(root, JSON.parse(root.dataset.droppy));
+    });
