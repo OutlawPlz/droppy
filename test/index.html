@@ -1,112 +1,43 @@
-<!DOCTYPE html>
-<html>
+<!doctype html>
+<html lang="en">
 <head>
-  <title>Droppy</title>
-  <meta charset="utf-8">
-  <!-- Attach stylesheets. -->
-  <link href="../dist/droppy.css" rel="stylesheet" media="all">
-  <link href="styles/css/style.css" rel="stylesheet" media="all">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Document</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div class="wrapper-page">
-    <h1>Droppy</h1>
-    <p>Testing Droppy script.</p>
-    <p>Init via script.</p>
-    <div class="test" data-droppy='{ "parentSelector": ".wrapper", "dropdownSelector": "nav", "triggerSelector": "button", "closeOthers": false, "clickOutToClose": false }'>
-      <div class="wrapper">
-        <button>Menu</button>
-        <button class="test-button">Open child</button>
-        <button class="open-all">Open All</button>
-        <button class="close-all">Close All</button>
-        <nav>
-          <ul class="menu">
-            <li class="menu-item">
-              <a href="#"><span>Prodotti</span></a>
-              <ul class="menu" id="asdro">
-                <li class="menu-item"><a href="#">Economici</a></li>
-                <li class="menu-item">
-                  <a href="#">Costosi</a>
-                  <ul class="menu">
-                    <li class="menu-item">
-                      <a href="#">Nuovo</a>
-                      <ul class="menu test-dropdown">
-                        <li class="menu-item"><a href="#">Di zecca</a></li>
-                        <li class="menu-item"><a href="#">Boh</a></li>
-                      </ul>
-                    </li>
-                    <li class="menu-item"><a href="#">Usato</a></li>
-                  </ul>
-                </li>
-                <li class="menu-item">
-                  <a href="#">Via di mezzo</a>
-                  <ul class="menu">
-                    <li><a href="#">Come nuovo</a></li>
-                    <li><a href="#">Qualche graffio</a></li>
-                  </ul>
-                </li>
-              </ul>
+<ul data-droppy='{"wrapper":"[data-wrapper]","trigger":"[data-trigger]","drop":"[data-drop]","animationIn":"fade-in","animationOut":"fade-out","display":"block","clickAwayToClose":false}'>
+    <li data-wrapper="">
+        <span data-trigger="" tabindex="0">Primo</span>
+        <ul data-drop="">
+            <li data-wrapper="">
+                <span data-trigger="">#1 - Primo</span>
+                <ul data-drop="">
+                    <li><span>#2 - Primo</span></li>
+                    <li><span>#2 - Secondo</span></li>
+                    <li><span>#2 - Terzo</span></li>
+                </ul>
             </li>
-            <li class="menu-item">
-              <a href="#">Novità</a>
-              <ul class="menu">
-                <li class="menu-item"><a href="#">Aprile</a></li>
-                <li class="menu-item"><a href="#">Marzo</a></li>
-                <li class="menu-item"><a href="#">Febbraio</a></li>
-                <li class="menu-item"><a href="#">Gennaio</a></li>
-              </ul>
-            </li>
-            <li class="menu-item">
-              <a href="#">Azienda</a>
-              <ul class="menu">
-                <li class="menu-item"><a href="#">Chi siamo</a></li>
-                <li class="menu-item"><a href="#">Dove siamo</a></li>
-                <li class="menu-item"><a href="#">Cosa facciamo</a></li>
-              </ul>
-            </li>
-            <li class="menu-item"><a href="#">Contatti</a></li>
-          </ul>
-        </nav>
-      </div>
-    </div>
-    <p>Init via HTML.</p>
-    <ul class="menu" data-droppy='{ "parentSelector": "li", "dropdownSelector": "li > ul.menu", "triggerSelector": "a", "closeOthers": false, "clickOutToClose": false }'>
-      <li class="menu-item">
-        <a href="#"><span>Prodotti</span></a>
-        <ul class="menu">
-          <li class="menu-item"><a href="#">Economici</a></li>
-          <li class="menu-item">
-            <a href="#">Costosi</a>
-            <ul class="menu">
-              <li class="menu-item"><a href="#">Nuovo</a></li>
-              <li class="menu-item"><a href="#">Usato</a></li>
-            </ul>
-          </li>
-          <li class="menu-item"><a href="#">Via di mezzo</a></li>
+            <li><span>#1 - Secondo</span></li>
+            <li><span>#1 - Terzo</span></li>
         </ul>
-      </li>
-      <li class="menu-item">
-        <a href="#">Novità</a>
-        <ul class="menu">
-          <li class="menu-item"><a href="#">Aprile</a></li>
-          <li class="menu-item"><a href="#">Marzo</a></li>
-          <li class="menu-item"><a href="#">Febbraio</a></li>
-          <li class="menu-item"><a href="#">Gennaio</a></li>
+    </li>
+    <li data-wrapper="">
+        <span data-trigger="">Secondo</span>
+        <ul data-drop="">
+            <li><span>#1 - Primo</span></li>
+            <li><span>#1 - Secondo</span></li>
+            <li><span>#1 - Terzo</span></li>
         </ul>
-      </li>
-      <li class="menu-item">
-        <a href="#">Azienda</a>
-        <ul class="menu">
-          <li class="menu-item"><a href="#">Chi siamo</a></li>
-          <li class="menu-item"><a href="#">Dove siamo</a></li>
-          <li class="menu-item"><a href="#">Cosa facciamo</a></li>
-        </ul>
-      </li>
-      <li class="menu-item"><a href="#">Contatti</a></li>
-    </ul>
-  </div>
-    <!-- Attach scripts. -->
-  <script src="../node_modules/tiny-emitter/dist/tinyemitter.js"></script>
-  <script src="../js/droppy.js"></script>
-  <script src="js/generic.js"></script>
+    </li>
+    <li><span>Terzo</span></li>
+</ul>
+
+<script type="module">
+    import Droppy from "../src/droppy.js";
+
+    window.Droppy = Droppy;
+</script>
 </body>
 </html>
