@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<ul data-droppy='{"wrapper":"[data-wrapper]","trigger":"[data-trigger]","drop":"[data-drop]","animationIn":"fade-in","animationOut":"fade-out","display":"block","clickAwayToClose":false}'>
+<ul data-plpl='{"wrapper":"[data-wrapper]","trigger":"[data-trigger]","drop":"[data-drop]","animationIn":"fade-in","animationOut":"fade-out","display":"block","clickAwayToClose":false}'>
     <li data-wrapper="">
         <span data-trigger="" tabindex="0">Primo</span>
         <ul data-drop="">
@@ -35,9 +35,11 @@
 </ul>
 
 <script type="module">
-    import Droppy from "../src/droppy.js";
+    import Droppy, {generator} from "../src/droppy.js";
 
     window.Droppy = Droppy;
+
+    generator('[data-plpl]');
 </script>
 </body>
 </html>

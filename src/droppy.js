@@ -84,6 +84,13 @@ export default class Droppy {
 }
 
 /**
+ * @typedef {Object} GeneratorOptions
+ * @prop {string} wrapper
+ * @prop {string} trigger
+ * @prop {string} drop
+ */
+
+/**
  * @param {string} selector
  * @returns {Droppy[]}
  */
@@ -96,7 +103,7 @@ export const generator = (selector) => {
     const roots = document.querySelectorAll(selector);
 
     for (const root of roots) {
-        /** @type {(DroppyOptions & {wrapper:string,trigger:string,drop:string})} */
+        /** @type {GeneratorOptions & DroppyOptions} */
         const options = JSON.parse(root.dataset[data]);
 
         const nodes = root.querySelectorAll(options.wrapper);
