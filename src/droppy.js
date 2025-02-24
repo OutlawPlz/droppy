@@ -9,7 +9,7 @@
  */
 
 /** @type {DroppyOptions} */
-const defaultOptions = {
+const droppyOptions = {
     animationIn: '',
     animationOut: '',
     display: 'block',
@@ -47,7 +47,7 @@ export default class Droppy {
 
         this.drop = drop;
 
-        this.options = { ...defaultOptions, ...options };
+        this.options = { ...droppyOptions, ...options };
 
         if (this.options.clickAwayToClose) clickAwayToClose.push(this);
     }
@@ -91,14 +91,24 @@ export default class Droppy {
  * @prop {string} drop CSS selector
  */
 
+/** @type {GeneratorOptions} */
+const generatorOptions = {
+    wrapper: '.droppy',
+    trigger: '.trigger',
+    drop: '.drop',
+    ...droppyOptions
+}
+
 /**
  * @param {HTMLElement} root
  * @param {GeneratorOptions} options
  * @returns {Droppy[]}
  */
-export const generator = (root, options) => {
+export function generator(root, options) {
     /** @type {Droppy[]} */
     const instances = [];
+
+    options = { ...generatorOptions, ...options };
 
     const nodes = root.querySelectorAll(options.wrapper);
 
@@ -115,5 +125,5 @@ export const generator = (root, options) => {
 
 document.querySelectorAll('[data-droppy]')
     .forEach(root => {
-        generator(root, JSON.parse(root.dataset.droppy));
+        generator(root, JSON.parse(root.dataset.droppy || "{}"));
     });

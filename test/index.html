@@ -7,13 +7,13 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<ul data-plpl='{"wrapper":"[data-wrapper]","trigger":"[data-trigger]","drop":"[data-drop]","animationIn":"fade-in","animationOut":"fade-out","display":"block","clickAwayToClose":false}'>
-    <li data-wrapper="">
-        <span data-trigger="" tabindex="0">Primo</span>
-        <ul data-drop="">
-            <li data-wrapper="">
-                <span data-trigger="">#1 - Primo</span>
-                <ul data-drop="">
+<ul data-droppy="">
+    <li class="droppy">
+        <span class="trigger">Primo</span>
+        <ul class="drop">
+            <li class="droppy">
+                <span class="trigger">#1 - Primo</span>
+                <ul class="drop">
                     <li><span>#2 - Primo</span></li>
                     <li><span>#2 - Secondo</span></li>
                     <li><span>#2 - Terzo</span></li>
@@ -23,9 +23,9 @@
             <li><span>#1 - Terzo</span></li>
         </ul>
     </li>
-    <li data-wrapper="">
-        <span data-trigger="">Secondo</span>
-        <ul data-drop="">
+    <li class="droppy">
+        <span class="trigger">Secondo</span>
+        <ul class="drop">
             <li><span>#1 - Primo</span></li>
             <li><span>#1 - Secondo</span></li>
             <li><span>#1 - Terzo</span></li>
@@ -38,10 +38,6 @@
     import Droppy, {generator} from "../src/droppy.js";
 
     window.Droppy = Droppy;
-
-    const root = document.querySelector("[data-plpl]");
-
-    generator(root, JSON.parse(root.dataset.plpl));
 </script>
 </body>
 </html>

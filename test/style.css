@@ -16,6 +16,6 @@
     animation: .3s forwards fadeOut;
 }
 
-[data-drop] {
+.drop {
     display: none;
 }
