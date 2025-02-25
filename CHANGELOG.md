@@ -14,6 +14,7 @@ All notable changes to this project will be documented in this file.
 ### Changed
 
 - `options` object has been simplified.
+- License from GNU GPLv3 to MIT.
 
 ### Removed
 
