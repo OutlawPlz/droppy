@@ -93,9 +93,9 @@ export default class Droppy {
 
 /** @type {GeneratorOptions} */
 const generatorOptions = {
-    wrapper: '.droppy',
-    trigger: '.trigger',
-    drop: '.drop',
+    wrapper: '.menu',
+    trigger: 'li > a',
+    drop: 'ul.menu',
     ...droppyOptions
 }
 

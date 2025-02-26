@@ -1,391 +1,134 @@
 # Droppy
 
-Pure JavaScript multi-level drop-down menu.
-
-At it's core, Droppy adds or removes CSS classes. This way you are able to
-control the menu appearance, just editing the `.droppy_drop` and
-`.droppy__drop--active` CSS classes.
-
-```html
-<!-- Classic HTML menu -->
-<nav>
-  <ul class="menu">
-    <li>
-      <a href="#">First level - Link #1</a>
-      <ul class="menu">
-        <li><a href="#">Second level - Link #1</a></li>
-        <li><a href="#">Second level - Link #2</a></li>
-      </ul>
-    </li>
-    <li><a href="#">First level - Link #2</a></li>
-    <li><a href="#">First level - Link #3</a></li>
-  </ul>
-</nav>
-```
+Pure JavaScript multi-level drop-down menu. Droppy shows and hides element by applying your custom animation.
 
 ## Quick Start
 
 Start using Droppy in three steps.
 
-1. Download latest Droppy package from [Github][836c3e46] or via NPM or Bower.
-  ```sh
-  # NPM
-  npm install droppy-menu --save
-  # Bower
-  bower install droppy-menu --save
-  ```
+1. Add Droppy to your page.
+   ```html
+   <script defer type="module" src="https://cdn.jsdelivr.net/npm/droppy-menu@v2.x.x/src/droppy.js"></script>
+   ```
 
-2. Add `dist/droppy.min.css` and `dist/droppy.min.js` to your web page.
-  ```html
-  <link href="/path/to/droppy/dist/droppy.min.css" rel="stylesheet" media="screen">
-  <script src="/path/to/droppy/dist/droppy.min.js"></script>
-  ```
+2. Mark your menu with the `data-droppy` attribute.
+   ```html
+   <nav data-droppy>
+     <ul class="menu">
+       <li>
+         <a href="#">First level - Link #1</a>
+         <ul class="menu">
+           <li><a href="#">Second level - Link #1</a></li>
+         </ul>
+       </li>
+     </ul>
+   </nav>
+   ```
 
-3. Initialize Droppy in a custom script.
-  ```js
-  var element = document.querySelector( '.dropdown-menu' );
-  // Initialize Droppy.
-  var droppy = new Droppy( element, {
-    parentSelector: 'li',
-    dropdownSelector: 'li > ul.menu',
-    triggerSelector: 'a'
-  } );
-  ```
+3. Style your brand-new dropdown menu.
+   ```css
+   ul > .menu {
+     display: none;
+   }
+   ```
 
-That's it. You're all set to start using Droppy.
+That's it! You're all set to start using Droppy.
 
-  [836c3e46]: https://github.com/OutlawPlz/droppy "Download"
+## Install via NPM
 
-### Initialize with HTML
+You can install Droppy via NPM by adding the package to your project.
 
-You can initialize Droppy in HTML, just adding `data-droppy` attribute to the
-menu element. Options can be set in its value using **valid JSON**.
+```sh
+npm install --save droppy-menu
+```
+
+### Use `Droppy` class
+
+Instantiate a new Droppy object the trigger and dropdown elements. Done!
+
+```js
+import Droppy from '@/droppy-menu/src/droppy.js';
+
+const trigger = document.querySelector('li > a');
+const dropdown = document.querySelector('ul > .menu');
+
+const droppy = new Droppy(trigger, dropdown, {
+    // Options...
+});
+```
+
+A Droppy instance **represents a single node** of your dropdown menu. This is useful if you want to use Droppy for a modal or a single dropdown.
+
+### Use `generator()` function
+
+If you wish to handle a whole menu, the Droppy generator is the way to go. Define your menu structure using the `wrapper`, `trigger`, and `drop` options.
+The generator returns an array of Droppy instances.
+
+```js
+import Droppy, {generator} from '@/droppy-menu/src/droppy.js'
+
+const root = document.querySelector('[data-droppy]');
+
+/** @type {Droppy[]} */
+const instances = generator(root, { 
+  wrapper: '.menu', 
+  trigger: 'li > a', 
+  drop: 'ul > .menu' 
+});
+```
+
+## Initialize via HTML
+
+As shown in the Quick Start section, you can initialize Droppy in HTML using the `data-droppy` attribute. Options can be set in its value.
 
 ```html
-<!-- Init with HTML -->
-<nav class="dropdown-menu" data-droppy='{ "parentSelector": "li", "dropdownSelector": "li > ul.menu", "triggerSelector": "a", "closeOthers": true, "clickOutToClose": true, "clickEscToClose": true, "animationIn": '', "animationOut": '', "preventDefault": true }'>
+<script defer type="module" src="https://cdn.jsdelivr.net/npm/droppy-menu@v2.x.x/src/droppy.js"></script>
+
+<nav data-droppy='{
+    "wrapper": ".menu", 
+    "trigger": "li > a", 
+    "drop": "ul > .menu", 
+    "animationIn": "fade-in", 
+    "animationOut": "fade-out"
+ }'>
+   ...
+</nav>
 ```
 
 ## Options
 
-To make Droppy work properly you have to describe your menu structure by
-setting the options `parentSelector`, `dropdownSelector` and `triggerSelector`.
+You can customize `Droppy` and `generator` function using the options object.
 
 ```js
-// Default options.
-var droppy = new Droppy( element, {
-  parentSelector: 'li',
-  dropdownSelector: 'li > ul',
-  triggerSelector: 'a',
-  closeOthers: true,
-  clickOutToClose: true,
-  clickEscToClose: true,
+/** @type {DroppyOptions} Default values */
+const droppyOptions = {
   animationIn: '',
   animationOut: '',
-  preventDefault: true
-}, callbacks );
+  display: 'block',
+  clickAwayToClose: true,
+}
 ```
 
-```html
-<nav class="dropdown-menu"> <!-- The Droppy's element -->
-  <ul class="menu">
-    <li> <!-- The parent selector "li" -->
-      <a href="#">Link #1</a> <!-- The trigger selector "a" -->
-      <ul class="menu"> <!-- The drop-down selector "li > ul" -->
-        <li><a href="#">Link #1</a></li>
-        <li><a href="#">Link #2</a></li>
-      </ul>
-    </li>
-    <li><a href="#">Link #2</a></li>
-    <li><a href="#">Link #3</a></li>
-  </ul>
-</nav>
+The `generator` options accepts all `Droppy` options.
+
+```js
+/** @type {GeneratorOptions} Default values */
+const generatorOptions = {
+  wrapper: '.menu',
+  trigger: 'li > a',
+  drop: 'ul.menu',
+  ...droppyOptions,
+}
 ```
-
-- ***dropdownSelector*** - It's a valid CSS selector of your drop-down. In the
-example above I have a drop-down when there is a `<ul class="menu">` son of a
-`<li>`. That's why the `dropdownSelector` is set to `li > ul.menu`.
-
-- ***parentSelector*** - It's a valid CSS selector of your parent element. The
-parent element **have to contain** the trigger element and the drop-down
-element. It should be the closest parent. In the example above the closest
-parent of both - `dropdownSelector` and `triggerSelector` - is the `<li>`
-element. That's why the `parentSelector` is set to `li`.
-
-- ***triggerSelector*** - It's a valid CSS selector of the element that triggers
-the open or close event. In the example above the trigger is the `<a>` element.
-That's why the `triggerSelector` is set to `a`.
-
-- ***closeOthers*** - A boolean value. Set to `true` if you want keep open only
-one drop-down at a time.
-
-- ***clickOutToClose*** - A boolean value. Set to `true` if you want to close
-all the drop-downs by clicking on the outside of the current menu.
-
-- ***clickEscToClose*** - A boolean value. Set to `true` if you want to close
-all the drop-downs by clicking ESC.
-
-- ***animationIn*** - A CSS class where is declared an animation. This class
-will be applied at the open of a drop-down and removed at the end of the
-animation.
-
-- ***animationOut*** - A CSS class where is declared an animation. This class
-will be applied at the close of a drop-down and removed at the end of the
-animation.
-
-- ***preventDefault*** - A boolean value. If the `triggerSelector` is an element
-that fires an event, you can prevent the execution of the default behavior
-setting this option to `true`. E.g. If `triggerSelector` is a link, we want the
-browser opens the drop-down, not follows the link. Setting `preventDefault` to
-`true` prevents the browser to follow the link.
 
 ## Methods
 
-Methods are actions done by Droppy instances.
+Public methods of Droppy instances. They are self-explanatory.
 
 ```js
-// Instantiate
-var droppy = new Droppy( element, options, callbacks );
+const droppy = new Droppy(trigger, dropdown);
+
+droppy.show(); // Shows current dropdown.
+droppy.hide(); // Hides current dropdown.
+droppy.toggle(); // Shows/hides current dropdown.
 ```
-
-### init()
-
-Initialize a Droppy object. It adds Droppy CSS classes and events.
-
-```js
-// Init Droppy object
-droppy.init();
-```
-
-### destroy()
-
-Reset a Droppy instance to a pre-init state. It removes Droppy CSS classes and
-events.
-
-```js
-// Reset Droppy instance to a pre-init state
-droppy.destroy();
-```
-
-### open( dropdown, withDescendants )
-
-Open the given drop-down. If `closeOthers` is set to `true`, the other
-drop-downs will be closed before opening the current one.
-
-- `{Element|DroppyNode} dropdown` - The drop-down element to open.
-- `{Boolean} [withDescendants=false]` - Should open or not all the drop-downs
-in the given drop-down.
-
-```js
-var dropdown = document.querySelector( '#menu-main .droppy__drop' )
-// Open a drop-down
-droppy.open( dropdown );
-```
-
-### close( dropdown, withDescendants )
-
-Close the given drop-down and all its descendants.
-
-- `{Element|DroppyNode} dropdown` - The drop-down element to close.
-- `{Boolean} [withDescendants=true]` - Should close or not all the drop-downs
-in the given drop-down.
-
-```js
-var dropdown = document.querySelector( '#menu-main .droppy__drop' )
-// Close a drop-down
-droppy.close( dropdown );
-```
-
-### toggle( dropdown, withDescendants )
-
-Open or close the given drop-down.
-
-- `{Element|DroppyNode} dropdown` - The drop-down element to toggle.
-- `{Boolean} [withDescendants=undefined]` - Should toggle or not all the
-drop-downs in the given drop-down.
-
-```js
-var dropdown = document.querySelector( '#menu-main .droppy__drop' )
-// Toggle a dropdown
-droppy.toggle( dropdown );
-```
-
-### openAll()
-
-Open all drop-downs of a menu.
-
-```js
-// Open all drop-downs
-droppy.openAll();
-```
-
-### closeAll()
-
-Close all drop-downs of a menu.
-
-```js
-// Close all drop-downs
-droppy.closeAll();
-```
-
-### on( event, callback, context )
-
-Subscribe to an event.
-
-- `{string} event` - The name of the event to subscribe to.
-- `{function} callback` - The function to call when the event is emitted.
-- `context` - The context to bind to the callback.
-
-```js
-// The callback function.
-function alertOpen( event ) {
-  alert( 'Open!' );
-  console.log( event );
-}
-
-// Subscribe to open event.
-droppy.on( 'open', alertOpen );
-```
-
-### once( event, callback, context )
-
-Subscribe to an event once.
-
-- `{string} event` - The name of the event to subscribe to.
-- `{function} callback` - The function to call when the event is emitted.
-- `context` - The context to bind to the callback.
-
-```js
-// SUbscribe to open event once.
-droppy.once( 'open', alertOpen );
-```
-
-### off( event, callback )
-
-Unsubscribe to an event. If no callback is provided, unsubscribe from all
-events.
-
-- `{string} event` - The name of the event to unsubscribe from.
-- `{function} callback` - The function used when binding to the event.
-
-```js
-// Unsubscribe to open event.
-droppy.off( 'open', alertOpen );
-```
-
-### Droppy.prototype.isInitialized( droppy )
-
-It returns true if the given Droppy instance is
-initialized, false otherwise.
-
-```js
-var droppy = new Droppy( element, options );
-// Check if initialized
-var initialized = Droppy.prototype.isInitialized( droppy );
-```
-
-### Droppy.prototype.getInstance( element )
-
-It returns the Droppy instance used by the given
-element.
-
-```js
-var element = document.querySelector( '[data-droppy]' );
-// Get the instance
-var droppy = Droppy.prototype.getInstance( element );
-```
-
-## Events
-
-Events are "things" that happen at a specific point of execution. You
-can listen to Droppy's events and react to them. Here's a list of Droppy's
-events.
-
-- `init` - Dispatched when a Droppy object is initialized.
-- `destroy` - Dispatched when a Droppy object is destroyed.
-- `open` - Dispatched when a drop-down is opened.
-- `close` - Dispatched when a drop-down is closed.
-- `openAll` - Dispatched when all drop-downs of a menu are opened.
-- `closeAll` - Dispatched when all drop-downs of a menu are closed.
-
-## Callbacks
-
-**DEPRECATED** - Callbacks will be removed in v2.0.0 in favor of events.
-
-Callbacks are function called at a specific point of execution. Callbacks does
-not wait for animation end, this may cause the execution of `afterOpen`,
-`afterClose`, `afterOpenAll` and `afterCloseAll` when the drop-down is not
-completely opened or closed yet.
-
-```js
-// Default callbacks.
-var droppy = new Droppy( element, options, {
-  beforeOpen: null,
-  afterOpen: null,
-  beforeClose: null,
-  afterClose: null,
-  beforeOpenAll: null,
-  afterOpenAll: null,
-  beforeCloseAll: null,
-  afterCloseAll: null,
-  beforeInit: null,
-  afterInit: null,
-  beforeDestroy: null,
-  afterDestroy: null
-} );
-```
-
-### Define a callback
-
-Define a callback in three steps.
-
-1. Create your callback function.
-  ```js
-  function alertCallback() {
-    alert( 'Before open.' );
-  }
-  ```
-
-2. Assign the function to the `callbacks` object.
-  ```js
-  var callbacks = {
-    beforeOpen: alertCallback
-  }
-  ```
-
-3. Create a Droppy object with the callbacks.
-  ```js
-  var droppy = new Droppy(element, options, callbacks);
-  ```
-
-## Detect drop-down structure
-
-Understanding how Droppy detect your drop-down menu structure, can help you set
-`*Selector` options correctly.
-
-Droppy starts from `dropdownSelector` to detect your drop-down menu structure.
-For each drop-down, Droppy loops through element parents until reach the first
-element that matches the `parentSelector`. Once got the parent element, Droppy
-selects the first element child of the parent element that matches the
-`triggerSelector`.
-
-Instead of querying at every click the DOM, Droppy stores your drop-down menu
-structure in the `tree` property. The `tree` is an array of `DroppyNode`
-instances.
-
-```js
-var droppy = new Droppy( element, options, callbacks );
-// Print the tree
-console.log( droppy.tree );
-```
-
-## Polyfills
-
-Droppy uses a bunch of polyfills to be compatible with old browsers. Here's a
-list of polyfills used.
-
-- [Element.prototype.classList()][ad792cb7]
-- [Element.prototype.matches()][92b6fcf0]
-
-  [ad792cb7]: https://github.com/eligrey/classList.js "Polyfill Element.prototype.classList()"
-  [92b6fcf0]: https://developer.mozilla.org/it/docs/Web/API/Element/matches#Polyfill "Polyfill Element.prototype.matches()"
