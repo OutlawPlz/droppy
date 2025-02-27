@@ -7,15 +7,14 @@
     "dropdown",
     "multi-level"
   ],
-  "main": "dist/droppy.js",
-  "style": "dist/droppy.css",
-  "author": "OutlawPlz",
-  "license": "GPL-3.0",
+  "main": "src/droppy.js",
+  "author": {
+    "name": "Matteo Palazzo",
+    "email": "outlaw.plz@gmail.com"
+  },
+  "license": "MIT",
   "repository": {
     "type": "git",
     "url": "https://github.com/OutlawPlz/droppy.git"
-  },
-  "bugs": {
-    "url": "https://github.com/OutlawPlz/droppy/issues"
   }
 }
