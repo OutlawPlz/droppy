@@ -7,30 +7,30 @@ Pure JavaScript multi-level drop-down menu. Droppy shows and hides element by ap
 Start using Droppy in three steps.
 
 1. Add Droppy to your page.
-   ```html
-   <script defer type="module" src="https://cdn.jsdelivr.net/npm/droppy-menu@v2.x.x/src/droppy.js"></script>
-   ```
+  ```html
+  <script defer type="module" src="https://cdn.jsdelivr.net/npm/droppy-menu@v2.x.x/src/droppy.js"></script>
+  ```
 
 2. Mark your menu with the `data-droppy` attribute.
-   ```html
-   <nav data-droppy>
-     <ul class="menu">
-       <li>
-         <a href="#">First level - Link #1</a>
-         <ul class="menu">
-           <li><a href="#">Second level - Link #1</a></li>
-         </ul>
-       </li>
-     </ul>
-   </nav>
-   ```
+  ```html
+  <nav data-droppy>
+    <ul class="menu">
+      <li>
+        <a href="#">First level - Link #1</a>
+        <ul class="menu">
+          <li><a href="#">Second level - Link #1</a></li>
+        </ul>
+      </li>
+    </ul>
+  </nav>
+  ```
 
 3. Style your brand-new dropdown menu.
-   ```css
-   ul > .menu {
-     display: none;
-   }
-   ```
+  ```css
+  ul > .menu {
+    display: none;
+  }
+  ```
 
 That's it! You're all set to start using Droppy.
 

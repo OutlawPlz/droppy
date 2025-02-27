@@ -5,39 +5,40 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Document</title>
     <link rel="stylesheet" href="style.css">
-    <script defer type="module" src="https://cdn.jsdelivr.net/npm/droppy-menu@v2.0.0-beta/src/droppy.js"></script>
+    <script defer type="module" src="https://cdn.jsdelivr.net/npm/droppy-menu@v2.x.x/src/droppy.js"></script>
 </head>
 <body>
 <!-- https://cdn.jsdelivr.net/npm/droppy-menu@v2.0.0-beta/src/droppy.js -->
 <!-- https://cdn.jsdelivr.net/npm/droppy-menu@v2.0.0-beta/src/droppy.js/+esm -->
 
-<ul data-droppy="">
-    <li class="droppy">
-        <span class="trigger">Primo</span>
-        <ul class="drop">
-            <li class="droppy">
-                <span class="trigger">#1 - Primo</span>
-                <ul class="drop">
-                    <li><span>#2 - Primo</span></li>
-                    <li><span>#2 - Secondo</span></li>
-                    <li><span>#2 - Terzo</span></li>
-                </ul>
-            </li>
-            <li><span>#1 - Secondo</span></li>
-            <li><span>#1 - Terzo</span></li>
-        </ul>
-    </li>
-    <li class="droppy">
-        <span class="trigger">Secondo</span>
-        <ul class="drop">
-            <li><span>#1 - Primo</span></li>
-            <li><span>#1 - Secondo</span></li>
-            <li><span>#1 - Terzo</span></li>
-        </ul>
-    </li>
-    <li><span>Terzo</span></li>
-</ul>
-
+<nav data-droppy="">
+    <ul class="menu">
+        <li>
+            <a href="#">Primo</a>
+            <ul class="menu">
+                <li class="droppy">
+                    <a href="#">#1 - Primo</a>
+                    <ul class="menu">
+                        <li><span>#2 - Primo</span></li>
+                        <li><span>#2 - Secondo</span></li>
+                        <li><span>#2 - Terzo</span></li>
+                    </ul>
+                </li>
+                <li><span>#1 - Secondo</span></li>
+                <li><span>#1 - Terzo</span></li>
+            </ul>
+        </li>
+        <li class="droppy">
+            <span class="trigger">Secondo</span>
+            <ul class="drop">
+                <li><span>#1 - Primo</span></li>
+                <li><span>#1 - Secondo</span></li>
+                <li><span>#1 - Terzo</span></li>
+            </ul>
+        </li>
+        <li><span>Terzo</span></li>
+    </ul>
+</nav>
 <script type="module">
     // import Droppy, {generator} from "../src/droppy.js";
     //
