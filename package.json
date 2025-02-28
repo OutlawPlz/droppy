@@ -1,7 +1,7 @@
 {
   "name": "droppy-menu",
-  "version": "2.0.0",
-  "description": "Pure JavaScript multi-level drop-down menu.",
+  "version": "2.0.1",
+  "description": "Pure JavaScript multi-level dropdown menu.",
   "keywords": [
     "menu",
     "dropdown",

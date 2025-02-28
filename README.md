@@ -1,6 +1,6 @@
 # Droppy
 
-Pure JavaScript multi-level drop-down menu. Droppy shows and hides element by applying your custom animation.
+Droppy is a pure JavaScript multi-level dropdown menu. It shows and hides elements using your custom animations. Styling the menu via custom CSS is up to you.
 
 ## Quick Start
 

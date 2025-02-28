@@ -4,64 +4,65 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Document</title>
+    <link rel="stylesheet" href="style.css">
     <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
-    <style type="text/tailwindcss">
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-
-        @keyframes fadeOut {
-            from { opacity: 1; }
-            to { opacity: 0; }
-        }
-
-        .fade-in {
-            animation: .3s forwards fadeIn;
-        }
-
-        .fade-out {
-            animation: .3s forwards fadeOut;
-        }
-
-        li > ul.menu {
-            display: none;
-        }
-    </style>
+    <style type="text/tailwindcss"></style>
 </head>
 <body>
 
 <!-- https://cdn.jsdelivr.net/npm/droppy-menu@v2.0.0-beta/src/droppy.js -->
 
-<div>
-    <nav>
-        <ul class="menu flex items-center gap-4">
-            <li class="relative">
-                <a href="#" class="block bg-gray-100 hover:bg-gray-200 py-2 px-4">Primo</a>
-                <ul class="menu absolute bottom-0 translate-y-full w-max left-0 p-2 border">
-                    <li>
-                        <a href="#">#1 - Primo</a>
-                        <ul class="menu">
-                            <li><span>#2 - Primo</span></li>
-                            <li><span>#2 - Secondo</span></li>
-                            <li><span>#2 - Terzo</span></li>
-                        </ul>
-                    </li>
-                    <li><span>#1 - Secondo</span></li>
-                    <li><span>#1 - Terzo</span></li>
-                </ul>
-            </li>
-            <li class="relative">
-                <a href="#" class="block bg-gray-100 hover:bg-gray-200 py-2 px-4">Secondo</a>
-                <ul class="menu absolute bottom-0 translate-y-full w-max left-0 p-2 border">
-                    <li><span>#1 - Primo</span></li>
-                    <li><span>#1 - Secondo</span></li>
-                    <li><span>#1 - Terzo</span></li>
-                </ul>
-            </li>
-            <li><span>Terzo</span></li>
-        </ul>
-    </nav>
+<div class="grid grid-cols-2 gap-6 p-6">
+    <div>
+        <h1>Simple dropdown menu</h1>
+    </div>
+
+    <div class="bg-gray-100 p-6 h-64 rounded-lg">
+        <nav id="simple-dropdown" class="flex items-center justify-between">
+            <div class="italic font-bold">LOGO</div>
+            <ul class="flex items-center">
+                <li>
+                    <a href="#">
+                        <span>Services</span>
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-3">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
+                        </svg>
+                    </a>
+                    <ul class="dropdown">
+                        <li>
+                            <a href="#">
+                                <span>First</span>
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-3">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
+                                </svg>
+                            </a>
+                            <ul class="dropdown">
+                                <li><a href="#">First</a></li>
+                                <li><a href="#">Second</a></li>
+                                <li><a href="#">Third</a></li>
+                            </ul>
+                        </li>
+                        <li><a href="#">Second</a></li>
+                        <li><a href="#">Third</a></li>
+                    </ul>
+                </li>
+                <li class="relative">
+                    <a href="#" class="">
+                        <span>About us</span>
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-3">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
+                        </svg>
+                    </a>
+                    <ul class="dropdown">
+                        <li><a href="#">First</a></li>
+                        <li><a href="#">Second</a></li>
+                        <li><a href="#">Third</a></li>
+                    </ul>
+                </li>
+                <li><a href="#">Blog</a></li>
+            </ul>
+        </nav>
+    </div>
 </div>
 
 <script type="module">
@@ -72,6 +73,7 @@
     const droppies = generator(
         document.querySelector('nav'),
         {
+            drop: '.dropdown',
             animationIn: 'fade-in',
             animationOut: 'fade-out',
             preventDefault: true,

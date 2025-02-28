@@ -11,6 +11,10 @@ All notable changes to this project will be documented in this file.
 - The `generator()` function ignores wrappers that don't contain a trigger or drop element.
 - Improved default generatorOptions: `{ wrapper: li, trigger: a, drop: ul.menu }`.
 
+### Fixed
+
+- Clicking inside a trigger sub-element closes the dropdown.
+
 ## v2.0.0 
 
 Released on **2025/02/27**.
