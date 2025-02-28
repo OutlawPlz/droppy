@@ -122,7 +122,7 @@ export function generator(root, options) {
         const trigger = wrapper.querySelector(options.trigger);
         const drop = wrapper.querySelector(options.drop);
 
-        if (! trigger || ! wrapper) return;
+        if (! trigger || ! drop) return;
 
         instances.push(new Droppy(trigger, drop, options));
     });
