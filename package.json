@@ -2,12 +2,15 @@
   "name": "droppy-menu",
   "version": "2.0.1",
   "description": "Pure JavaScript multi-level dropdown menu.",
+  "scripts": {
+    "min": "terser src/droppy.js -cmo src/droppy.min.js"
+  },
   "keywords": [
     "menu",
     "dropdown",
-    "multi-level"
+    "multi-level",
+    "goodcat"
   ],
-  "main": "src/droppy.js",
   "author": {
     "name": "Matteo Palazzo",
     "email": "outlaw.plz@gmail.com"
@@ -16,5 +19,8 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/OutlawPlz/droppy.git"
+  },
+  "devDependencies": {
+    "terser": "^5.39.0"
   }
 }
