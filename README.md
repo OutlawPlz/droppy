@@ -27,7 +27,7 @@ Start using Droppy in three steps.
 
 3. Style your brand-new dropdown menu.
   ```css
-  ul > .menu {
+  li > .menu {
     display: none;
   }
   ```
