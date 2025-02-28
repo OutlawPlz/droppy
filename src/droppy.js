@@ -23,8 +23,8 @@ const clickAwayToClose = [];
 
 document.body.addEventListener('click', (event) => {
     for (const droppy of clickAwayToClose) {
-        if (droppy.trigger !== event.target
-            && droppy.drop.checkVisibility()
+        if (droppy.drop.checkVisibility()
+            && ! droppy.trigger.contains(event.target)
             && ! droppy.drop.contains(event.target)) droppy.hide();
     }
 });
