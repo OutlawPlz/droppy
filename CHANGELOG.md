@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
+## 2.0.1
+
+[unreleased]
+
+### Changed
+
+- The `generator()` function ignores wrappers that don't contain a trigger or drop element.
+- Improved default generatorOptions: `{ wrapper: li, trigger: a, drop: ul.menu }`.
+
 ## v2.0.0 
 
 Released on **2025/02/27**.

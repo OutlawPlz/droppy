@@ -50,7 +50,7 @@ Instantiate a new Droppy object the trigger and dropdown elements. Done!
 import Droppy from '@/droppy-menu/src/droppy.js';
 
 const trigger = document.querySelector('li > a');
-const dropdown = document.querySelector('ul > .menu');
+const dropdown = document.querySelector('li > ul.menu');
 
 const droppy = new Droppy(trigger, dropdown, {
     // Options...
@@ -62,7 +62,7 @@ A Droppy instance **represents a single node** of your dropdown menu. This is us
 ### Use `generator()` function
 
 If you wish to handle a whole menu, the Droppy generator is the way to go. Define your menu structure using the `wrapper`, `trigger`, and `drop` options.
-The generator returns an array of Droppy instances.
+The generator returns an array of Droppy instances. The `generator()` function ignores wrappers that don't contain a trigger or drop element.
 
 ```js
 import Droppy, {generator} from '@/droppy-menu/src/droppy.js'
@@ -71,9 +71,9 @@ const root = document.querySelector('[data-droppy]');
 
 /** @type {Droppy[]} */
 const instances = generator(root, { 
-  wrapper: '.menu', 
-  trigger: 'li > a', 
-  drop: 'ul > .menu' 
+  wrapper: 'li', 
+  trigger: 'a', 
+  drop: 'ul.menu' 
 });
 ```
 
@@ -85,9 +85,9 @@ As shown in the Quick Start section, you can initialize Droppy in HTML using the
 <script defer type="module" src="https://cdn.jsdelivr.net/npm/droppy-menu@v2.x.x/src/droppy.js"></script>
 
 <nav data-droppy='{
-    "wrapper": ".menu", 
-    "trigger": "li > a", 
-    "drop": "ul > .menu", 
+    "wrapper": "li", 
+    "trigger": "a", 
+    "drop": "ul.menu", 
     "animationIn": "fade-in", 
     "animationOut": "fade-out"
  }'>
@@ -106,6 +106,7 @@ const droppyOptions = {
   animationOut: '',
   display: 'block',
   clickAwayToClose: true,
+  preventDefault: false,
 }
 ```
 
@@ -114,8 +115,8 @@ The `generator` options accepts all `Droppy` options.
 ```js
 /** @type {GeneratorOptions} Default values */
 const generatorOptions = {
-  wrapper: '.menu',
-  trigger: 'li > a',
+  wrapper: 'li',
+  trigger: 'a',
   drop: 'ul.menu',
   ...droppyOptions,
 }
