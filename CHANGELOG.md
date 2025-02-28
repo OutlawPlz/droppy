@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 
 ## 2.0.1
 
-[unreleased]
+Released on **2025/02/28**.
 
 ### Changed
 
