@@ -4,45 +4,82 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Document</title>
-    <link rel="stylesheet" href="style.css">
-    <script defer type="module" src="https://cdn.jsdelivr.net/npm/droppy-menu@v2.x.x/src/droppy.js"></script>
+    <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
+    <style type="text/tailwindcss">
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes fadeOut {
+            from { opacity: 1; }
+            to { opacity: 0; }
+        }
+
+        .fade-in {
+            animation: .3s forwards fadeIn;
+        }
+
+        .fade-out {
+            animation: .3s forwards fadeOut;
+        }
+
+        li > ul.menu {
+            #display: none;
+        }
+    </style>
 </head>
 <body>
-<!-- https://cdn.jsdelivr.net/npm/droppy-menu@v2.0.0-beta/src/droppy.js -->
-<!-- https://cdn.jsdelivr.net/npm/droppy-menu@v2.0.0-beta/src/droppy.js/+esm -->
 
-<nav data-droppy="">
-    <ul class="menu">
-        <li>
-            <a href="#">Primo</a>
-            <ul class="menu">
-                <li class="droppy">
-                    <a href="#">#1 - Primo</a>
-                    <ul class="menu">
-                        <li><span>#2 - Primo</span></li>
-                        <li><span>#2 - Secondo</span></li>
-                        <li><span>#2 - Terzo</span></li>
-                    </ul>
-                </li>
-                <li><span>#1 - Secondo</span></li>
-                <li><span>#1 - Terzo</span></li>
-            </ul>
-        </li>
-        <li class="droppy">
-            <span class="trigger">Secondo</span>
-            <ul class="drop">
-                <li><span>#1 - Primo</span></li>
-                <li><span>#1 - Secondo</span></li>
-                <li><span>#1 - Terzo</span></li>
-            </ul>
-        </li>
-        <li><span>Terzo</span></li>
-    </ul>
-</nav>
+<!-- https://cdn.jsdelivr.net/npm/droppy-menu@v2.0.0-beta/src/droppy.js -->
+
+<div>
+    <nav>
+        <ul class="menu flex items-center gap-4">
+            <li class="relative">
+                <a href="#" class="block bg-gray-100 hover:bg-gray-200 py-2 px-4">Primo</a>
+                <ul class="menu absolute bottom-0 translate-y-full w-max left-0 p-2 border">
+                    <li>
+                        <a href="#">#1 - Primo</a>
+                        <ul class="menu">
+                            <li><span>#2 - Primo</span></li>
+                            <li><span>#2 - Secondo</span></li>
+                            <li><span>#2 - Terzo</span></li>
+                        </ul>
+                    </li>
+                    <li><span>#1 - Secondo</span></li>
+                    <li><span>#1 - Terzo</span></li>
+                </ul>
+            </li>
+            <li class="relative">
+                <a href="#" class="block bg-gray-100 hover:bg-gray-200 py-2 px-4">Secondo</a>
+                <ul class="menu absolute bottom-0 translate-y-full w-max left-0 p-2 border">
+                    <li><span>#1 - Primo</span></li>
+                    <li><span>#1 - Secondo</span></li>
+                    <li><span>#1 - Terzo</span></li>
+                </ul>
+            </li>
+            <li><span>Terzo</span></li>
+        </ul>
+    </nav>
+</div>
+
 <script type="module">
-    // import Droppy, {generator} from "../src/droppy.js";
-    //
-    // window.Droppy = Droppy;
+    import Droppy, {generator} from "../src/droppy.js";
+
+    window.Droppy = Droppy;
+
+    const droppies = generator(
+        document.querySelector('nav'),
+        {
+            wrapper: 'li',
+            trigger: 'a',
+            drop: 'ul.menu',
+            preventDefault: true,
+        }
+    );
+
+    console.log(droppies);
 </script>
 </body>
 </html>

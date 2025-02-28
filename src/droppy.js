@@ -6,6 +6,7 @@
  * @prop {string} animationOut CSS class name
  * @prop {string} display CSS display property values
  * @prop {boolean} clickAwayToClose
+ * @prop {boolean} preventDefault
  */
 
 /** @type {DroppyOptions} */
@@ -14,6 +15,7 @@ const droppyOptions = {
     animationOut: '',
     display: 'block',
     clickAwayToClose: true,
+    preventDefault: false,
 }
 
 /** @type {Droppy[]} */
@@ -38,7 +40,7 @@ export default class Droppy {
     /**
      * @param {HTMLElement} trigger
      * @param {HTMLElement} drop
-     * @param {DroppyOptions} options
+     * @param {Partial<DroppyOptions>} options
      */
     constructor(trigger, drop, options) {
         this.trigger = trigger;
@@ -53,6 +55,8 @@ export default class Droppy {
     }
 
     show() {
+        if (this.options.preventDefault) event.preventDefault();
+
         if (this.options.animationIn) {
             this.drop.addEventListener('animationend', () => {
                 this.drop.classList.remove(this.options.animationIn);
@@ -65,6 +69,8 @@ export default class Droppy {
     };
 
     hide() {
+        if (this.options.preventDefault) event.preventDefault();
+
         this.drop.addEventListener('animationend', () => {
             this.drop.style.display = 'none';
 
@@ -93,15 +99,15 @@ export default class Droppy {
 
 /** @type {GeneratorOptions} */
 const generatorOptions = {
-    wrapper: '.menu',
-    trigger: 'li > a',
+    wrapper: 'li',
+    trigger: 'a',
     drop: 'ul.menu',
     ...droppyOptions
 }
 
 /**
  * @param {HTMLElement} root
- * @param {GeneratorOptions} options
+ * @param {Partial<GeneratorOptions>} options
  * @returns {Droppy[]}
  */
 export function generator(root, options) {
