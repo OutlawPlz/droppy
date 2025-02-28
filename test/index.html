@@ -25,7 +25,7 @@
         }
 
         li > ul.menu {
-            #display: none;
+            display: none;
         }
     </style>
 </head>
@@ -72,9 +72,8 @@
     const droppies = generator(
         document.querySelector('nav'),
         {
-            wrapper: 'li',
-            trigger: 'a',
-            drop: 'ul.menu',
+            animationIn: 'fade-in',
+            animationOut: 'fade-out',
             preventDefault: true,
         }
     );

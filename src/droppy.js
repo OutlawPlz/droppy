@@ -116,14 +116,15 @@ export function generator(root, options) {
 
     options = { ...generatorOptions, ...options };
 
-    const nodes = root.querySelectorAll(options.wrapper);
+    const wrappers = root.querySelectorAll(options.wrapper);
 
-    nodes.forEach(node => {
-        instances.push(new Droppy(
-            node.querySelector(options.trigger),
-            node.querySelector(options.drop),
-            options
-        ));
+    wrappers.forEach(wrapper => {
+        const trigger = wrapper.querySelector(options.trigger);
+        const drop = wrapper.querySelector(options.drop);
+
+        if (! trigger || ! wrapper) return;
+
+        instances.push(new Droppy(trigger, drop, options));
     });
 
     return instances;
