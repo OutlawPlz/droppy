@@ -8,7 +8,9 @@
     --color-neutral-800: oklch(0.269 0 0);
     --color-white: #fff;
     --spacing: 0.25rem;
+    --container-3xs: 16rem;
     --container-2xs: 18rem;
+    --container-xs: 20rem;
     --container-3xl: 48rem;
     --text-2xl: 1.5rem;
     --text-2xl--line-height: calc(2 / 1.5);
@@ -223,6 +225,15 @@
   .size-10 {
     width: calc(var(--spacing) * 10);
     height: calc(var(--spacing) * 10);
+  }
+  .w-2xs {
+    width: var(--container-2xs);
+  }
+  .w-3xs {
+    width: var(--container-3xs);
+  }
+  .w-xs {
+    width: var(--container-xs);
   }
   .max-w-2xs {
     max-width: var(--container-2xs);
