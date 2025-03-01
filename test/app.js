@@ -1,2 +1,2 @@
-// https://cdn.jsdelivr.net/npm/droppy-menu@v2.0.0-beta/src/droppy.js
-import Droppy from "../src/droppy.min.js";
+// https://cdn.jsdelivr.net/npm/droppy-menu@v2.x.x/src/droppy.min.js
+import Droppy from "../src/droppy.js";

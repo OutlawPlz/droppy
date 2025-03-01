@@ -27,14 +27,12 @@ a {
     white-space: nowrap;
 }
 
-.dropdown {
-    display: none;
-
-    @apply absolute z-10 rounded-lg bg-white ring-1 shadow-lg ring-neutral-800/3 p-1 mt-1 min-w-32;
+.example {
+    @apply ring-1 ring-neutral-800/9 px-6 py-12 min-h-64 rounded-xl mt-6 overflow-x-auto;
 }
 
-.dropdown .dropdown {
-    @apply top-0 translate-x-full;
+.dropdown {
+    @apply rounded-lg bg-white ring-1 shadow-lg ring-neutral-800/3 p-1 mt-1 min-w-32;
 }
 
 .dropdown a {

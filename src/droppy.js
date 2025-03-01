@@ -1,4 +1,4 @@
-/*! v2.0.1 */
+/*! v2.0.2 */
 'use strict';
 
 /**
@@ -102,7 +102,7 @@ export default class Droppy {
 const generatorOptions = {
     wrapper: 'li',
     trigger: 'a',
-    drop: 'ul.menu',
+    drop: 'ul',
     ...droppyOptions
 }
 
