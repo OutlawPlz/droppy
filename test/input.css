@@ -46,7 +46,7 @@ a {
 }
 
 .example {
-    @apply ring-1 ring-neutral-800/9 px-6 py-12 min-h-64 rounded-xl mt-6;
+    @apply ring-1 ring-neutral-800/10 px-6 py-12 min-h-64 rounded-xl mt-6;
 }
 
 .dropdown {
