@@ -9,8 +9,6 @@
     --color-white: #fff;
     --spacing: 0.25rem;
     --container-2xs: 18rem;
-    --container-sm: 24rem;
-    --container-lg: 32rem;
     --container-3xl: 48rem;
     --text-2xl: 1.5rem;
     --text-2xl--line-height: calc(2 / 1.5);
@@ -175,9 +173,6 @@
   }
 }
 @layer utilities {
-  .collapse {
-    visibility: collapse;
-  }
   .absolute {
     position: absolute;
   }
@@ -189,6 +184,12 @@
   }
   .right-0 {
     right: calc(var(--spacing) * 0);
+  }
+  .bottom-0 {
+    bottom: calc(var(--spacing) * 0);
+  }
+  .left-0 {
+    left: calc(var(--spacing) * 0);
   }
   .z-10 {
     z-index: 10;
@@ -211,15 +212,6 @@
   .hidden {
     display: none;
   }
-  .inline-flex {
-    display: inline-flex;
-  }
-  .list-item {
-    display: list-item;
-  }
-  .table {
-    display: table;
-  }
   .size-4 {
     width: calc(var(--spacing) * 4);
     height: calc(var(--spacing) * 4);
@@ -238,24 +230,15 @@
   .max-w-3xl {
     max-width: var(--container-3xl);
   }
-  .max-w-lg {
-    max-width: var(--container-lg);
-  }
-  .max-w-sm {
-    max-width: var(--container-sm);
-  }
   .min-w-fit {
     min-width: fit-content;
   }
-  .border-collapse {
-    border-collapse: collapse;
+  .shrink-0 {
+    flex-shrink: 0;
   }
   .translate-x-full {
     --tw-translate-x: 100%;
     translate: var(--tw-translate-x) var(--tw-translate-y);
-  }
-  .resize {
-    resize: both;
   }
   .flex-col {
     flex-direction: column;
@@ -266,14 +249,11 @@
   .justify-between {
     justify-content: space-between;
   }
-  .gap-1 {
-    gap: calc(var(--spacing) * 1);
+  .justify-end {
+    justify-content: flex-end;
   }
   .gap-1\.5 {
     gap: calc(var(--spacing) * 1.5);
-  }
-  .gap-2 {
-    gap: calc(var(--spacing) * 2);
   }
   .gap-8 {
     gap: calc(var(--spacing) * 8);
@@ -281,15 +261,20 @@
   .gap-12 {
     gap: calc(var(--spacing) * 12);
   }
+  .overflow-x-auto {
+    overflow-x: auto;
+  }
+  .overflow-x-hidden {
+    overflow-x: hidden;
+  }
+  .overflow-y-auto {
+    overflow-y: auto;
+  }
   .rounded-lg {
     border-radius: var(--radius-lg);
   }
   .rounded-md {
     border-radius: var(--radius-md);
-  }
-  .border {
-    border-style: var(--tw-border-style);
-    border-width: 1px;
   }
   .p-1 {
     padding: calc(var(--spacing) * 1);
@@ -299,9 +284,6 @@
   }
   .px-3 {
     padding-inline: calc(var(--spacing) * 3);
-  }
-  .py-1 {
-    padding-block: calc(var(--spacing) * 1);
   }
   .py-2 {
     padding-block: calc(var(--spacing) * 2);
@@ -327,12 +309,9 @@
   .text-neutral-800 {
     color: var(--color-neutral-800);
   }
-  .underline {
-    text-decoration-line: underline;
-  }
-  .outline {
-    outline-style: var(--tw-outline-style);
-    outline-width: 1px;
+  .shadow-md {
+    --tw-shadow: 0 4px 6px -1px var(--tw-shadow-color, rgb(0 0 0 / 0.1)), 0 2px 4px -2px var(--tw-shadow-color, rgb(0 0 0 / 0.1));
+    box-shadow: var(--tw-inset-shadow), var(--tw-inset-ring-shadow), var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow);
   }
   .hover\:bg-neutral-800\/4 {
     &:hover {
@@ -371,13 +350,34 @@
 .fade-out {
   animation: .3s forwards fadeOut;
 }
+@keyframes slideIn {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+@keyframes slideOut {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-100%);
+  }
+}
+.slide-in {
+  animation: .5s forwards slideIn;
+}
+.slide-out {
+  animation: .5s forwards slideOut;
+}
 a {
   white-space: nowrap;
 }
 .example {
   margin-top: calc(var(--spacing) * 6);
   min-height: calc(var(--spacing) * 64);
-  overflow-x: auto;
   border-radius: var(--radius-xl);
   padding-inline: calc(var(--spacing) * 6);
   padding-block: calc(var(--spacing) * 12);
@@ -429,11 +429,6 @@ a {
   inherits: false;
   initial-value: 0;
 }
-@property --tw-border-style {
-  syntax: "*";
-  inherits: false;
-  initial-value: solid;
-}
 @property --tw-font-weight {
   syntax: "*";
   inherits: false;
@@ -441,11 +436,6 @@ a {
 @property --tw-tracking {
   syntax: "*";
   inherits: false;
-}
-@property --tw-outline-style {
-  syntax: "*";
-  inherits: false;
-  initial-value: solid;
 }
 @property --tw-shadow {
   syntax: "*";
