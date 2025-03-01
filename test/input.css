@@ -1,0 +1,42 @@
+@import "tailwindcss";
+@plugin "@tailwindcss/typography";
+
+@theme {
+    --default-font-family: "Nunito", sans-serif;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes fadeOut {
+    from { opacity: 1; }
+    to { opacity: 0; }
+}
+
+.fade-in {
+    animation: .3s forwards fadeIn;
+}
+
+.fade-out {
+    animation: .3s forwards fadeOut;
+}
+
+a {
+    white-space: nowrap;
+}
+
+.dropdown {
+    display: none;
+
+    @apply absolute z-10 rounded-lg bg-white ring-1 shadow-lg ring-neutral-800/3 p-1 mt-1 min-w-32;
+}
+
+.dropdown .dropdown {
+    @apply top-0 translate-x-full;
+}
+
+.dropdown a {
+    @apply flex justify-between px-3 p-1 rounded-md hover:bg-neutral-800/4 hover:text-neutral-800;
+}

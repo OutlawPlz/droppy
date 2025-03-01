@@ -21,6 +21,9 @@
     "url": "https://github.com/OutlawPlz/droppy.git"
   },
   "devDependencies": {
+    "@tailwindcss/cli": "^4.0.9",
+    "@tailwindcss/typography": "^0.5.16",
+    "tailwindcss": "^4.0.9",
     "terser": "^5.39.0"
   }
 }
