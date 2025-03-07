@@ -17,7 +17,7 @@ Start using Droppy in three steps.
     <ul class="menu">
       <li>
         <a href="#">First level - Link #1</a>
-        <ul class="menu">
+        <ul class="dropdown">
           <li><a href="#">Second level - Link #1</a></li>
         </ul>
       </li>
@@ -27,7 +27,7 @@ Start using Droppy in three steps.
 
 3. Style your brand-new dropdown menu.
   ```css
-  li > .menu {
+  li > .dropdown {
     display: none;
   }
   ```
@@ -50,7 +50,7 @@ Instantiate a new Droppy object the trigger and dropdown elements. Done!
 import Droppy from '@/droppy-menu/src/droppy.js';
 
 const trigger = document.querySelector('li > a');
-const dropdown = document.querySelector('li > ul.menu');
+const dropdown = document.querySelector('li > ul');
 
 const droppy = new Droppy(trigger, dropdown, {
     // Options...
@@ -73,7 +73,7 @@ const root = document.querySelector('[data-droppy]');
 const instances = generator(root, { 
   wrapper: 'li', 
   trigger: 'a', 
-  drop: 'ul.menu' 
+  drop: 'ul' 
 });
 ```
 
@@ -87,7 +87,7 @@ As shown in the Quick Start section, you can initialize Droppy in HTML using the
 <nav data-droppy='{
     "wrapper": "li", 
     "trigger": "a", 
-    "drop": "ul.menu", 
+    "drop": "ul", 
     "animationIn": "fade-in", 
     "animationOut": "fade-out"
  }'>
@@ -117,7 +117,7 @@ The `generator` options accepts all `Droppy` options.
 const generatorOptions = {
   wrapper: 'li',
   trigger: 'a',
-  drop: 'ul.menu',
+  drop: 'ul',
   ...droppyOptions,
 }
 ```
@@ -133,3 +133,23 @@ droppy.show(); // Shows current dropdown.
 droppy.hide(); // Hides current dropdown.
 droppy.toggle(); // Shows/hides current dropdown.
 ```
+
+## `DroppyContext` class
+
+Each `Droppy` instance is added to a `DroppyContext`. If you don't specify a context when creating an instance, it will be added to the `globalContext`. You can access the `globalContext` by importing it into your script.
+
+```js
+import { globalContext } from '@/droppy-menu/src/droppy.js';
+```
+
+You can also define a custom context for a specific `Droppy` instance by specifying it in the constructor:
+
+```js
+import Droppy, { DroppyContext } from '@/droppy-menu/src/droppy.js';
+
+const customContext = new DroppyContext();
+
+new Droppy(trigger, drop, options, customContext);
+```
+
+The `DroppyContext` is used to group multiple `Droppy` instances together.

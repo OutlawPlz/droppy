@@ -1,5 +1,42 @@
-/*! v2.0.2 */
+/*! v2.1.0 */
 'use strict';
+
+export class DroppyContext {
+    /** @type {Droppy[]} */
+    context= [];
+
+    constructor() {
+        document.addEventListener('click', this.handleClose);
+    }
+
+    /**
+     * @param {...Droppy} items
+     */
+    push(...items) {
+        this.context.push(...items);
+    }
+
+    /**
+     * @param {Event} event
+     */
+    handleClose = (event) => {
+        for (const droppy of this.context) {
+            if (droppy.drop.checkVisibility()
+                && droppy.options.clickAwayToClose
+                && ! droppy.trigger.contains(event.target)
+                && ! droppy.drop.contains(event.target)) droppy.hide();
+        }
+    }
+
+    closeAll() {
+        console.log(this.context);
+        for (const droppy of this.context) {
+            if (droppy.drop.checkVisibility()) droppy.hide();
+        }
+    }
+}
+
+export const globalContext = new DroppyContext();
 
 /**
  * @typedef {Object} DroppyOptions
@@ -7,6 +44,7 @@
  * @prop {string} animationOut CSS class name
  * @prop {string} display CSS display property values
  * @prop {boolean} clickAwayToClose
+ * @prop {boolean} closeOthers
  * @prop {boolean} preventDefault
  */
 
@@ -16,19 +54,9 @@ const droppyOptions = {
     animationOut: '',
     display: 'block',
     clickAwayToClose: true,
+    closeOthers: false,
     preventDefault: false,
 }
-
-/** @type {Droppy[]} */
-const clickAwayToClose = [];
-
-document.body.addEventListener('click', (event) => {
-    for (const droppy of clickAwayToClose) {
-        if (droppy.drop.checkVisibility()
-            && ! droppy.trigger.contains(event.target)
-            && ! droppy.drop.contains(event.target)) droppy.hide();
-    }
-});
 
 export default class Droppy {
     /** @type {HTMLElement} */
@@ -37,13 +65,16 @@ export default class Droppy {
     drop;
     /** @type {DroppyOptions} */
     options;
+    /** @type {DroppyContext} */
+    #context = globalContext;
 
     /**
      * @param {HTMLElement} trigger
      * @param {HTMLElement} drop
      * @param {Partial<DroppyOptions>} options
+     * @param {DroppyContext|undefined} context
      */
-    constructor(trigger, drop, options) {
+    constructor(trigger, drop, options = {}, context) {
         this.trigger = trigger;
 
         this.trigger.addEventListener('click', () => this.toggle());
@@ -52,7 +83,9 @@ export default class Droppy {
 
         this.options = { ...droppyOptions, ...options };
 
-        if (this.options.clickAwayToClose) clickAwayToClose.push(this);
+        if (context) this.#context = context;
+
+        this.#context.push(this);
     }
 
     show() {

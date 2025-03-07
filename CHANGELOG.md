@@ -2,9 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
-## 2.0.2
+## 2.1.0
 
-[unreleased]
+Released on **2025/03/07**.
+
+### Added
+
+- Adds `DroppyContenxt` class.
 
 ### Changed
 

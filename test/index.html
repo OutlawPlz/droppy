@@ -220,18 +220,25 @@
                         </a>
 
                         <div class="hidden absolute left-0 right-0">
-                            <div class="grid grid-cols-2 gap-4 p-6">
+                            <div class="grid grid-cols-3 gap-4 p-6">
                                 <div class="p-6">
-                                    <a href="#" class="font-semibold flex items-center gap-1.5 px-3 p-1 rounded-md hover:bg-neutral-800/5 hover:text-neutral-800">
+                                    <button data-tab="tab-1" class="font-semibold flex justify-between items-center gap-1.5 px-3 p-1 rounded-md hover:bg-neutral-800/5 hover:text-neutral-800">
                                         <span>Company</span>
-                                    </a>
-                                    <a href="#" class="font-semibold flex items-center gap-1.5 px-3 p-1 rounded-md hover:bg-neutral-800/5 hover:text-neutral-800">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4 shrink-0 -rotate-90">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
+                                        </svg>
+                                    </button>
+                                    <button data-tab="tab-2" class="font-semibold flex justify-between items-center gap-1.5 px-3 p-1 rounded-md hover:bg-neutral-800/5 hover:text-neutral-800">
                                         <span>Mission</span>
-                                    </a>
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4 shrink-0 -rotate-90">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
+                                        </svg>
+                                    </button>
                                 </div>
 
-                                <div class="bg-neutral-800/5 rounded-lg p-6">
-                                    <p>Donec lacus arcu, scelerisque a porta nec, auctor sollicitudin diam. Nam scelerisque sapien.</p>
+                                <div class="col-span-2 bg-neutral-800/5 rounded-lg p-6">
+                                    <p id="tab-1">Donec lacus arcu, scelerisque a porta nec, auctor sollicitudin diam. Nam scelerisque sapien.</p>
+                                    <p id="tab-2">Aliquam sed neque id arcu scelerisque ultrices. Integer interdum ut elit vel faucibus.</p>
                                 </div>
                             </div>
                         </div>
