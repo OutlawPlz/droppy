@@ -18,8 +18,6 @@ function tabsGenerator(root, options = { clickAwayToClose: false, animationIn: '
             /** @type {Droppy} */
             const droppy = event.detail.droppy;
 
-            // TODO: Forse è più semplice una preventClose?
-
             droppy.drop.checkVisibility()
                 ? event.preventDefault()
                 : droppy.context.closeAll();
