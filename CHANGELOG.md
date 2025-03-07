@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## 2.1.1
+
+[unreleased]
+
+### Added
+
+- Adds `beforetoggle` and `toggle` events.
+
 ## 2.1.0
 
 Released on **2025/03/07**.

@@ -1,4 +1,4 @@
-/*! v2.1.0 */
+/*! v2.1.1 */
 'use strict';
 
 export class DroppyContext {
@@ -29,7 +29,6 @@ export class DroppyContext {
     }
 
     closeAll() {
-        console.log(this.context);
         for (const droppy of this.context) {
             if (droppy.drop.checkVisibility()) droppy.hide();
         }
@@ -44,7 +43,6 @@ export const globalContext = new DroppyContext();
  * @prop {string} animationOut CSS class name
  * @prop {string} display CSS display property values
  * @prop {boolean} clickAwayToClose
- * @prop {boolean} closeOthers
  * @prop {boolean} preventDefault
  */
 
@@ -54,7 +52,6 @@ const droppyOptions = {
     animationOut: '',
     display: 'block',
     clickAwayToClose: true,
-    closeOthers: false,
     preventDefault: false,
 }
 
@@ -66,7 +63,7 @@ export default class Droppy {
     /** @type {DroppyOptions} */
     options;
     /** @type {DroppyContext} */
-    #context = globalContext;
+    context;
 
     /**
      * @param {HTMLElement} trigger
@@ -74,7 +71,7 @@ export default class Droppy {
      * @param {Partial<DroppyOptions>} options
      * @param {DroppyContext|undefined} context
      */
-    constructor(trigger, drop, options = {}, context) {
+    constructor(trigger, drop, options = {}, context = globalContext) {
         this.trigger = trigger;
 
         this.trigger.addEventListener('click', () => this.toggle());
@@ -83,9 +80,9 @@ export default class Droppy {
 
         this.options = { ...droppyOptions, ...options };
 
-        if (context) this.#context = context;
+        this.context = context;
 
-        this.#context.push(this);
+        this.context.push(this);
     }
 
     show() {
@@ -119,7 +116,25 @@ export default class Droppy {
     };
 
     toggle() {
+        const beforeToggle = new CustomEvent('beforetoggle', {
+            bubbles: true,
+            cancelable: true,
+            detail: { droppy : this },
+        });
+
+        this.drop.dispatchEvent(beforeToggle);
+
+        if (beforeToggle.defaultPrevented) return;
+
         this.drop.checkVisibility() ? this.hide() : this.show();
+
+        const toggle = new CustomEvent('toggle', {
+            bubbles: true,
+            cancelable: true,
+            detail: { droppy : this },
+        })
+
+        this.drop.dispatchEvent(toggle);
     }
 }
 
