@@ -2,13 +2,19 @@
 
 All notable changes to this project will be documented in this file.
 
-## 2.1.1
+## 2.2.0
 
 [unreleased]
 
 ### Added
 
 - Adds `beforetoggle` and `toggle` events.
+- Adds `newContext` to `GeneratorOptions`.
+- Adds `tabsGenerator` function.
+
+### Changed
+
+- Renames `generator` to `menuGenerator`.
 
 ## 2.1.0
 

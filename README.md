@@ -11,9 +11,9 @@ Start using Droppy in three steps.
   <script defer type="module" src="https://cdn.jsdelivr.net/npm/droppy-menu@v2.x.x/src/droppy.js"></script>
   ```
 
-2. Mark your menu with the `data-droppy` attribute.
+2. Mark your menu with the `data-menu` attribute.
   ```html
-  <nav data-droppy>
+  <nav data-menu>
     <ul class="menu">
       <li>
         <a href="#">First level - Link #1</a>
@@ -59,15 +59,15 @@ const droppy = new Droppy(trigger, dropdown, {
 
 A Droppy instance **represents a single node** of your dropdown menu. This is useful if you want to use Droppy for a modal or a single dropdown.
 
-### Use `generator()` function
+### Use `menuGenerator()` function
 
 If you wish to handle a whole menu, the Droppy generator is the way to go. Define your menu structure using the `wrapper`, `trigger`, and `drop` options.
-The generator returns an array of Droppy instances. The `generator()` function ignores wrappers that don't contain a trigger or drop element.
+The generator returns an array of Droppy instances. The `menuGenerator()` function ignores wrappers that don't contain a trigger or drop element.
 
 ```js
-import Droppy, {generator} from '@/droppy-menu/src/droppy.js'
+import Droppy, {menuGenerator} from '@/droppy-menu/src/droppy.js'
 
-const root = document.querySelector('[data-droppy]');
+const root = document.querySelector('[data-menu]');
 
 /** @type {Droppy[]} */
 const instances = generator(root, { 
@@ -79,12 +79,12 @@ const instances = generator(root, {
 
 ## Initialize via HTML
 
-As shown in the Quick Start section, you can initialize Droppy in HTML using the `data-droppy` attribute. Options can be set in its value.
+As shown in the Quick Start section, you can initialize Droppy in HTML using the `data-menu` attribute. Options can be set in its value.
 
 ```html
 <script defer type="module" src="https://cdn.jsdelivr.net/npm/droppy-menu@v2.x.x/src/droppy.js"></script>
 
-<nav data-droppy='{
+<nav data-menu='{
     "wrapper": "li", 
     "trigger": "a", 
     "drop": "ul", 
@@ -97,7 +97,7 @@ As shown in the Quick Start section, you can initialize Droppy in HTML using the
 
 ## Options
 
-You can customize `Droppy` and `generator` function using the options object.
+You can customize `Droppy` and `menuGenerator` function using the options object.
 
 ```js
 /** @type {DroppyOptions} Default values */
@@ -110,7 +110,7 @@ const droppyOptions = {
 }
 ```
 
-The `generator` options accepts all `Droppy` options.
+The `menuGenerator` options accepts all `Droppy` options.
 
 ```js
 /** @type {GeneratorOptions} Default values */
@@ -118,6 +118,7 @@ const generatorOptions = {
   wrapper: 'li',
   trigger: 'a',
   drop: 'ul',
+  newContext: false,
   ...droppyOptions,
 }
 ```

@@ -1,9 +1,9 @@
-/*! v2.1.1 */
+/*! v2.2.0 */
 'use strict';
 
 export class DroppyContext {
     /** @type {Droppy[]} */
-    context= [];
+    instances= [];
 
     constructor() {
         document.addEventListener('click', this.handleClose);
@@ -13,14 +13,14 @@ export class DroppyContext {
      * @param {...Droppy} items
      */
     push(...items) {
-        this.context.push(...items);
+        this.instances.push(...items);
     }
 
     /**
      * @param {Event} event
      */
     handleClose = (event) => {
-        for (const droppy of this.context) {
+        for (const droppy of this.instances) {
             if (droppy.drop.checkVisibility()
                 && droppy.options.clickAwayToClose
                 && ! droppy.trigger.contains(event.target)
@@ -28,9 +28,15 @@ export class DroppyContext {
         }
     }
 
-    closeAll() {
-        for (const droppy of this.context) {
+    hideAll() {
+        for (const droppy of this.instances) {
             if (droppy.drop.checkVisibility()) droppy.hide();
+        }
+    }
+
+    showAll() {
+        for (const droppy of this.instances) {
+            if (! droppy.drop.checkVisibility()) droppy.show();
         }
     }
 }
@@ -119,7 +125,7 @@ export default class Droppy {
         const beforeToggle = new CustomEvent('beforetoggle', {
             bubbles: true,
             cancelable: true,
-            detail: { droppy : this },
+            detail: { droppy: this },
         });
 
         this.drop.dispatchEvent(beforeToggle);
@@ -131,7 +137,7 @@ export default class Droppy {
         const toggle = new CustomEvent('toggle', {
             bubbles: true,
             cancelable: true,
-            detail: { droppy : this },
+            detail: { droppy: this },
         })
 
         this.drop.dispatchEvent(toggle);
@@ -144,6 +150,7 @@ export default class Droppy {
  * @prop {string} wrapper CSS selector
  * @prop {string} trigger CSS selector
  * @prop {string} drop CSS selector
+ * @prop {boolean} newContext
  */
 
 /** @type {GeneratorOptions} */
@@ -151,35 +158,71 @@ const generatorOptions = {
     wrapper: 'li',
     trigger: 'a',
     drop: 'ul',
+    newContext: false,
     ...droppyOptions
 }
 
 /**
  * @param {HTMLElement} root
  * @param {Partial<GeneratorOptions>} options
- * @returns {Droppy[]}
+ * @returns {DroppyContext}
  */
-export function generator(root, options) {
-    /** @type {Droppy[]} */
-    const instances = [];
-
+export function menuGenerator(root, options) {
     options = { ...generatorOptions, ...options };
+
+    const context = options.newContext
+        ? new DroppyContext()
+        : globalContext;
 
     const wrappers = root.querySelectorAll(options.wrapper);
 
-    wrappers.forEach(wrapper => {
+    for (const wrapper of wrappers) {
         const trigger = wrapper.querySelector(options.trigger);
         const drop = wrapper.querySelector(options.drop);
 
-        if (! trigger || ! drop) return;
+        if (! trigger || ! drop) continue;
 
-        instances.push(new Droppy(trigger, drop, options));
-    });
+        new Droppy(trigger, drop, options, context);
+    }
 
-    return instances;
+    return context;
 }
 
-document.querySelectorAll('[data-droppy]')
-    .forEach(root => {
-        generator(root, JSON.parse(root.dataset.droppy || "{}"));
+document
+    .querySelectorAll('[data-menu]')
+    .forEach((root) => menuGenerator(root, JSON.parse(root.dataset.menu || "{}")));
+
+/**
+ *
+ * @param {HTMLElement} root
+ * @param {Partial<GeneratorOptions>} options
+ * @returns {DroppyContext}
+ */
+export function tabsGenerator(root, options) {
+    options = { ...generatorOptions, ...options };
+
+    const context = new DroppyContext();
+
+    root.addEventListener('beforetoggle', (event) => {
+        /** @type {Droppy} */
+        const droppy = event.detail.droppy;
+
+        droppy.drop.checkVisibility()
+            ? event.preventDefault()
+            : droppy.context.hideAll();
     });
+
+    const triggers = root.querySelectorAll('[data-tab]');
+
+    for (const trigger of triggers) {
+        const drop = root.querySelector(trigger.dataset.tab);
+
+        new Droppy(trigger, drop, options, context);
+    }
+
+    return context;
+}
+
+document
+    .querySelectorAll('[data-tabs]')
+    .forEach((root) => tabsGenerator(root, JSON.parse(root.dataset.tabs || "{}")));
