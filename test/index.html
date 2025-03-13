@@ -220,15 +220,15 @@
                         </a>
 
                         <div class="hidden absolute left-0 right-0">
-                            <div data-tabs='{ "trigger":"[data-tab]", "clickAwayToClose":false }' class="grid grid-cols-3 gap-4 p-6">
+                            <div data-tabs='{ "clickAwayToClose":false }' class="grid grid-cols-3 gap-4 p-6">
                                 <div class="p-6">
-                                    <button data-tab="#tab-1" class="font-semibold flex justify-between items-center gap-1.5 px-3 p-1 rounded-md hover:bg-neutral-800/5 hover:text-neutral-800">
+                                    <button data-target="#tab-1" class="font-semibold flex justify-between items-center gap-1.5 px-3 p-1 rounded-md hover:bg-neutral-800/5 hover:text-neutral-800">
                                         <span>Company</span>
                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4 shrink-0 -rotate-90">
                                             <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
                                         </svg>
                                     </button>
-                                    <button data-tab="#tab-2" class="font-semibold flex justify-between items-center gap-1.5 px-3 p-1 rounded-md hover:bg-neutral-800/5 hover:text-neutral-800">
+                                    <button data-target="#tab-2" class="font-semibold flex justify-between items-center gap-1.5 px-3 p-1 rounded-md hover:bg-neutral-800/5 hover:text-neutral-800">
                                         <span>Mission</span>
                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4 shrink-0 -rotate-90">
                                             <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
@@ -263,6 +263,54 @@
                     </li>
                 </ul>
             </nav>
+        </div>
+    </section>
+
+    <section id="tabs">
+        <h2 class="text-2xl font-semibold text-neutral-800">Tabs</h2>
+        <p>Tabs with fade in animation.</p>
+
+        <div class="example overflow-auto">
+            <div class="relative" data-tabs='{ "animationIn":"fade-in", "display":"grid", "clickAwayToClose":false }'>
+                <div class="flex w-fit border-b border-neutral-200 mx-auto">
+                    <button data-target="#target-1" class="p-3 text-neutral-400 border-b-2 border-transparent hover:text-neutral-800 -mb-px">Docs</button>
+                    <button data-target="#target-2" class="p-3 text-neutral-400 border-b-2 border-transparent hover:text-neutral-800 -mb-px">Guide</button>
+                    <button data-target="#target-3" class="p-3 text-neutral-400 border-b-2 border-transparent hover:text-neutral-800 -mb-px">Community</button>
+                </div>
+
+                <div id="target-1" class="grid grid-cols-2 items-center gap-8 mt-4 p-4">
+                    <div>
+                        <p class="font-bold">Aenean dolor justo</p>
+                        <p class="mt-2">Nam aliquet tortor ante, nec cursus purus eleifend in. Aliquam aliquam rutrum dolor, vel luctus erat cursus non. Proin id erat congue, consequat tellus id, bibendum est. Vivamus nec scelerisque lacus. Nunc a odio lacus. Sed eget luctus arcu, sed fermentum lorem.</p>
+                    </div>
+
+                    <div class="rounded-lg aspect-[4/3] flex items-center justify-center bg-neutral-800/5">
+                        <span class="font-semibold text-neutral-400 tracking-wider">JPG</span>
+                    </div>
+                </div>
+
+                <div id="target-2" class="hidden grid-cols-2 items-center gap-8 mt-4 p-4">
+                    <div>
+                        <p class="font-bold">Etiam sed consequat urna</p>
+                        <p class="mt-2">Etiam elit libero, dignissim ut scelerisque non, facilisis ut ipsum. Fusce id ligula risus. Nullam sed pharetra purus, ac ullamcorper velit. Suspendisse felis leo, rhoncus sed orci vel, egestas tempor mauris.</p>
+                    </div>
+
+                    <div class="rounded-lg aspect-[4/3] flex items-center justify-center bg-neutral-800/5">
+                        <span class="font-semibold text-neutral-400 tracking-wider">WEBP</span>
+                    </div>
+                </div>
+
+                <div id="target-3" class="hidden grid-cols-2 items-center gap-8 mt-4 p-4">
+                    <div>
+                        <p class="font-bold">Mauris sit amet tellus ullamcorper</p>
+                        <p class="mt-2">Nam vel gravida metus. Praesent eget sapien eget ligula auctor scelerisque et eu felis. Morbi quis molestie mauris, fermentum laoreet magna. Sed ullamcorper cursus tellus, vel congue ex. Curabitur dictum turpis ac turpis finibus luctus.</p>
+                    </div>
+
+                    <div class="rounded-lg aspect-[4/3] flex items-center justify-center bg-neutral-800/5">
+                        <span class="font-semibold text-neutral-400 tracking-wider">PNG</span>
+                    </div>
+                </div>
+            </div>
         </div>
     </section>
 </div>

@@ -5,27 +5,11 @@ export class DroppyContext {
     /** @type {Droppy[]} */
     instances= [];
 
-    constructor() {
-        document.addEventListener('click', this.handleClose);
-    }
-
     /**
      * @param {...Droppy} items
      */
     push(...items) {
         this.instances.push(...items);
-    }
-
-    /**
-     * @param {Event} event
-     */
-    handleClose = (event) => {
-        for (const droppy of this.instances) {
-            if (droppy.drop.checkVisibility()
-                && droppy.options.clickAwayToClose
-                && ! droppy.trigger.contains(event.target)
-                && ! droppy.drop.contains(event.target)) droppy.hide();
-        }
     }
 
     hideAll() {
@@ -174,6 +158,15 @@ export function menuGenerator(root, options) {
         ? new DroppyContext()
         : globalContext;
 
+    document.addEventListener('click', (event) => {
+        for (const instance of context.instances) {
+            if (instance.drop.checkVisibility()
+                && instance.options.clickAwayToClose
+                && ! instance.trigger.contains(event.target)
+                && ! instance.drop.contains(event.target)) instance.hide();
+        }
+    });
+
     const wrappers = root.querySelectorAll(options.wrapper);
 
     for (const wrapper of wrappers) {
@@ -193,13 +186,12 @@ document
     .forEach((root) => menuGenerator(root, JSON.parse(root.dataset.menu || "{}")));
 
 /**
- *
  * @param {HTMLElement} root
- * @param {Partial<GeneratorOptions>} options
+ * @param {Partial<DroppyOptions>} options
  * @returns {DroppyContext}
  */
 export function tabsGenerator(root, options) {
-    options = { ...generatorOptions, ...options };
+    options = { ...droppyOptions, ...options };
 
     const context = new DroppyContext();
 
@@ -210,12 +202,20 @@ export function tabsGenerator(root, options) {
         droppy.drop.checkVisibility()
             ? event.preventDefault()
             : droppy.context.hideAll();
+
+        for (const instance of droppy.context.instances) {
+            instance.trigger.classList.remove('active');
+        }
+
+        droppy.trigger.classList.add('active');
     });
 
-    const triggers = root.querySelectorAll('[data-tab]');
+    const triggers = root.querySelectorAll('[data-target]');
 
     for (const trigger of triggers) {
-        const drop = root.querySelector(trigger.dataset.tab);
+        const drop = root.querySelector(trigger.dataset.target);
+
+        if (! drop) continue;
 
         new Droppy(trigger, drop, options, context);
     }
