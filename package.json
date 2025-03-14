@@ -1,6 +1,6 @@
 {
   "name": "droppy-menu",
-  "version": "2.1.0",
+  "version": "2.2.0-beta",
   "description": "Pure JavaScript multi-level dropdown menu.",
   "scripts": {
     "min": "terser src/droppy.js -cmo src/droppy.min.js"
