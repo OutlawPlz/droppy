@@ -1,4 +1,4 @@
-/*! v2.2.0 */
+/*! v2.2.0-beta */
 'use strict';
 
 export class DroppyContext {
@@ -32,7 +32,7 @@ export const globalContext = new DroppyContext();
  * @prop {string} animationIn CSS class name
  * @prop {string} animationOut CSS class name
  * @prop {string} display CSS display property values
- * @prop {boolean} clickAwayToClose
+ * @prop {string} triggerActiveClass
  * @prop {boolean} preventDefault
  */
 
@@ -41,7 +41,7 @@ const droppyOptions = {
     animationIn: '',
     animationOut: '',
     display: 'block',
-    clickAwayToClose: true,
+    triggerActiveClass: 'active',
     preventDefault: false,
 }
 
@@ -86,6 +86,10 @@ export default class Droppy {
             this.drop.classList.add(this.options.animationIn);
         }
 
+        if (this.options.triggerActiveClass) {
+            this.trigger.classList.add(this.options.triggerActiveClass);
+        }
+
         this.drop.style.display = this.options.display;
     };
 
@@ -103,6 +107,10 @@ export default class Droppy {
         this.options.animationOut
             ? this.drop.classList.add(this.options.animationOut)
             : this.drop.dispatchEvent(new Event('animationend'));
+
+        if (this.options.triggerActiveClass) {
+            this.trigger.classList.remove(this.options.triggerActiveClass);
+        }
     };
 
     toggle() {
@@ -134,7 +142,7 @@ export default class Droppy {
  * @prop {string} wrapper CSS selector
  * @prop {string} trigger CSS selector
  * @prop {string} drop CSS selector
- * @prop {boolean} newContext
+ * @prop {boolean} clickAwayToClose
  */
 
 /** @type {GeneratorOptions} */
@@ -142,21 +150,18 @@ const generatorOptions = {
     wrapper: 'li',
     trigger: 'a',
     drop: 'ul',
-    newContext: false,
+    clickAwayToClose: true,
     ...droppyOptions
 }
 
 /**
  * @param {HTMLElement} root
  * @param {Partial<GeneratorOptions>} options
+ * @param {DroppyContext} context
  * @returns {DroppyContext}
  */
-export function menuGenerator(root, options) {
+export function menuGenerator(root, options, context = globalContext) {
     options = { ...generatorOptions, ...options };
-
-    const context = options.newContext
-        ? new DroppyContext()
-        : globalContext;
 
     document.addEventListener('click', (event) => {
         for (const instance of context.instances) {
@@ -188,12 +193,11 @@ document
 /**
  * @param {HTMLElement} root
  * @param {Partial<DroppyOptions>} options
+ * @param {DroppyContext} context
  * @returns {DroppyContext}
  */
-export function tabsGenerator(root, options) {
+export function tabsGenerator(root, options, context = new DroppyContext()) {
     options = { ...droppyOptions, ...options };
-
-    const context = new DroppyContext();
 
     root.addEventListener('beforetoggle', (event) => {
         /** @type {Droppy} */
@@ -202,12 +206,6 @@ export function tabsGenerator(root, options) {
         droppy.drop.checkVisibility()
             ? event.preventDefault()
             : droppy.context.hideAll();
-
-        for (const instance of droppy.context.instances) {
-            instance.trigger.classList.remove('active');
-        }
-
-        droppy.trigger.classList.add('active');
     });
 
     const triggers = root.querySelectorAll('[data-target]');

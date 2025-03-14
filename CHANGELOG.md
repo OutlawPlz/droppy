@@ -2,19 +2,25 @@
 
 All notable changes to this project will be documented in this file.
 
-## 2.2.0
+## 2.2.0-beta
 
-[unreleased]
+Released on **2025/03/14**.
 
 ### Added
 
 - Adds `beforetoggle` and `toggle` events.
-- Adds `newContext` to `GeneratorOptions`.
 - Adds `tabsGenerator` function.
+- Adds `triggerActiveClass` to `DroppyOptions`.
 
 ### Changed
 
 - Renames `generator` to `menuGenerator`.
+- Improves docs.
+
+### Removed
+
+- Removes `clickAwayToClose` from `DroppyOptions`.
+- The `DroppyContext` no longer registers the `click` handler used for the 'click away' functionality.
 
 ## 2.1.0
 

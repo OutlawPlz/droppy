@@ -42,9 +42,9 @@ You can install Droppy via NPM by adding the package to your project.
 npm install --save droppy-menu
 ```
 
-### Use `Droppy` class
+### Init via `Droppy` class
 
-Instantiate a new Droppy object the trigger and dropdown elements. Done!
+Create a new Droppy instance by specifying the `trigger` and `dropdown` elements. Done!
 
 ```js
 import Droppy from '@/droppy-menu/src/droppy.js';
@@ -59,67 +59,22 @@ const droppy = new Droppy(trigger, dropdown, {
 
 A Droppy instance **represents a single node** of your dropdown menu. This is useful if you want to use Droppy for a modal or a single dropdown.
 
-### Use `menuGenerator()` function
+### Init via HTML attribute
 
-If you wish to handle a whole menu, the Droppy generator is the way to go. Define your menu structure using the `wrapper`, `trigger`, and `drop` options.
-The generator returns an array of Droppy instances. The `menuGenerator()` function ignores wrappers that don't contain a trigger or drop element.
-
-```js
-import Droppy, {menuGenerator} from '@/droppy-menu/src/droppy.js'
-
-const root = document.querySelector('[data-menu]');
-
-/** @type {Droppy[]} */
-const instances = generator(root, { 
-  wrapper: 'li', 
-  trigger: 'a', 
-  drop: 'ul' 
-});
-```
-
-## Initialize via HTML
-
-As shown in the Quick Start section, you can initialize Droppy in HTML using the `data-menu` attribute. Options can be set in its value.
-
-```html
-<script defer type="module" src="https://cdn.jsdelivr.net/npm/droppy-menu@v2.x.x/src/droppy.js"></script>
-
-<nav data-menu='{
-    "wrapper": "li", 
-    "trigger": "a", 
-    "drop": "ul", 
-    "animationIn": "fade-in", 
-    "animationOut": "fade-out"
- }'>
-   ...
-</nav>
-```
+You can initialize Droppy in HTML using the generator's attributes. Check the section related to generators.
 
 ## Options
 
-You can customize `Droppy` and `menuGenerator` function using the options object.
+You can customize `Droppy` using the options object.
 
 ```js
 /** @type {DroppyOptions} Default values */
 const droppyOptions = {
-  animationIn: '',
-  animationOut: '',
-  display: 'block',
-  clickAwayToClose: true,
-  preventDefault: false,
-}
-```
-
-The `menuGenerator` options accepts all `Droppy` options.
-
-```js
-/** @type {GeneratorOptions} Default values */
-const generatorOptions = {
-  wrapper: 'li',
-  trigger: 'a',
-  drop: 'ul',
-  newContext: false,
-  ...droppyOptions,
+  animationIn: '', // A CSS class with animation.
+  animationOut: '', // A CSS class with animation.
+  display: 'block', // E.g. block, inline, flex, grid, etc.
+  triggerActiveClass: 'active', // Adds the class to the trigger.
+  preventDefault: false, // If the trigger is <a> element, prevent default action.
 }
 ```
 
@@ -154,3 +109,79 @@ new Droppy(trigger, drop, options, customContext);
 ```
 
 The `DroppyContext` is used to group multiple `Droppy` instances together.
+
+## Generators
+
+Droppy provides functions that help you create specific behaviors. For example, `menuGenerator` allows you to create a dropdown menu, while `tabsGenerator` enables a tabbed interface. Each generator function has its own options, which are always a superset of `DroppyOptions`.
+
+### The `menuGenerator` function
+
+Define your menu structure using the `wrapper`, `trigger`, and `drop` options along with a `root` element. The generator will search for each `wrapper` and then select the `trigger` and `drop` elements inside it. If `clickAwayToClose` option is `true`, clicking outside the drop will close it.
+
+```js
+import { menuGenerator } from '/@/droppy-menu/src/droppy.js';
+
+const options = {
+    wrapper: 'li',
+    trigger: 'a',
+    drop: 'ul',
+    clickAwayToClose: true,
+    ...droppyOptions,
+}
+
+const nav = document.querySelector('nav');
+
+/** @type {DroppyContext} */
+const context = menuGenerator(nav, options);
+```
+
+As shown in the Quick Start section, you can initialize Droppy in HTML using the `data-menu` attribute. Options can be set in its value.
+
+```html
+<nav data-menu='{
+    "wrapper": "li", 
+    "trigger": "a", 
+    "drop": "ul", 
+    "animationIn": "fade-in", 
+    "animationOut": "fade-out"
+ }'>
+   ...
+</nav>
+```
+
+### The `tabsGenerator` function
+
+Within the root element, the generator will look for the `data-target` attribute. Each `data-target` value must be a valid CSS selector. E.g. `data-target="#tab-1"`. The generator will ignore any missing or invalid selectors.
+
+```js
+import { tabsGenerator } from '/@/droppy-menu/src/droppy.js';
+
+const options = { ...droppyOptions };
+
+const root = document.querySelector('.tabs');
+
+/** @type {DroppyContext} */
+const context = tabsGenerator(root, options);
+```
+
+You can initialize tabs in HTML using the `data-tabs` attribute. Options can be set in its value.
+
+```html
+<div data-tabs='{ "animationIn":"fade-in" }'>
+    <button data-target="#tab-1">Tab 1</button>
+    <button data-target="#tab-2">Tab 2</button>
+    <button data-target="#tab-3">Tab 3</button>
+    
+    <div id="tab-1">
+        <!-- Content... -->
+    </div>
+
+    <div id="tab-2">
+        <!-- Content... -->
+    </div>
+
+    <div id="tab-2">
+        <!-- Content... -->
+    </div>
+</div>
+```
