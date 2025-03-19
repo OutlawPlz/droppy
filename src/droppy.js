@@ -1,16 +1,9 @@
-/*! v2.2.0-beta */
+/*! v2.2.1-beta */
 'use strict';
 
 export class DroppyContext {
     /** @type {Droppy[]} */
     instances= [];
-
-    /**
-     * @param {...Droppy} items
-     */
-    push(...items) {
-        this.instances.push(...items);
-    }
 
     hideAll() {
         for (const droppy of this.instances) {
@@ -25,7 +18,16 @@ export class DroppyContext {
     }
 }
 
-export const globalContext = new DroppyContext();
+export const clickAwayContext = new DroppyContext();
+
+document.addEventListener('click', (event) => {
+    for (const instance of clickAwayContext.instances) {
+        if (instance.drop.checkVisibility()
+            && instance.options.clickAwayToClose
+            && ! instance.trigger.contains(event.target)
+            && ! instance.drop.contains(event.target)) instance.toggle();
+    }
+});
 
 /**
  * @typedef {Object} DroppyOptions
@@ -34,6 +36,7 @@ export const globalContext = new DroppyContext();
  * @prop {string} display CSS display property values
  * @prop {string} triggerActiveClass
  * @prop {boolean} preventDefault
+ * @prop {boolean} clickAwayToClose
  */
 
 /** @type {DroppyOptions} */
@@ -43,6 +46,7 @@ const droppyOptions = {
     display: 'block',
     triggerActiveClass: 'active',
     preventDefault: false,
+    clickAwayToClose: true,
 }
 
 export default class Droppy {
@@ -59,9 +63,9 @@ export default class Droppy {
      * @param {HTMLElement} trigger
      * @param {HTMLElement} drop
      * @param {Partial<DroppyOptions>} options
-     * @param {DroppyContext|undefined} context
+     * @param {DroppyContext=} context
      */
-    constructor(trigger, drop, options = {}, context = globalContext) {
+    constructor(trigger, drop, options = {}, context = new DroppyContext()) {
         this.trigger = trigger;
 
         this.trigger.addEventListener('click', () => this.toggle());
@@ -72,7 +76,11 @@ export default class Droppy {
 
         this.context = context;
 
-        this.context.push(this);
+        this.context.instances.push(this);
+
+        if (this.options.clickAwayToClose) {
+            clickAwayContext.instances.push(this);
+        }
     }
 
     show() {
@@ -150,7 +158,6 @@ const generatorOptions = {
     wrapper: 'li',
     trigger: 'a',
     drop: 'ul',
-    clickAwayToClose: true,
     ...droppyOptions
 }
 
@@ -160,17 +167,8 @@ const generatorOptions = {
  * @param {DroppyContext} context
  * @returns {DroppyContext}
  */
-export function menuGenerator(root, options, context = globalContext) {
+export function menuGenerator(root, options, context = new DroppyContext()) {
     options = { ...generatorOptions, ...options };
-
-    document.addEventListener('click', (event) => {
-        for (const instance of context.instances) {
-            if (instance.drop.checkVisibility()
-                && instance.options.clickAwayToClose
-                && ! instance.trigger.contains(event.target)
-                && ! instance.drop.contains(event.target)) instance.hide();
-        }
-    });
 
     const wrappers = root.querySelectorAll(options.wrapper);
 
