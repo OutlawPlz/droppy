@@ -86,31 +86,40 @@ export default class Droppy {
     show() {
         if (this.options.preventDefault) event.preventDefault();
 
-        if (this.options.animationIn) {
-            this.drop.addEventListener('animationend', () => {
-                this.drop.classList.remove(this.options.animationIn);
-            }, { once: true });
+        const promise = new Promise((resolve) => {
+            this.drop.addEventListener('animationend', resolve);
+        })
+            .then(() => {
+                if (this.options.animationIn) {
+                    this.drop.classList.remove(this.options.animationIn);
+                }
+            });
 
-            this.drop.classList.add(this.options.animationIn);
-        }
+        this.options.animationIn
+            ? this.drop.classList.add(this.options.animationIn)
+            : this.drop.dispatchEvent(new Event('animationend'));
 
         if (this.options.triggerActiveClass) {
             this.trigger.classList.add(this.options.triggerActiveClass);
         }
 
         this.drop.style.display = this.options.display;
+
+        return promise;
     };
 
     hide() {
         if (this.options.preventDefault) event.preventDefault();
 
-        this.drop.addEventListener('animationend', () => {
+        const promise = new Promise((resolve) => {
+            this.drop.addEventListener('animationend', resolve);
+        }).then(() => {
             this.drop.style.display = 'none';
 
             if (this.options.animationOut) {
                 this.drop.classList.remove(this.options.animationOut);
             }
-        }, { once: true });
+        });
 
         this.options.animationOut
             ? this.drop.classList.add(this.options.animationOut)
@@ -119,9 +128,11 @@ export default class Droppy {
         if (this.options.triggerActiveClass) {
             this.trigger.classList.remove(this.options.triggerActiveClass);
         }
+
+        return promise;
     };
 
-    toggle() {
+    async toggle() {
         const beforeToggle = new CustomEvent('beforetoggle', {
             bubbles: true,
             cancelable: true,
@@ -132,7 +143,9 @@ export default class Droppy {
 
         if (beforeToggle.defaultPrevented) return;
 
-        this.drop.checkVisibility() ? this.hide() : this.show();
+        this.drop.checkVisibility()
+            ? await this.hide()
+            : await this.show();
 
         const toggle = new CustomEvent('toggle', {
             bubbles: true,

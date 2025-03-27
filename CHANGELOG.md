@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## 2.2.1-beta
+
+[unreleased]
+
+### Added
+
+- Adds Promise to `show()` and `hide()` methods.
+
 ## 2.2.0-beta
 
 Released on **2025/03/14**.
