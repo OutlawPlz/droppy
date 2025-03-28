@@ -5,6 +5,8 @@
   "scripts": {
     "min": "terser src/droppy.js -cmo src/droppy.min.js"
   },
+  "type": "module",
+  "exports": "./src/droppy.js",
   "keywords": [
     "menu",
     "dropdown",
