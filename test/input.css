@@ -41,6 +41,24 @@
     animation: .5s forwards slideOut;
 }
 
+@keyframes scaleIn {
+    from { transform: scale(.95); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
+
+@keyframes scaleOut {
+    from { transform: scale(1); opacity: 1; }
+    to { transform: scale(.95); opacity: 0; }
+}
+
+.scale-in {
+    animation: scaleIn .3s forwards;
+}
+
+.scale-out {
+    animation: scaleOut .3s forwards;
+}
+
 a {
     white-space: nowrap;
 }

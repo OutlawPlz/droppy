@@ -158,16 +158,15 @@ export default class Droppy {
 }
 
 /**
- * @typedef {DroppyOptions} GeneratorOptions
+ * @typedef {DroppyOptions} MenuGeneratorOptions
  * @extends DroppyOptions
  * @prop {string} wrapper CSS selector
  * @prop {string} trigger CSS selector
  * @prop {string} drop CSS selector
- * @prop {boolean} clickAwayToClose
  */
 
-/** @type {GeneratorOptions} */
-const generatorOptions = {
+/** @type {MenuGeneratorOptions} */
+const menuGeneratorOptions = {
     wrapper: 'li',
     trigger: 'a',
     drop: 'ul',
@@ -176,12 +175,12 @@ const generatorOptions = {
 
 /**
  * @param {HTMLElement} root
- * @param {Partial<GeneratorOptions>} options
+ * @param {Partial<MenuGeneratorOptions>} options
  * @param {DroppyContext} context
  * @returns {DroppyContext}
  */
 export function menuGenerator(root, options, context = new DroppyContext()) {
-    options = { ...generatorOptions, ...options };
+    options = { ...menuGeneratorOptions, ...options };
 
     const wrappers = root.querySelectorAll(options.wrapper);
 
@@ -235,3 +234,37 @@ export function tabsGenerator(root, options, context = new DroppyContext()) {
 document
     .querySelectorAll('[data-tabs]')
     .forEach((root) => tabsGenerator(root, JSON.parse(root.dataset.tabs || "{}")));
+
+/**
+ * @typedef {DroppyOptions} ModalGeneratorOptions
+ * @prop {string} modal CSS selector
+ * @prop {string|HTMLElement} backdrop CSS selector
+ */
+
+/**
+ * @param {HTMLElement} trigger
+ * @param {ModalGeneratorOptions} options
+ * @param {DroppyContext} context
+ */
+export function modalGenerator(trigger, options, context = new DroppyContext()) {
+    const modal = document.querySelector(options.modal);
+
+    if (options.backdrop && typeof options.backdrop === 'string') {
+        options.backdrop = document.querySelector(options.backdrop);
+    }
+
+    new Droppy(trigger, modal, options, context);
+
+    modal.addEventListener('beforetoggle', (event) => {
+        /** @type {Droppy} */
+        const droppy = event.detail.droppy;
+
+        droppy.drop.checkVisibility()
+            ? droppy.options.backdrop.style.display = 'none'
+            : droppy.options.backdrop.style.display = 'block';
+    })
+}
+
+document
+    .querySelectorAll('[data-modal]')
+    .forEach((root) => modalGenerator(root, JSON.parse(root.dataset.modal || "{}")));

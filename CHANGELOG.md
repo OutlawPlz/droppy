@@ -9,6 +9,7 @@ All notable changes to this project will be documented in this file.
 ### Added
 
 - Adds Promise to `show()` and `hide()` methods.
+- Adds `modalGenerator` function.
 
 ## 2.2.0-beta
 
