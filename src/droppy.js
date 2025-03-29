@@ -68,7 +68,11 @@ export default class Droppy {
     constructor(trigger, drop, options = {}, context = new DroppyContext()) {
         this.trigger = trigger;
 
-        this.trigger.addEventListener('click', () => this.toggle());
+        this.trigger.addEventListener('click', (event) => {
+            if (this.options.preventDefault) event.preventDefault();
+
+            this.toggle();
+        });
 
         this.drop = drop;
 
@@ -84,8 +88,6 @@ export default class Droppy {
     }
 
     show() {
-        if (this.options.preventDefault) event.preventDefault();
-
         const promise = new Promise((resolve) => {
             this.drop.addEventListener('animationend', resolve);
         })
@@ -109,8 +111,6 @@ export default class Droppy {
     };
 
     hide() {
-        if (this.options.preventDefault) event.preventDefault();
-
         const promise = new Promise((resolve) => {
             this.drop.addEventListener('animationend', resolve);
         }).then(() => {
