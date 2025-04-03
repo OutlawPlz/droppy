@@ -185,3 +185,36 @@ You can initialize tabs in HTML using the `data-tabs` attribute. Options can be 
     </div>
 </div>
 ```
+
+### The `modalGenerator` function
+
+The `modalGenerator` function is used to create a modal dialog. It will look for the `modal` and `backdrop` CSS selector in the options. 
+
+```js
+import { modalGenerator } from '@/droppy-menu/src/droppy.js';
+
+const options = {
+    modal: #modal',
+    backdrop: '#backdrop',
+    ...droppyOptions,
+}
+
+const trigger = document.querySelector('button[data-modal]');
+
+/** @type {DroppyContext} */
+const context = modalGenerator(trigger, options);
+```
+
+You can initialize tabs in HTML using the `data-modal` attribute. Options can be set in its value.
+
+```html
+<div>
+    <button data-modal='{ "modal":"#modal", "backdrop":"#backdrop" }'>Open modal</button>
+    
+    <div id="modal">
+        <p>Modal content...</p>
+    </div>
+
+    <div id="backdrop" class="backdrop"></div>
+</div>
+```

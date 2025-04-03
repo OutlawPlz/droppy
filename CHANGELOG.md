@@ -2,9 +2,9 @@
 
 All notable changes to this project will be documented in this file.
 
-## 2.2.1-beta
+## 2.2.1
 
-[unreleased]
+Released on **2025/04/03**.
 
 ### Added
 

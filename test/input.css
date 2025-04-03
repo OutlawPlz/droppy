@@ -75,6 +75,6 @@ a {
     @apply flex justify-between px-3 p-1 rounded-md hover:bg-neutral-800/4 hover:text-neutral-800;
 }
 
-.active {
+#tabs .active {
     @apply border-b-neutral-800 text-neutral-800;
 }

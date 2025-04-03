@@ -1,4 +1,4 @@
-/*! v2.2.1-beta */
+/*! v2.2.1 */
 'use strict';
 
 export class DroppyContext {
